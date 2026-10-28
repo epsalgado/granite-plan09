@@ -164,14 +164,15 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   background: var(--navy);
   animation: none;
 }
-.preview-frame { position: relative; background: #f3f6fa; }
+.preview-frame { position: relative; background: #d9e1ea; }
 .preview-plan {
   display: block;
   width: 100%;
-  height: 280px;
-  object-fit: cover;
-  object-position: 22% 48%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
   user-select: none;
+  background: #d9e1ea;
 }
 .hero[data-phase="upload"] .preview-plan { filter: saturate(0.7) brightness(0.92); }
 .upload-cta {
@@ -182,7 +183,7 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  background: rgba(7, 26, 46, 0.48);
+  background: rgba(7, 26, 46, 0.32);
   color: #fff;
   text-align: center;
   pointer-events: none;
@@ -260,8 +261,8 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
 .hero-bar { max-width: 22rem; margin: 1rem 0 0; }
 
 @keyframes heroScan {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(270px); }
+  0% { top: 0; }
+  100% { top: calc(100% - 3px); }
 }
 @keyframes blink {
   50% { opacity: 0.55; }
@@ -628,7 +629,6 @@ body.pitch .plan-card { min-height: 520px; }
   .trust { grid-template-columns: 1fr 1fr; }
   .plan-card { height: 360px; }
   .chips { grid-template-columns: 1fr; }
-  .preview-plan { height: 220px; }
   .preview-list { position: static; width: auto; margin: 0.6rem; }
   .hero-steps { width: auto; right: 0.8rem; }
 }
