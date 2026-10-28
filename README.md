@@ -2,8 +2,25 @@
 
 Hackathon prototype (Team Granite). Customer basket + specialist trust view for **one drawing**: `A-40-1-1091.pdf`.
 
-Live: Cloudflare Pages (after connect).  
-Not the official 2Hero repo. Personal demo under `epsalgado`.
+**Live demo:** https://granite-plan09.pages.dev  
+**Code:** https://github.com/epsalgado/granite-plan09  
+
+This is Eddie’s working mockup, not the official 2Hero repo (`2hero-programs/ahl-team-granite`). The pack has 11 drawings; only PLAN 09 (`A-40-1-1091`) has a BoM API run.
+
+## For teammates
+
+Anyone can **view and clone** this repo (it is public). To **edit and push**:
+
+1. Send Eddie your GitHub username.
+2. He adds you under GitHub → this repo → **Settings → Collaborators**.
+3. Accept the email invite.
+4. Clone, edit, push `main`. Cloudflare Pages will update the live demo.
+
+```bash
+git clone https://github.com/epsalgado/granite-plan09.git
+```
+
+Static HTML/CSS/JS. No build step. Pages settings: Framework **None**, output `/`, branch `main`.
 
 ## Local
 
