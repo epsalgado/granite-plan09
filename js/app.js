@@ -274,31 +274,82 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function playReading() {
-  const overlay = $("readOverlay");
-  const bar = $("readBar");
-  const status = $("readStatus");
-  const steps = [
-    [8, "Sorting the sheet"],
-    [28, "Finding room names"],
-    [52, "Matching H2 to the request"],
-    [74, "Flagging missing lengths"],
-    [100, "Basket is amber — not ready to order"],
-  ];
-  overlay.hidden = false;
-  bar.style.width = "0%";
-  for (const [pct, text] of steps) {
-    status.textContent = text;
-    bar.style.width = pct + "%";
-    await sleep(1600);
+const READ_STEPS = [
+  [10, "File received"],
+  [28, "Sorting the sheet"],
+  [48, "Finding room names"],
+  [68, "Matching H2 to the request"],
+  [86, "Flagging missing lengths"],
+  [100, "Basket is amber — not ready to order"],
+];
+
+let landingPhase = "upload";
+let landingBusy = false;
+let readToken = 0;
+let demoStarted = false;
+
+function setLandingPhase(phase) {
+  landingPhase = phase;
+  $("landing").dataset.phase = phase;
+  document.querySelectorAll("[data-phase-copy]").forEach((el) => {
+    el.hidden = el.dataset.phaseCopy !== phase;
+  });
+  const pill = $("heroPill");
+  const label = $("heroBarLabel");
+  if (phase === "upload") {
+    pill.textContent = "Ready to upload";
+    label.textContent = "A-40-1-1091.pdf · PLAN 09";
+  } else if (phase === "reading") {
+    pill.textContent = "AI reading…";
+    label.textContent = "A-40-1-1091 · PLAN 09";
+  } else {
+    pill.textContent = "Gaps found";
+    label.textContent = "A-40-1-1091 · PLAN 09";
   }
-  overlay.hidden = true;
+}
+
+function markHeroSteps(activeIdx) {
+  $("heroSteps").querySelectorAll("li").forEach((li, i) => {
+    li.classList.toggle("on", i === activeIdx);
+    li.classList.toggle("done", activeIdx >= 0 && i < activeIdx);
+  });
+}
+
+async function playLandingRead() {
+  if (landingBusy || landingPhase !== "upload") return;
+  landingBusy = true;
+  const token = ++readToken;
+  setLandingPhase("reading");
+  load().catch(() => {});
+  $("heroBar").style.width = "0%";
+  for (let i = 0; i < READ_STEPS.length; i++) {
+    if (token !== readToken) return;
+    const [pct, text] = READ_STEPS[i];
+    $("heroStatus").textContent = text;
+    $("heroBar").style.width = pct + "%";
+    markHeroSteps(i);
+    await sleep(i === 0 ? 700 : 1200);
+  }
+  if (token !== readToken) return;
+  markHeroSteps(READ_STEPS.length);
+  setLandingPhase("overview");
+  landingBusy = false;
+}
+
+function skipLandingRead() {
+  if (landingPhase !== "reading") return;
+  readToken += 1;
+  landingBusy = false;
+  $("heroBar").style.width = "100%";
+  markHeroSteps(READ_STEPS.length);
+  setLandingPhase("overview");
 }
 
 async function startDemo({ pitch = false } = {}) {
+  if (demoStarted) return;
+  demoStarted = true;
   await load();
   $("landing").style.display = "none";
-  await playReading();
   $("app").classList.add("on");
   bindViewer();
   selected = "A0-025";
@@ -309,6 +360,12 @@ async function startDemo({ pitch = false } = {}) {
     focusSelected();
   });
   if (pitch) runPitch();
+}
+
+async function enterFromHero({ pitch = false } = {}) {
+  if (landingPhase === "reading") skipLandingRead();
+  if (landingPhase === "upload") await playLandingRead();
+  await startDemo({ pitch });
 }
 
 function setPitchCaption(text) {
@@ -360,7 +417,7 @@ function togglePitch() {
     return;
   }
   if (!$("app").classList.contains("on")) {
-    startDemo({ pitch: true });
+    enterFromHero({ pitch: true });
     return;
   }
   runPitch();
@@ -377,8 +434,27 @@ function openModal() {
 }
 
 $("tryExample").addEventListener("click", () => startDemo({ pitch: false }));
-$("pitchFromHero").addEventListener("click", () => startDemo({ pitch: true }));
+$("uploadExample").addEventListener("click", () => playLandingRead());
+$("skipRead").addEventListener("click", skipLandingRead);
+$("pitchFromHero").addEventListener("click", () => enterFromHero({ pitch: true }));
 $("pitchBtn").addEventListener("click", togglePitch);
+
+const heroSheet = $("heroSheet");
+heroSheet.addEventListener("click", () => {
+  if (landingPhase === "upload") playLandingRead();
+});
+["dragenter", "dragover"].forEach((ev) => {
+  heroSheet.addEventListener(ev, (e) => {
+    e.preventDefault();
+    if (landingPhase === "upload") heroSheet.classList.add("dragover");
+  });
+});
+heroSheet.addEventListener("dragleave", () => heroSheet.classList.remove("dragover"));
+heroSheet.addEventListener("drop", (e) => {
+  e.preventDefault();
+  heroSheet.classList.remove("dragover");
+  if (landingPhase === "upload") playLandingRead();
+});
 
 document.querySelectorAll(".mode button").forEach((b) => {
   b.addEventListener("click", () => {
