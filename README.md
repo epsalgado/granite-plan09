@@ -4,6 +4,7 @@ Hackathon prototype (Team Granite). Customer basket + specialist trust view for 
 
 **Live demo:** https://granite-plan09.pages.dev  
 **Code:** https://github.com/epsalgado/granite-plan09  
+Cloudflare Web Analytics is on for the live demo (page views only, no names).  
 
 This is Eddie’s working mockup, not the official 2Hero repo (`2hero-programs/ahl-team-granite`). The pack has 11 drawings; only PLAN 09 (`A-40-1-1091`) has a BoM API run.
 
