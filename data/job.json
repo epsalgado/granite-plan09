@@ -8,6 +8,28 @@
     "H2_building_total": 12
   },
   "quoteHasH2": false,
+  "marks": [
+    { "id": "A0-022", "label": "A0-022", "code": "H2", "x": 64.7, "y": 61.8 },
+    { "id": "A0-023", "label": "A0-023", "code": "H2", "x": 55.6, "y": 60.1 },
+    { "id": "A0-025", "label": "A0-025", "code": "H2", "x": 41.7, "y": 57.7 },
+    { "id": "A0-026", "label": "A0-026", "code": "H2", "x": 33.9, "y": 53.5 },
+    { "id": "A0-006", "label": "A0-006", "code": "TP2", "x": 51.3, "y": 35.7 },
+    { "id": "H2a", "label": "H2", "code": "H2", "room": "A0-026", "x": 37.1, "y": 67.7 },
+    { "id": "H2b", "label": "H2", "code": "H2", "room": "A0-023", "x": 59.8, "y": 64.3 },
+    { "id": "H2c", "label": "H2", "code": "H2", "room": "A0-022", "x": 67.3, "y": 68.0 },
+    { "id": "H2d", "label": "H2", "code": "H2", "room": "A0-025", "x": 48.5, "y": 54.4 },
+    { "id": "TP3a", "label": "TP3", "code": "TP3", "room": "A0-026", "x": 35.9, "y": 51.7 },
+    { "id": "TP3b", "label": "TP3", "code": "TP3", "room": "A0-025", "x": 39.3, "y": 53.7 },
+    { "id": "TP3c", "label": "TP3", "code": "TP3", "room": "A0-023", "x": 58.6, "y": 55.9 },
+    { "id": "TP3d", "label": "TP3", "code": "TP3", "room": "A0-022", "x": 66.1, "y": 59.0 },
+    { "id": "TP2a", "label": "TP2", "code": "TP2", "room": "A0-006", "x": 43.0, "y": 39.1 },
+    { "id": "TP2b", "label": "TP2", "code": "TP2", "room": "A0-006", "x": 46.6, "y": 39.1 },
+    { "id": "TP2c", "label": "TP2", "code": "TP2", "room": "A0-006", "x": 57.9, "y": 39.3 },
+    { "id": "IL.4", "label": "IL.4", "code": "IL.4", "x": 86.0, "y": 47.0 },
+    { "id": "IL.5", "label": "IL.5", "code": "IL.5", "x": 86.0, "y": 48.4 },
+    { "id": "IL.6", "label": "IL.6", "code": "IL.6", "x": 86.0, "y": 49.8 },
+    { "id": "IL.7", "label": "IL.7", "code": "IL.7", "x": 86.0, "y": 51.2 }
+  ],
   "rooms": [
     {
       "id": "A0-022",

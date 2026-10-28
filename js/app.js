@@ -5,6 +5,10 @@ let mode = "customer";
 let selected = null;
 let pitchTimer = null;
 let pitching = false;
+let scale = 1;
+let panX = 0;
+let panY = 0;
+let viewerBound = false;
 
 async function load() {
   const res = await fetch("data/job.json");
@@ -31,36 +35,109 @@ function trustHtml() {
       <div class="t-card extra"><strong>IL hatches</strong><b>Schedule</b><span>Not counted on the plan</span></div>`;
 }
 
-function drawPlan() {
-  const svg = $("plan");
-  const ghosts = [
-    [50, 10, 28, 24],
-    [80, 10, 16, 24],
-    [50, 42, 16, 16],
-    [68, 42, 16, 16],
-    [50, 62, 16, 16],
-    [68, 62, 28, 16],
-  ];
-  const g = ghosts
-    .map(([x, y, w, h]) => `<rect class="ghost" x="${x}" y="${y}" width="${w}" height="${h}" rx="0.8" />`)
-    .join("");
-  const rooms = job.rooms
-    .map((r) => {
-      const sel = r.id === selected ? "sel" : "lit";
-      const tag = r.items.some((i) => i.code === "H2") ? "H2" : r.items[0].code;
-      return `<rect class="room ${sel}" data-room="${r.id}" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="0.8" />
-        <text class="room-label" x="${r.x + r.w / 2}" y="${r.y + r.h / 2 - 1.2}" text-anchor="middle">${r.id}</text>
-        <text class="room-tag" x="${r.x + r.w / 2}" y="${r.y + r.h / 2 + 3.4}" text-anchor="middle">${tag}</text>`;
+function applyView() {
+  $("stage").style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+}
+
+function imgSize() {
+  const img = $("stage").querySelector("img");
+  return { w: img.offsetWidth || 1600, h: img.offsetHeight || 1130 };
+}
+
+function fitView() {
+  const vp = $("viewport");
+  const { w, h } = imgSize();
+  scale = Math.min(vp.clientWidth / w, vp.clientHeight / h) * 0.98;
+  panX = (vp.clientWidth - w * scale) / 2;
+  panY = (vp.clientHeight - h * scale) / 2;
+  applyView();
+}
+
+function zoomAt(factor, cx, cy) {
+  const next = Math.min(5.5, Math.max(0.4, scale * factor));
+  panX = cx - ((cx - panX) * next) / scale;
+  panY = cy - ((cy - panY) * next) / scale;
+  scale = next;
+  applyView();
+}
+
+function zoomTo(pctX, pctY, s = 2.5) {
+  const vp = $("viewport");
+  const { w, h } = imgSize();
+  scale = s;
+  panX = vp.clientWidth / 2 - (pctX / 100) * w * scale;
+  panY = vp.clientHeight / 2 - (pctY / 100) * h * scale;
+  applyView();
+}
+
+function drawMarks() {
+  $("marks").innerHTML = job.marks
+    .map((m) => {
+      const room = m.room || m.id;
+      const sel = room === selected || m.id === selected ? "sel" : "";
+      const kind = m.label.startsWith("A0-") ? "room" : "code";
+      return `<button type="button" class="pin ${kind} ${sel}" data-id="${m.id}" data-room="${room}"
+        style="left:${m.x}%;top:${m.y}%">${m.label}</button>`;
     })
     .join("");
-  svg.innerHTML = `
-    <rect x="1.5" y="1.5" width="97" height="97" fill="#f6f8fb" stroke="#0b3a6e" stroke-width="0.8"/>
-    <text class="plan-quiet" x="4" y="6">Ground floor · health centre</text>
-    ${g}${rooms}
-    <text class="plan-quiet" x="4" y="96">Amber = on the drawing, not ready to order</text>`;
-  svg.querySelectorAll(".room").forEach((el) => {
-    el.addEventListener("click", () => select(el.dataset.room));
+  $("marks").querySelectorAll(".pin").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const room = el.dataset.room;
+      if (job.rooms.some((r) => r.id === room)) select(room);
+      else select(el.dataset.id);
+    });
   });
+}
+
+function bindViewer() {
+  if (viewerBound) return;
+  viewerBound = true;
+  const vp = $("viewport");
+  $("zoomIn").addEventListener("click", () =>
+    zoomAt(1.25, vp.clientWidth / 2, vp.clientHeight / 2)
+  );
+  $("zoomOut").addEventListener("click", () =>
+    zoomAt(0.8, vp.clientWidth / 2, vp.clientHeight / 2)
+  );
+  $("zoomFit").addEventListener("click", fitView);
+  vp.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      const r = vp.getBoundingClientRect();
+      zoomAt(e.deltaY < 0 ? 1.12 : 0.9, e.clientX - r.left, e.clientY - r.top);
+    },
+    { passive: false }
+  );
+  let drag = null;
+  vp.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".pin")) return;
+    drag = { x: e.clientX - panX, y: e.clientY - panY };
+    vp.classList.add("drag");
+    vp.setPointerCapture(e.pointerId);
+  });
+  vp.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    panX = e.clientX - drag.x;
+    panY = e.clientY - drag.y;
+    applyView();
+  });
+  vp.addEventListener("pointerup", () => {
+    drag = null;
+    vp.classList.remove("drag");
+  });
+  $("stage").querySelector("img").addEventListener("load", () => {
+    fitView();
+    if (selected) focusSelected();
+  });
+}
+
+function focusSelected() {
+  const mark =
+    job.marks.find((m) => m.id === selected) ||
+    job.marks.find((m) => (m.room || m.id) === selected);
+  if (mark) zoomTo(mark.x, mark.y, 2.6);
 }
 
 function sideHtml() {
@@ -125,17 +202,28 @@ function customerBasketHtml() {
     </div>${rooms}${extras}`;
 }
 
-function render() {
+function render(opts = {}) {
   $("drawingName").textContent = "· " + job.drawing;
   $("trust").className = "trust" + (mode === "specialist" ? " specialist" : "");
   $("trust").innerHTML = trustHtml();
   const pillEl = $("sheetPill");
-  if (pillEl) pillEl.textContent = selected ? selected : "Click a room";
-  drawPlan();
+  if (pillEl) pillEl.textContent = selected ? selected : "Click a pin";
+  drawMarks();
   $("side").innerHTML = sideHtml();
   $("side").querySelectorAll("[data-room]").forEach((el) => {
     el.addEventListener("click", () => select(el.dataset.room));
   });
+  $("side").querySelectorAll(".extras").forEach((el) => {
+    el.addEventListener("click", () => {
+      const m = job.marks.find((x) => x.id === "IL.5");
+      if (m) {
+        selected = "IL.5";
+        drawMarks();
+        zoomTo(m.x, m.y, 2.8);
+      }
+    });
+  });
+  if (opts.zoom !== false) focusSelected();
 }
 
 function select(id) {
@@ -148,7 +236,7 @@ function setMode(next) {
   document.querySelectorAll(".mode button").forEach((b) => {
     b.classList.toggle("active", b.dataset.mode === mode);
   });
-  render();
+  render({ zoom: false });
 }
 
 function sleep(ms) {
@@ -181,9 +269,14 @@ async function startDemo({ pitch = false } = {}) {
   $("landing").style.display = "none";
   await playReading();
   $("app").classList.add("on");
+  bindViewer();
   selected = "A0-025";
   mode = "customer";
   setMode("customer");
+  requestAnimationFrame(() => {
+    fitView();
+    focusSelected();
+  });
   if (pitch) runPitch();
 }
 

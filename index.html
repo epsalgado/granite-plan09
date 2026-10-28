@@ -94,9 +94,19 @@
         <div class="plan-card">
           <div class="sheet-bar">
             <span>A-40-1-1091 · PLAN 09</span>
-            <span class="reading-pill idle" id="sheetPill">Click a room</span>
+            <span class="zoom-tools">
+              <button type="button" id="zoomOut" title="Zoom out">−</button>
+              <button type="button" id="zoomFit" title="Fit page">Fit</button>
+              <button type="button" id="zoomIn" title="Zoom in">+</button>
+            </span>
+            <span class="reading-pill idle" id="sheetPill">Click a pin</span>
           </div>
-          <svg class="plan" id="plan" viewBox="0 0 100 100" role="img" aria-label="Schematic PLAN 09"></svg>
+          <div class="viewport" id="viewport">
+            <div class="stage" id="stage">
+              <img src="img/plan-1091.png" alt="PLAN 09 drawing A-40-1-1091" draggable="false" />
+              <div class="marks" id="marks"></div>
+            </div>
+          </div>
         </div>
       </div>
       <aside class="side" id="side"></aside>

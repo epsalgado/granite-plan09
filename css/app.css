@@ -340,16 +340,67 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   animation: none;
   background: var(--navy);
 }
+.zoom-tools { display: flex; gap: 0.25rem; }
+.zoom-tools button {
+  width: 2rem;
+  height: 1.7rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--navy);
+  font-weight: 800;
+  border-radius: 6px;
+}
+.viewport {
+  position: relative;
+  height: calc(100% - 2.4rem);
+  overflow: hidden;
+  background: #d9e1ea;
+  cursor: grab;
+  touch-action: none;
+}
+.viewport.drag { cursor: grabbing; }
+.stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.stage img {
+  display: block;
+  width: 1600px;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+}
+.marks { position: absolute; inset: 0; }
+.pin {
+  position: absolute;
+  transform: translate(-50%, -110%);
+  background: #e87722;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.18rem 0.38rem;
+  border-radius: 4px;
+  border: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  white-space: nowrap;
+  z-index: 2;
+}
+.pin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #e87722;
+}
+.pin.sel { background: #0b3a6e; z-index: 3; }
+.pin.sel::after { border-top-color: #0b3a6e; }
+.pin.code { background: #c45a0c; }
 .plan-card h2, .side h2 { font-size: 0.95rem; margin: 0 0 0.6rem; color: #fff; }
-svg.plan { width: 100%; height: calc(100% - 2.4rem); display: block; background: #f6f8fb; }
-.room { fill: rgba(232, 119, 34, 0.22); stroke: #e87722; stroke-width: 1.1; cursor: pointer; }
-.room:hover { fill: rgba(232, 119, 34, 0.4); }
-.room.sel { fill: rgba(232, 119, 34, 0.55); stroke: #c45a0c; stroke-width: 2; }
-.room.lit { fill: rgba(232, 119, 34, 0.28); }
-.room-label { font-size: 3.1px; fill: #0b3a6e; pointer-events: none; font-weight: 800; }
-.room-tag { font-size: 2.4px; fill: #e87722; pointer-events: none; font-weight: 700; }
-.plan-quiet { font-size: 2.6px; fill: #7b8b9c; }
-.ghost { fill: #e4eaf0; stroke: #c5d0dc; stroke-dasharray: 0; }
 
 .side { overflow: auto; max-height: calc(100vh - 170px); }
 .basket-head { margin-bottom: 0.7rem; }
