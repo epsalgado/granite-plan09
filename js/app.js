@@ -158,10 +158,7 @@ function bindViewer() {
   vp.addEventListener("pointerleave", endDrag);
   const img = $("stage").querySelector("img");
   if (img.complete) fitView();
-  img.addEventListener("load", () => {
-    fitView();
-    if (selected) focusSelected();
-  });
+  img.addEventListener("load", fitView);
 }
 
 function focusSelected() {
@@ -370,8 +367,7 @@ async function startDemo({ pitch = false } = {}) {
   mode = "customer";
   setMode("customer");
   requestAnimationFrame(() => {
-    fitView();
-    focusSelected();
+    requestAnimationFrame(fitView);
   });
   if (pitch) runPitch();
 }
