@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Granite — PLAN 09 basket</title>
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <main class="landing" id="landing">
+    <div class="eyebrow">Team Granite · Ahlsell AI Blueprint Hackathon</div>
+    <h1>From one floor plan to a basket you can trust.</h1>
+    <p class="lead">
+      Upload a drawing and get a material list for the rooms on that sheet —
+      with gaps visible, not hidden. This demo uses the health-centre plan
+      <strong>A-40-1-1091</strong> (PLAN 09).
+    </p>
+    <div class="actions">
+      <button class="btn-primary" id="tryExample" type="button">Try the example: PLAN 09</button>
+    </div>
+    <p class="hint">
+      Not an order. One of eleven drawings in the pack. Hook rails, curtains and other floors stay out of this basket.
+    </p>
+  </main>
+
+  <div class="app" id="app">
+    <header class="top">
+      <div class="brand">Granite Takeoff <span id="drawingName"></span></div>
+      <div class="mode" role="tablist">
+        <button type="button" class="active" data-mode="customer">Customer</button>
+        <button type="button" data-mode="specialist">Specialist</button>
+      </div>
+    </header>
+
+    <section class="trust" id="trust"></section>
+
+    <div class="main">
+      <div class="plan-wrap">
+        <div class="plan-card">
+          <h2>Floor plan · click a room</h2>
+          <svg class="plan" id="plan" viewBox="0 0 100 100" role="img" aria-label="Schematic PLAN 09"></svg>
+        </div>
+      </div>
+      <aside class="side" id="side"></aside>
+    </div>
+
+    <footer class="foot">
+      <span>Hook rails, curtains and other floors: not on this drawing.</span>
+      <button class="btn-primary" type="button" id="requestBtn">Request quote</button>
+    </footer>
+  </div>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true">
+    <div class="box">
+      <h2>Send PLAN 09 to Ahlsell</h2>
+      <p>This is a <strong>request</strong>, not an order. A specialist still has to check lengths, kit contents and hatch quantities.</p>
+      <ul id="modalList"></ul>
+      <div class="actions">
+        <button class="btn-primary" type="button" id="sendBtn">Send request</button>
+        <button class="btn-ghost" type="button" id="closeModal">Back</button>
+      </div>
+      <p class="hint" id="sentMsg" hidden>Sent. Not an order — an Ahlsell specialist will check this floor.</p>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

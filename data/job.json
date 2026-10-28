@@ -1,0 +1,74 @@
+{
+  "drawing": "A-40-1-1091.pdf",
+  "title": "PLAN 09 — health centre ground floor",
+  "job": "9d01abee754977639447e9fc8feac564aab2da2a370f9ae1a16f6b375834fdf7",
+  "packNote": "1 of 11 drawings in the project pack",
+  "askedForThisSheet": {
+    "H2_rooms": ["A0-022", "A0-023", "A0-025", "A0-026"],
+    "H2_building_total": 12
+  },
+  "quoteHasH2": false,
+  "rooms": [
+    {
+      "id": "A0-022",
+      "x": 8, "y": 42, "w": 18, "h": 16,
+      "items": [
+        { "code": "H2", "text": "Shelf H2", "qty": 1, "unit": "st", "status": "amber", "why": "Length and specification not on this plan." },
+        { "code": "TP3", "text": "Wash-place kit TP3", "qty": 1, "unit": "st", "status": "amber", "why": "Kit contents need the room-type standard (not in this upload)." }
+      ]
+    },
+    {
+      "id": "A0-023",
+      "x": 28, "y": 42, "w": 18, "h": 16,
+      "items": [
+        { "code": "H2", "text": "Shelf H2", "qty": 1, "unit": "st", "status": "amber", "why": "Length and specification not on this plan." },
+        { "code": "TP3", "text": "Wash-place kit TP3", "qty": 1, "unit": "st", "status": "amber", "why": "Kit contents need the room-type standard (not in this upload)." }
+      ]
+    },
+    {
+      "id": "A0-025",
+      "x": 8, "y": 62, "w": 18, "h": 16,
+      "items": [
+        { "code": "H2", "text": "Shelf H2", "qty": 1, "unit": "st", "status": "amber", "why": "Length and specification not on this plan." },
+        { "code": "TP3", "text": "Wash-place kit TP3", "qty": 1, "unit": "st", "status": "amber", "why": "Kit contents need the room-type standard (not in this upload)." }
+      ]
+    },
+    {
+      "id": "A0-026",
+      "x": 28, "y": 62, "w": 18, "h": 16,
+      "items": [
+        { "code": "H2", "text": "Shelf H2", "qty": 1, "unit": "st", "status": "amber", "why": "Length and specification not on this plan." },
+        { "code": "TP3", "text": "Wash-place kit TP3", "qty": 1, "unit": "st", "status": "amber", "why": "Kit contents need the room-type standard (not in this upload)." }
+      ]
+    },
+    {
+      "id": "A0-006",
+      "x": 58, "y": 18, "w": 22, "h": 20,
+      "items": [
+        { "code": "TP2", "text": "Wash-place kit TP2", "qty": 3, "unit": "st", "status": "amber", "why": "Three kits in this room; contents unknown without the type standard." }
+      ]
+    }
+  ],
+  "sheetExtras": [
+    { "code": "IL.4", "text": "Inspection hatch 300×300", "qty": 2, "unit": "st", "room": "—", "status": "amber", "why": "From the sheet schedule, not counted on the plan. Floor unverified." },
+    { "code": "IL.5", "text": "Frame/hatch UNI INB", "qty": 16, "unit": "st", "room": "—", "status": "amber", "why": "Schedule quantity. PLAN 09 is the source sheet, not a proven installation floor." },
+    { "code": "IL.6", "text": "Vent cabinet hatch 250×250", "qty": 1, "unit": "st", "room": "—", "status": "amber", "why": "Schedule, not plan-count." },
+    { "code": "IL.7", "text": "Inspection hatch 300×300", "qty": 2, "unit": "st", "room": "—", "status": "amber", "why": "Schedule, not plan-count." }
+  ],
+  "checks": [
+    { "id": "pack", "ok": false, "text": "Only this PDF was sent. Other plans, room description and type standard were not supplied." },
+    { "id": "h2match", "ok": true, "text": "Four H2 rooms on this plan match the customer email (A0-022, 023, 025, 026)." },
+    { "id": "h2len", "ok": false, "text": "H2 length and specification unavailable." },
+    { "id": "il", "ok": false, "text": "IL hatch quantities come from a schedule, not from counting on the plan." },
+    { "id": "noroom", "ok": false, "text": "Some sanitary symbols in the full 69-line draft have no room." },
+    { "id": "invented", "ok": false, "text": "Some codes (S1, EFT, UDS) have no product type — confirm they are not invented." },
+    { "id": "quote", "ok": false, "text": "Customer asked for H2. The specialist reference quote has no H2 lines." },
+    { "id": "scope", "ok": true, "text": "Do not pull building totals (20× KL1, 40 curtains) into this job." }
+  ],
+  "compare": [
+    { "asked": "4× H2 rooms named for 1091", "drawn": "4× H2 found", "basket": "4× H2 amber (no length)" },
+    { "asked": "12× H2 in the Excel (whole building)", "drawn": "8 H2 sit on other plans", "basket": "Hidden — not this sheet" },
+    { "asked": "Wash-places in those rooms", "drawn": "4× TP3", "basket": "4 kits amber (contents unknown)" },
+    { "asked": "Hatches not in the Excel", "drawn": "IL.4–7 schedule", "basket": "Shown as extra / amber" }
+  ]
+}
