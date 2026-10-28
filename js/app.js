@@ -19,41 +19,45 @@ function pill(status) {
 function trustHtml() {
   if (mode === "customer") {
     return `
-      <div><strong>Scope</strong> PLAN 09 · ${job.packNote}</div>
-      <div><strong>Ready to order</strong> 0 lines with full spec</div>
-      <div><strong>Needs specialist</strong> 4× H2 (no length) · 4× TP3 · 3× TP2</div>
-      <div><strong>Extra on drawing</strong> Inspection hatches IL.4–7 (you didn’t list these)</div>`;
+      <div class="t-card"><strong>Scope</strong><b>PLAN 09</b><span>${job.packNote}</span></div>
+      <div class="t-card warn"><strong>Ready to order</strong><b>0</b><span>Nothing is fully specified</span></div>
+      <div class="t-card warn"><strong>Needs a specialist</strong><b>4 H2</b><span>No lengths · TP3 kits unknown</span></div>
+      <div class="t-card extra"><strong>You didn’t ask</strong><b>IL hatches</b><span>On the drawing, not in the Excel</span></div>`;
   }
   return `
-      <div><strong>Pack</strong> Incomplete — only A-40-1-1091.pdf</div>
-      <div><strong>H2 vs email</strong> 4 rooms match · 8 H2 on other plans</div>
-      <div><strong>Quote</strong> Specialist quote has no H2 lines</div>
-      <div><strong>IL hatches</strong> Schedule qty, not counted on plan</div>`;
+      <div class="t-card warn"><strong>Pack</strong><b>1 PDF</b><span>Incomplete — only this sheet</span></div>
+      <div class="t-card ok"><strong>H2 vs email</strong><b>4 match</b><span>8 more H2 sit on other plans</span></div>
+      <div class="t-card warn"><strong>Quote</strong><b>No H2</b><span>Specialist quote never listed shelves</span></div>
+      <div class="t-card extra"><strong>IL hatches</strong><b>Schedule</b><span>Not counted on the plan</span></div>`;
 }
 
 function drawPlan() {
   const svg = $("plan");
   const ghosts = [
-    [52, 42, 14, 16],
-    [68, 42, 14, 16],
-    [52, 62, 14, 16],
-    [68, 62, 22, 16],
-    [8, 8, 40, 28],
-    [82, 8, 14, 28],
+    [50, 10, 28, 24],
+    [80, 10, 16, 24],
+    [50, 42, 16, 16],
+    [68, 42, 16, 16],
+    [50, 62, 16, 16],
+    [68, 62, 28, 16],
   ];
   const g = ghosts
-    .map(([x, y, w, h]) => `<rect class="ghost" x="${x}" y="${y}" width="${w}" height="${h}" />`)
+    .map(([x, y, w, h]) => `<rect class="ghost" x="${x}" y="${y}" width="${w}" height="${h}" rx="0.8" />`)
     .join("");
   const rooms = job.rooms
     .map((r) => {
-      const sel = r.id === selected ? "sel" : "";
-      return `<rect class="room ${sel}" data-room="${r.id}" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" />
-        <text class="room-label" x="${r.x + 1.2}" y="${r.y + 6}">${r.id}</text>`;
+      const sel = r.id === selected ? "sel" : "lit";
+      const tag = r.items.some((i) => i.code === "H2") ? "H2" : r.items[0].code;
+      return `<rect class="room ${sel}" data-room="${r.id}" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="0.8" />
+        <text class="room-label" x="${r.x + r.w / 2}" y="${r.y + r.h / 2 - 1.2}" text-anchor="middle">${r.id}</text>
+        <text class="room-tag" x="${r.x + r.w / 2}" y="${r.y + r.h / 2 + 3.4}" text-anchor="middle">${tag}</text>`;
     })
     .join("");
-  svg.innerHTML = `<rect x="1" y="1" width="98" height="98" fill="#fff" stroke="#1b3a5f" stroke-width="0.6" />
-    <text x="3" y="6" font-size="3.2" fill="#5c6b7a">A-40-1-1091 · schematic (not the legal drawing)</text>
-    ${g}${rooms}`;
+  svg.innerHTML = `
+    <rect x="1.5" y="1.5" width="97" height="97" fill="#f6f8fb" stroke="#0b3a6e" stroke-width="0.8"/>
+    <text class="plan-quiet" x="4" y="6">Ground floor · health centre</text>
+    ${g}${rooms}
+    <text class="plan-quiet" x="4" y="96">Amber = on the drawing, not ready to order</text>`;
   svg.querySelectorAll(".room").forEach((el) => {
     el.addEventListener("click", () => select(el.dataset.room));
   });
@@ -89,7 +93,7 @@ function customerBasketHtml() {
           ? r.items.map((it) => `<div class="detail on">${it.why}</div>`).join("")
           : "";
       return `<article class="basket-room ${sel}" data-room="${r.id}">
-        <h3>${r.id}</h3>
+        <h3>Room ${r.id}</h3>
         ${r.items
           .map(
             (it) => `<div class="line">
@@ -103,8 +107,8 @@ function customerBasketHtml() {
       </article>`;
     })
     .join("");
-  const extras = `<article class="basket-room">
-      <h3>On the sheet, not in your Excel</h3>
+  const extras = `<article class="basket-room extras">
+      <h3>On the sheet · not in your list</h3>
       ${job.sheetExtras
         .map(
           (it) => `<div class="line">
@@ -115,13 +119,18 @@ function customerBasketHtml() {
         )
         .join("")}
     </article>`;
-  return `<h2>Basket for this floor</h2>${rooms}${extras}`;
+  return `<div class="basket-head">
+      <h2>Basket</h2>
+      <p>11 lines · all amber · 0 kr ready</p>
+    </div>${rooms}${extras}`;
 }
 
 function render() {
   $("drawingName").textContent = "· " + job.drawing;
   $("trust").className = "trust" + (mode === "specialist" ? " specialist" : "");
   $("trust").innerHTML = trustHtml();
+  const pillEl = $("sheetPill");
+  if (pillEl) pillEl.textContent = selected ? selected : "Click a room";
   drawPlan();
   $("side").innerHTML = sideHtml();
   $("side").querySelectorAll("[data-room]").forEach((el) => {
