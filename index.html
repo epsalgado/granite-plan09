@@ -79,10 +79,10 @@
               <li>Finding room names</li>
               <li>Matching H2 to the request</li>
               <li>Flagging missing lengths</li>
-              <li>Basket is amber — not ready to order</li>
+              <li>Nothing is ready to order</li>
             </ol>
             <aside class="preview-list">
-              <header>Basket · PLAN 09 <small>11 lines · amber</small></header>
+              <header>This floor · PLAN 09 <small>0 ready to order</small></header>
               <p>H2 shelf <b>no length</b></p>
               <p>TP3 kit <b>no contents</b></p>
               <p>IL.5 hatches <b>not in the list</b></p>
@@ -120,7 +120,12 @@
               <button type="button" id="zoomFit" title="Fit page">Fit</button>
               <button type="button" id="zoomIn" title="Zoom in">+</button>
             </span>
-            <span class="reading-pill idle" id="sheetPill">Click a pin</span>
+            <span class="pin-legend" aria-hidden="true">
+              <span class="lg room"></span> Room
+              <span class="lg code"></span> Product
+              <span class="lg extra"></span> Extra
+            </span>
+            <span class="reading-pill idle" id="sheetPill">Click a room to see why it is blocked</span>
           </div>
           <div class="viewport" id="viewport">
             <div class="stage" id="stage">
@@ -134,8 +139,8 @@
     </div>
 
     <footer class="foot">
-      <span>Hook rails, curtains and other floors: not on this drawing.</span>
-      <button class="btn-orange" type="button" id="requestBtn">Request quote</button>
+      <span>Hook rails, curtains and other floors are not on this drawing — so they are not in this list.</span>
+      <button class="btn-orange" type="button" id="requestBtn">Send as request</button>
     </footer>
   </div>
 

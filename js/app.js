@@ -17,23 +17,19 @@ async function load() {
   job = await res.json();
 }
 
-function pill(status) {
-  return `<span class="pill ${status}">${status}</span>`;
-}
-
 function trustHtml() {
   if (mode === "customer") {
     return `
-      <div class="t-card"><strong>Scope</strong><b>PLAN 09</b><span>${job.packNote}</span></div>
-      <div class="t-card warn"><strong>Ready to order</strong><b>0</b><span>Nothing is fully specified</span></div>
-      <div class="t-card warn"><strong>Needs a specialist</strong><b>4 H2</b><span>No lengths · TP3 kits unknown</span></div>
-      <div class="t-card extra"><strong>You didn’t ask</strong><b>IL hatches</b><span>On the drawing, not in the Excel</span></div>`;
+      <div class="t-card"><strong>This sheet</strong><b>PLAN 09</b><span>1 of 11 drawings — this floor only</span></div>
+      <div class="t-card warn"><strong>Ready to order</strong><b>0</b><span>Lengths and kit lists are missing</span></div>
+      <div class="t-card warn"><strong>Blocked</strong><b>4 shelves · 7 kits</b><span>Drawn, but not specified enough to buy</span></div>
+      <div class="t-card extra"><strong>Not in the request</strong><b>Hatches</b><span>On this sheet anyway — not counted on the floor</span></div>`;
   }
   return `
-      <div class="t-card warn"><strong>Pack</strong><b>1 PDF</b><span>Incomplete — only this sheet</span></div>
-      <div class="t-card ok"><strong>H2 vs email</strong><b>4 match</b><span>8 more H2 sit on other plans</span></div>
-      <div class="t-card warn"><strong>Quote</strong><b>No H2</b><span>Specialist quote never listed shelves</span></div>
-      <div class="t-card extra"><strong>IL hatches</strong><b>Schedule</b><span>Not counted on the plan</span></div>`;
+      <div class="t-card warn"><strong>Pack</strong><b>1 PDF</b><span>Room description and type standard missing</span></div>
+      <div class="t-card ok"><strong>Email vs plan</strong><b>4 match</b><span>The named H2 rooms are here · 8 more on other plans</span></div>
+      <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>The specialist quote never listed these shelves</span></div>
+      <div class="t-card extra"><strong>Hatches</strong><b>Table</b><span>Quantities from the sheet schedule, not a floor count</span></div>`;
 }
 
 function imgSize() {
@@ -86,7 +82,11 @@ function drawMarks() {
     .map((m) => {
       const room = m.room || m.id;
       const sel = room === selected || m.id === selected ? "sel" : "";
-      const kind = m.label.startsWith("A0-") ? "room" : "code";
+      const kind = m.label.startsWith("A0-")
+        ? "room"
+        : String(m.label).startsWith("IL")
+          ? "extra"
+          : "code";
       return `<button type="button" class="pin ${kind} ${sel}" data-id="${m.id}" data-room="${room}"
         style="left:${m.x}%;top:${m.y}%">${m.label}</button>`;
     })
@@ -171,6 +171,10 @@ function focusSelected() {
   if (mark) zoomTo(mark.x, mark.y, 2.6);
 }
 
+function qtyLabel(it) {
+  return it.qty > 1 ? `×${it.qty}` : "";
+}
+
 function sideHtml() {
   if (mode === "specialist") {
     const checks = job.checks
@@ -180,11 +184,11 @@ function sideHtml() {
       .map((r) => `<tr><td>${r.asked}</td><td>${r.drawn}</td><td>${r.basket}</td></tr>`)
       .join("");
     return `
-      <h2>Check these first</h2>
+      <h2>Check these before you sign</h2>
       <ul class="checks">${checks}</ul>
-      <h2>Asked · drawn · basket</h2>
+      <h2>Asked · on this drawing · in the list</h2>
       <table class="compare">
-        <thead><tr><th>Asked</th><th>On this drawing</th><th>Basket</th></tr></thead>
+        <thead><tr><th>Asked</th><th>On this drawing</th><th>In the list</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
       ${customerBasketHtml()}`;
@@ -195,41 +199,45 @@ function sideHtml() {
 function customerBasketHtml() {
   const rooms = job.rooms
     .map((r) => {
-      const sel = r.id === selected ? "sel" : "";
-      const details =
-        r.id === selected
-          ? r.items.map((it) => `<div class="detail on">${it.why}</div>`).join("")
-          : "";
-      return `<article class="basket-room ${sel}" data-room="${r.id}">
-        <h3>Room ${r.id}</h3>
+      const open = r.id === selected;
+      return `<article class="basket-room ${open ? "sel" : ""}" data-room="${r.id}">
+        <h3>${r.id}<small>${r.name}</small></h3>
         ${r.items
           .map(
-            (it) => `<div class="line">
-              <span><strong>${it.code}</strong> ${it.text}</span>
-              <span>${it.qty} ${it.unit}</span>
-              ${pill(it.status)}
+            (it) => `<div class="line-block">
+              <div class="line">
+                <span><strong>${it.code}</strong> ${it.text} ${qtyLabel(it)}</span>
+                <span class="blocker">${it.blocker}</span>
+              </div>
+              ${open ? `<p class="need">${it.need}</p>` : ""}
             </div>`
           )
           .join("")}
-        ${details}
       </article>`;
     })
     .join("");
-  const extras = `<article class="basket-room extras">
-      <h3>On the sheet · not in your list</h3>
+  const extraOpen = job.sheetExtras.some((x) => x.code === selected);
+  const extras = `<article class="basket-room extras ${extraOpen ? "sel" : ""}" data-extra="1">
+      <h3>On the sheet · not in the request</h3>
+      <p class="need always">Hatch table on this PDF. These were not in the customer Excel, and the quantities were not counted on the floor.</p>
       ${job.sheetExtras
         .map(
-          (it) => `<div class="line">
-            <span><strong>${it.code}</strong> ${it.text}</span>
-            <span>${it.qty} ${it.unit}</span>
-            ${pill(it.status)}
+          (it) => `<div class="line-block">
+            <div class="line">
+              <span><strong>${it.code}</strong> ${it.text} ${qtyLabel(it)}</span>
+            </div>
+            ${extraOpen && selected === it.code ? `<p class="need">${it.need}</p>` : ""}
           </div>`
         )
         .join("")}
     </article>`;
+  const intro =
+    mode === "specialist"
+      ? "Same rooms the customer sees. Sign nothing until the gaps are closed."
+      : "Nothing here is ready to order. Click a room to see it on the plan.";
   return `<div class="basket-head">
-      <h2>Basket</h2>
-      <p>11 lines · all amber · 0 kr ready</p>
+      <h2>This floor</h2>
+      <p>${intro}</p>
     </div>${rooms}${extras}`;
 }
 
@@ -238,7 +246,13 @@ function render(opts = {}) {
   $("trust").className = "trust" + (mode === "specialist" ? " specialist" : "");
   $("trust").innerHTML = trustHtml();
   const pillEl = $("sheetPill");
-  if (pillEl) pillEl.textContent = selected ? selected : "Click a pin";
+  if (pillEl) {
+    const room = job.rooms.find((r) => r.id === selected);
+    const extra = job.sheetExtras.find((x) => x.code === selected);
+    if (room) pillEl.textContent = `${room.id} · ${room.name}`;
+    else if (extra) pillEl.textContent = `${extra.code} · not in the request`;
+    else pillEl.textContent = "Click a room to see why it is blocked";
+  }
   drawMarks();
   $("side").innerHTML = sideHtml();
   $("side").querySelectorAll("[data-room]").forEach((el) => {
@@ -280,7 +294,7 @@ const READ_STEPS = [
   [48, "Finding room names"],
   [68, "Matching H2 to the request"],
   [86, "Flagging missing lengths"],
-  [100, "Basket is amber — not ready to order"],
+  [100, "Nothing is ready to order"],
 ];
 
 let landingPhase = "upload";

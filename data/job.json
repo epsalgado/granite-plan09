@@ -33,64 +33,64 @@
   "rooms": [
     {
       "id": "A0-022",
-      "x": 8, "y": 42, "w": 18, "h": 16,
+      "name": "BVC rum",
       "items": [
-        { "code": "H2", "text": "Shelf H2", "qty": 1, "unit": "st", "status": "amber", "why": "Length and specification not on this plan." },
-        { "code": "TP3", "text": "Wash-place kit TP3", "qty": 1, "unit": "st", "status": "amber", "why": "Kit contents need the room-type standard (not in this upload)." }
+        { "code": "H2", "text": "Shelf", "qty": 1, "blocker": "No length", "need": "The floor plan marks an H2 shelf. Length and spec are on the room description — that file was not uploaded." },
+        { "code": "TP3", "text": "Wash-place kit", "qty": 1, "blocker": "Kit unknown", "need": "TP3 is a package code. What is inside it comes from the type standard, which is not in this upload." }
       ]
     },
     {
       "id": "A0-023",
-      "x": 28, "y": 42, "w": 18, "h": 16,
+      "name": "BVC rum",
       "items": [
-        { "code": "H2", "text": "Shelf H2", "qty": 1, "unit": "st", "status": "amber", "why": "Length and specification not on this plan." },
-        { "code": "TP3", "text": "Wash-place kit TP3", "qty": 1, "unit": "st", "status": "amber", "why": "Kit contents need the room-type standard (not in this upload)." }
+        { "code": "H2", "text": "Shelf", "qty": 1, "blocker": "No length", "need": "Same gap as the other H2 rooms: the shelf is drawn, the length is not." },
+        { "code": "TP3", "text": "Wash-place kit", "qty": 1, "blocker": "Kit unknown", "need": "Need the type standard before this can become a product list." }
       ]
     },
     {
       "id": "A0-025",
-      "x": 8, "y": 62, "w": 18, "h": 16,
+      "name": "BVC",
       "items": [
-        { "code": "H2", "text": "Shelf H2", "qty": 1, "unit": "st", "status": "amber", "why": "Length and specification not on this plan." },
-        { "code": "TP3", "text": "Wash-place kit TP3", "qty": 1, "unit": "st", "status": "amber", "why": "Kit contents need the room-type standard (not in this upload)." }
+        { "code": "H2", "text": "Shelf", "qty": 1, "blocker": "No length", "need": "The floor plan marks an H2 shelf. Length and spec are on the room description — that file was not uploaded." },
+        { "code": "TP3", "text": "Wash-place kit", "qty": 1, "blocker": "Kit unknown", "need": "TP3 is a package code. What is inside it comes from the type standard, which is not in this upload." }
       ]
     },
     {
       "id": "A0-026",
-      "x": 28, "y": 62, "w": 18, "h": 16,
+      "name": "BEH RUM",
       "items": [
-        { "code": "H2", "text": "Shelf H2", "qty": 1, "unit": "st", "status": "amber", "why": "Length and specification not on this plan." },
-        { "code": "TP3", "text": "Wash-place kit TP3", "qty": 1, "unit": "st", "status": "amber", "why": "Kit contents need the room-type standard (not in this upload)." }
+        { "code": "H2", "text": "Shelf", "qty": 1, "blocker": "No length", "need": "The floor plan marks an H2 shelf. Length and spec are on the room description — that file was not uploaded." },
+        { "code": "TP3", "text": "Wash-place kit", "qty": 1, "blocker": "Kit unknown", "need": "TP3 is a package code. What is inside it comes from the type standard, which is not in this upload." }
       ]
     },
     {
       "id": "A0-006",
-      "x": 58, "y": 18, "w": 22, "h": 20,
+      "name": "ÖBEH / AVLAST",
       "items": [
-        { "code": "TP2", "text": "Wash-place kit TP2", "qty": 3, "unit": "st", "status": "amber", "why": "Three kits in this room; contents unknown without the type standard." }
+        { "code": "TP2", "text": "Wash-place kit", "qty": 3, "blocker": "Kit unknown", "need": "Three wash-places in this room. TP2 contents also need the type standard — not a guess from the floor plan." }
       ]
     }
   ],
   "sheetExtras": [
-    { "code": "IL.4", "text": "Inspection hatch 300×300", "qty": 2, "unit": "st", "room": "—", "status": "amber", "why": "From the sheet schedule, not counted on the plan. Floor unverified." },
-    { "code": "IL.5", "text": "Frame/hatch UNI INB", "qty": 16, "unit": "st", "room": "—", "status": "amber", "why": "Schedule quantity. PLAN 09 is the source sheet, not a proven installation floor." },
-    { "code": "IL.6", "text": "Vent cabinet hatch 250×250", "qty": 1, "unit": "st", "room": "—", "status": "amber", "why": "Schedule, not plan-count." },
-    { "code": "IL.7", "text": "Inspection hatch 300×300", "qty": 2, "unit": "st", "room": "—", "status": "amber", "why": "Schedule, not plan-count." }
+    { "code": "IL.4", "text": "Inspection hatch 300×300", "qty": 2, "need": "From the hatch table on this sheet, not counted on the floor." },
+    { "code": "IL.5", "text": "Frame / hatch UNI INB", "qty": 16, "need": "Table says 16. PLAN 09 is the source sheet — not proof they all install on this floor." },
+    { "code": "IL.6", "text": "Vent cabinet hatch 250×250", "qty": 1, "need": "From the hatch table, not a room count." },
+    { "code": "IL.7", "text": "Inspection hatch 300×300", "qty": 2, "need": "From the hatch table, not a room count." }
   ],
   "checks": [
-    { "id": "pack", "ok": false, "text": "Only this PDF was sent. Other plans, room description and type standard were not supplied." },
-    { "id": "h2match", "ok": true, "text": "Four H2 rooms on this plan match the customer email (A0-022, 023, 025, 026)." },
-    { "id": "h2len", "ok": false, "text": "H2 length and specification unavailable." },
-    { "id": "il", "ok": false, "text": "IL hatch quantities come from a schedule, not from counting on the plan." },
-    { "id": "noroom", "ok": false, "text": "Some sanitary symbols in the full 69-line draft have no room." },
-    { "id": "invented", "ok": false, "text": "Some codes (S1, EFT, UDS) have no product type — confirm they are not invented." },
-    { "id": "quote", "ok": false, "text": "Customer asked for H2. The specialist reference quote has no H2 lines." },
-    { "id": "scope", "ok": true, "text": "Do not pull building totals (20× KL1, 40 curtains) into this job." }
+    { "id": "pack", "ok": false, "text": "Only this PDF was uploaded. Ten other drawings, the room description and the type standard are missing." },
+    { "id": "h2match", "ok": true, "text": "The four H2 rooms in the email are on this plan (A0-022, 023, 025, 026)." },
+    { "id": "h2len", "ok": false, "text": "H2 is drawn, but length is not on this floor plan." },
+    { "id": "kits", "ok": false, "text": "TP3 / TP2 are package codes. Contents need the type standard." },
+    { "id": "il", "ok": false, "text": "Hatch quantities come from a table on the sheet, not from counting rooms." },
+    { "id": "quote", "ok": false, "text": "The customer asked for H2. The old specialist quote never listed H2." },
+    { "id": "scope", "ok": true, "text": "Hook rails, curtains and other floors stay out of this basket." },
+    { "id": "draft", "ok": false, "text": "The raw API draft also has symbols with no room and codes with no product type — do not treat those as ready." }
   ],
   "compare": [
-    { "asked": "4× H2 rooms named for 1091", "drawn": "4× H2 found", "basket": "4× H2 amber (no length)" },
-    { "asked": "12× H2 in the Excel (whole building)", "drawn": "8 H2 sit on other plans", "basket": "Hidden — not this sheet" },
-    { "asked": "Wash-places in those rooms", "drawn": "4× TP3", "basket": "4 kits amber (contents unknown)" },
-    { "asked": "Hatches not in the Excel", "drawn": "IL.4–7 schedule", "basket": "Shown as extra / amber" }
+    { "asked": "4 H2 rooms named for this sheet", "drawn": "4 found here", "basket": "Listed — length missing" },
+    { "asked": "12 H2 in the whole-building Excel", "drawn": "8 sit on other plans", "basket": "Not this floor" },
+    { "asked": "Wash-places in those rooms", "drawn": "4× TP3 + 3× TP2", "basket": "Listed — kit contents missing" },
+    { "asked": "Hatches (not in the Excel)", "drawn": "IL.4–7 table on this sheet", "basket": "Shown as extra — not counted on the floor" }
   ]
 }
