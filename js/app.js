@@ -445,14 +445,15 @@ function openModal() {
 
 $("tryExample").addEventListener("click", () => startDemo({ pitch: false }));
 $("uploadExample").addEventListener("click", () => playLandingRead());
+$("pick1091").addEventListener("click", (e) => {
+  e.stopPropagation();
+  playLandingRead();
+});
 $("skipRead").addEventListener("click", skipLandingRead);
 $("pitchFromHero").addEventListener("click", () => enterFromHero({ pitch: true }));
 $("pitchBtn").addEventListener("click", togglePitch);
 
 const heroSheet = $("heroSheet");
-heroSheet.addEventListener("click", () => {
-  if (landingPhase === "upload") playLandingRead();
-});
 ["dragenter", "dragover"].forEach((ev) => {
   heroSheet.addEventListener(ev, (e) => {
     e.preventDefault();
