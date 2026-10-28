@@ -308,8 +308,8 @@ function setLandingPhase(phase) {
   const pill = $("heroPill");
   const label = $("heroBarLabel");
   if (phase === "upload") {
-    pill.textContent = "Ready to upload";
-    label.textContent = "A-40-1-1091.pdf · PLAN 09";
+    pill.textContent = "Empty";
+    label.textContent = "No file";
   } else if (phase === "reading") {
     pill.textContent = "AI reading…";
     label.textContent = "A-40-1-1091 · PLAN 09";

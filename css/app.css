@@ -174,7 +174,16 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   user-select: none;
   background: #d9e1ea;
 }
-.hero[data-phase="upload"] .preview-plan { filter: saturate(0.7) brightness(0.92); }
+.hero[data-phase="upload"] .preview-plan { display: none; }
+.hero[data-phase="upload"] .preview-frame {
+  min-height: 320px;
+  background: #eef3f8;
+}
+.hero[data-phase="upload"] .upload-cta {
+  background: transparent;
+  color: var(--navy);
+}
+.hero[data-phase="upload"] .upload-cta span { opacity: 0.7; }
 .upload-cta {
   position: absolute;
   inset: 0;
