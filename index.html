@@ -3,34 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Granite — PLAN 09 basket</title>
+  <title>Granite — PLAN 09 is not an order</title>
   <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
-  <main class="landing" id="landing">
-    <div class="eyebrow">Team Granite · Ahlsell AI Blueprint Hackathon</div>
-    <h1>From one floor plan to a basket you can trust.</h1>
-    <p class="lead">
-      Upload a drawing and get a material list for the rooms on that sheet —
-      with gaps visible, not hidden. This demo uses the health-centre plan
-      <strong>A-40-1-1091</strong> (PLAN 09).
-    </p>
-    <div class="actions">
-      <button class="btn-primary" id="tryExample" type="button">Try the example: PLAN 09</button>
-    </div>
-    <p class="hint">
-      Not an order. One of eleven drawings in the pack. Hook rails, curtains and other floors stay out of this basket.
-    </p>
+  <main class="hero" id="landing">
+    <header class="hero-nav">
+      <div class="logo">Granite <small>drawing → basket · AI</small></div>
+      <div class="hero-nav-right">
+        <span class="chip-quiet">Team Granite · Ahlsell hackathon</span>
+        <button type="button" class="btn-ghost light" id="pitchFromHero">Pitch mode</button>
+      </div>
+    </header>
+
+    <section class="hero-grid">
+      <div class="hero-copy">
+        <p class="badge">PLAN 09 · 1 of 11 drawings · not a checkout</p>
+        <h1>PLAN 09 is not an order.<br /><em>And here is why.</em></h1>
+        <p class="lead">
+          Four shelves. No lengths. Wash-place kits with no contents.
+          A specialist still has to sign — so the basket shows the gaps first.
+        </p>
+        <div class="actions">
+          <button class="btn-orange" id="tryExample" type="button">Try PLAN 09</button>
+          <span class="micro">~8 seconds to read the sheet · no sign-in</span>
+        </div>
+        <ul class="chips">
+          <li>This floor only</li>
+          <li>0 lines ready to order</li>
+          <li>Click a room, see the gap</li>
+          <li>Specialist checks before anything is sent</li>
+        </ul>
+      </div>
+
+      <div class="hero-stage" aria-hidden="true">
+        <div class="preview-sheet">
+          <div class="preview-bar">
+            <span>A-40-1-1091 · PLAN 09</span>
+            <span class="reading-pill">AI reading…</span>
+          </div>
+          <svg viewBox="0 0 100 72" class="preview-svg">
+            <rect x="2" y="2" width="96" height="68" fill="#f7f4ee" stroke="#9aa8b8"/>
+            <rect x="8" y="10" width="22" height="16" fill="#d7e3ef" stroke="#1b3a5f"/>
+            <rect x="8" y="30" width="18" height="14" class="pulse-room"/>
+            <rect x="28" y="30" width="18" height="14" class="pulse-room d2"/>
+            <rect x="8" y="46" width="18" height="14" class="pulse-room d3"/>
+            <rect x="28" y="46" width="18" height="14" class="pulse-room d4"/>
+            <rect x="55" y="12" width="20" height="16" fill="#d7e3ef" stroke="#1b3a5f"/>
+            <line class="scan" x1="4" y1="8" x2="96" y2="8"/>
+          </svg>
+          <aside class="preview-list">
+            <header>Basket · PLAN 09 <small>11 lines · amber</small></header>
+            <p>H2 shelf · A0-025 <b>no length</b></p>
+            <p>TP3 kit · A0-025 <b>contents unknown</b></p>
+            <p>IL.5 hatches <b>you didn’t ask</b></p>
+            <footer>Total ready to order <strong>0</strong></footer>
+          </aside>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <div class="read-overlay" id="readOverlay" hidden>
+    <div class="read-card">
+      <p class="badge">A-40-1-1091.pdf</p>
+      <h2>Reading PLAN 09 like a specialist…</h2>
+      <p id="readStatus">Sorting the sheet</p>
+      <div class="bar"><span id="readBar"></span></div>
+    </div>
+  </div>
 
   <div class="app" id="app">
     <header class="top">
       <div class="brand">Granite Takeoff <span id="drawingName"></span></div>
-      <div class="mode" role="tablist">
-        <button type="button" class="active" data-mode="customer">Customer</button>
-        <button type="button" data-mode="specialist">Specialist</button>
+      <div class="top-tools">
+        <div class="mode" role="tablist">
+          <button type="button" class="active" data-mode="customer">Customer</button>
+          <button type="button" data-mode="specialist">Specialist</button>
+        </div>
+        <button type="button" class="btn-ghost light" id="pitchBtn">Pitch mode</button>
       </div>
     </header>
+
+    <p class="pitch-caption" id="pitchCaption" hidden></p>
 
     <section class="trust" id="trust"></section>
 
@@ -46,17 +101,18 @@
 
     <footer class="foot">
       <span>Hook rails, curtains and other floors: not on this drawing.</span>
-      <button class="btn-primary" type="button" id="requestBtn">Request quote</button>
+      <button class="btn-orange" type="button" id="requestBtn">Request quote</button>
     </footer>
   </div>
 
   <div class="modal" id="modal" role="dialog" aria-modal="true">
     <div class="box">
+      <p class="stamp">PARTIAL · NOT SIGNED</p>
       <h2>Send PLAN 09 to Ahlsell</h2>
       <p>This is a <strong>request</strong>, not an order. A specialist still has to check lengths, kit contents and hatch quantities.</p>
       <ul id="modalList"></ul>
       <div class="actions">
-        <button class="btn-primary" type="button" id="sendBtn">Send request</button>
+        <button class="btn-orange" type="button" id="sendBtn">Send request</button>
         <button class="btn-ghost" type="button" id="closeModal">Back</button>
       </div>
       <p class="hint" id="sentMsg" hidden>Sent. Not an order — an Ahlsell specialist will check this floor.</p>

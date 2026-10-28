@@ -3,16 +3,13 @@ const $ = (id) => document.getElementById(id);
 let job = null;
 let mode = "customer";
 let selected = null;
+let pitchTimer = null;
+let pitching = false;
 
 async function load() {
-  try {
-    const res = await fetch("data/job.json");
-    job = await res.json();
-  } catch (err) {
-    throw new Error(
-      "Could not load data/job.json. Open this site via Cloudflare or run python3 -m http.server 4173 in the project folder (do not double-click the HTML file)."
-    );
-  }
+  const res = await fetch("data/job.json");
+  if (!res.ok) throw new Error("Could not load data/job.json");
+  job = await res.json();
 }
 
 function pill(status) {
@@ -44,11 +41,8 @@ function drawPlan() {
     [8, 8, 40, 28],
     [82, 8, 14, 28],
   ];
-  let g = ghosts
-    .map(
-      ([x, y, w, h]) =>
-        `<rect class="ghost" x="${x}" y="${y}" width="${w}" height="${h}" />`
-    )
+  const g = ghosts
+    .map(([x, y, w, h]) => `<rect class="ghost" x="${x}" y="${y}" width="${w}" height="${h}" />`)
     .join("");
   const rooms = job.rooms
     .map((r) => {
@@ -65,32 +59,13 @@ function drawPlan() {
   });
 }
 
-function itemRows(items) {
-  return items
-    .map(
-      (it) => `<div class="line">
-        <span><strong>${it.code}</strong> ${it.text}</span>
-        <span>${it.qty} ${it.unit}</span>
-        ${pill(it.status)}
-      </div>
-      <div class="detail ${selected ? "on" : ""}">${it.why}</div>`
-    )
-    .join("");
-}
-
 function sideHtml() {
   if (mode === "specialist") {
     const checks = job.checks
-      .map(
-        (c) =>
-          `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${c.text}</li>`
-      )
+      .map((c) => `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${c.text}</li>`)
       .join("");
     const rows = job.compare
-      .map(
-        (r) =>
-          `<tr><td>${r.asked}</td><td>${r.drawn}</td><td>${r.basket}</td></tr>`
-      )
+      .map((r) => `<tr><td>${r.asked}</td><td>${r.drawn}</td><td>${r.basket}</td></tr>`)
       .join("");
     return `
       <h2>Check these first</h2>
@@ -167,19 +142,98 @@ function setMode(next) {
   render();
 }
 
-$("tryExample").addEventListener("click", async () => {
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function playReading() {
+  const overlay = $("readOverlay");
+  const bar = $("readBar");
+  const status = $("readStatus");
+  const steps = [
+    [8, "Sorting the sheet"],
+    [28, "Finding room names"],
+    [52, "Matching H2 to the request"],
+    [74, "Flagging missing lengths"],
+    [100, "Basket is amber — not ready to order"],
+  ];
+  overlay.hidden = false;
+  bar.style.width = "0%";
+  for (const [pct, text] of steps) {
+    status.textContent = text;
+    bar.style.width = pct + "%";
+    await sleep(1600);
+  }
+  overlay.hidden = true;
+}
+
+async function startDemo({ pitch = false } = {}) {
   await load();
   $("landing").style.display = "none";
+  await playReading();
   $("app").classList.add("on");
   selected = "A0-025";
-  render();
-});
+  mode = "customer";
+  setMode("customer");
+  if (pitch) runPitch();
+}
 
-document.querySelectorAll(".mode button").forEach((b) => {
-  b.addEventListener("click", () => setMode(b.dataset.mode));
-});
+function setPitchCaption(text) {
+  const el = $("pitchCaption");
+  el.hidden = !text;
+  el.textContent = text || "";
+}
 
-$("requestBtn").addEventListener("click", () => {
+function runPitch() {
+  stopPitch();
+  pitching = true;
+  document.body.classList.add("pitch");
+  $("pitchBtn").textContent = "Exit pitch";
+  const beats = [
+    { t: 0, caption: "1 · Four H2 rooms on this floor — lengths unknown", room: "A0-022", mode: "customer" },
+    { t: 3500, caption: "1 · Four H2 rooms on this floor — lengths unknown", room: "A0-023", mode: "customer" },
+    { t: 7000, caption: "1 · Four H2 rooms on this floor — lengths unknown", room: "A0-025", mode: "customer" },
+    { t: 10500, caption: "1 · Four H2 rooms on this floor — lengths unknown", room: "A0-026", mode: "customer" },
+    { t: 14000, caption: "2 · Specialist: check these first. H2 is not even in the quote.", room: "A0-025", mode: "specialist" },
+    { t: 20000, caption: "3 · Request quote = partial, not signed.", room: "A0-025", mode: "specialist", modal: true },
+  ];
+  pitchTimer = [];
+  beats.forEach((b) => {
+    pitchTimer.push(
+      setTimeout(() => {
+        if (!pitching) return;
+        setMode(b.mode);
+        select(b.room);
+        setPitchCaption(b.caption);
+        if (b.modal) openModal();
+      }, b.t)
+    );
+  });
+}
+
+function stopPitch() {
+  pitching = false;
+  document.body.classList.remove("pitch");
+  $("pitchBtn").textContent = "Pitch mode";
+  setPitchCaption("");
+  if (pitchTimer) pitchTimer.forEach(clearTimeout);
+  pitchTimer = [];
+  $("modal").classList.remove("on");
+}
+
+function togglePitch() {
+  if (pitching) {
+    stopPitch();
+    return;
+  }
+  if (!$("app").classList.contains("on")) {
+    startDemo({ pitch: true });
+    return;
+  }
+  runPitch();
+}
+
+function openModal() {
   $("modalList").innerHTML = `
     <li>Included: 4 rooms with H2 + TP3 (A0-022, 023, 025, 026)</li>
     <li>Included: A0-006 with TP2 × 3</li>
@@ -187,7 +241,20 @@ $("requestBtn").addEventListener("click", () => {
     <li>Blocked: H2 lengths, kit contents, unverified hatch floor</li>`;
   $("sentMsg").hidden = true;
   $("modal").classList.add("on");
+}
+
+$("tryExample").addEventListener("click", () => startDemo({ pitch: false }));
+$("pitchFromHero").addEventListener("click", () => startDemo({ pitch: true }));
+$("pitchBtn").addEventListener("click", togglePitch);
+
+document.querySelectorAll(".mode button").forEach((b) => {
+  b.addEventListener("click", () => {
+    if (pitching) stopPitch();
+    setMode(b.dataset.mode);
+  });
 });
+
+$("requestBtn").addEventListener("click", openModal);
 $("closeModal").addEventListener("click", () => $("modal").classList.remove("on"));
 $("sendBtn").addEventListener("click", () => {
   $("sentMsg").hidden = false;
