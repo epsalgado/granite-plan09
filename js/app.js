@@ -9,6 +9,7 @@ let scale = 1;
 let panX = 0;
 let panY = 0;
 let viewerBound = false;
+const BASE_W = 1600;
 
 async function load() {
   const res = await fetch("data/job.json");
@@ -35,13 +36,23 @@ function trustHtml() {
       <div class="t-card extra"><strong>IL hatches</strong><b>Schedule</b><span>Not counted on the plan</span></div>`;
 }
 
-function applyView() {
-  $("stage").style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
-}
-
 function imgSize() {
   const img = $("stage").querySelector("img");
-  return { w: img.offsetWidth || 1600, h: img.offsetHeight || 1130 };
+  const ratio =
+    img.naturalWidth && img.naturalHeight
+      ? img.naturalHeight / img.naturalWidth
+      : 3368 / 4768;
+  return { w: BASE_W, h: BASE_W * ratio };
+}
+
+function applyView() {
+  const stage = $("stage");
+  const { w } = imgSize();
+  stage.style.width = `${w * scale}px`;
+  stage.style.height = "auto";
+  stage.style.left = `${panX}px`;
+  stage.style.top = `${panY}px`;
+  stage.style.transform = "none";
 }
 
 function fitView() {
@@ -94,13 +105,18 @@ function bindViewer() {
   if (viewerBound) return;
   viewerBound = true;
   const vp = $("viewport");
-  $("zoomIn").addEventListener("click", () =>
-    zoomAt(1.25, vp.clientWidth / 2, vp.clientHeight / 2)
-  );
-  $("zoomOut").addEventListener("click", () =>
-    zoomAt(0.8, vp.clientWidth / 2, vp.clientHeight / 2)
-  );
-  $("zoomFit").addEventListener("click", fitView);
+  $("zoomIn").addEventListener("click", (e) => {
+    e.preventDefault();
+    zoomAt(1.25, vp.clientWidth / 2, vp.clientHeight / 2);
+  });
+  $("zoomOut").addEventListener("click", (e) => {
+    e.preventDefault();
+    zoomAt(0.8, vp.clientWidth / 2, vp.clientHeight / 2);
+  });
+  $("zoomFit").addEventListener("click", (e) => {
+    e.preventDefault();
+    fitView();
+  });
   vp.addEventListener(
     "wheel",
     (e) => {
@@ -112,22 +128,37 @@ function bindViewer() {
   );
   let drag = null;
   vp.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
     if (e.target.closest(".pin")) return;
-    drag = { x: e.clientX - panX, y: e.clientY - panY };
+    drag = { x: e.clientX, y: e.clientY, panX, panY, moved: false };
     vp.classList.add("drag");
-    vp.setPointerCapture(e.pointerId);
   });
   vp.addEventListener("pointermove", (e) => {
-    if (!drag) return;
-    panX = e.clientX - drag.x;
-    panY = e.clientY - drag.y;
+    if (!drag || e.buttons !== 1) {
+      if (e.buttons !== 1) {
+        drag = null;
+        vp.classList.remove("drag");
+      }
+      return;
+    }
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) < 3 && !drag.moved) return;
+    drag.moved = true;
+    panX = drag.panX + dx;
+    panY = drag.panY + dy;
     applyView();
   });
-  vp.addEventListener("pointerup", () => {
+  const endDrag = () => {
     drag = null;
     vp.classList.remove("drag");
-  });
-  $("stage").querySelector("img").addEventListener("load", () => {
+  };
+  vp.addEventListener("pointerup", endDrag);
+  vp.addEventListener("pointercancel", endDrag);
+  vp.addEventListener("pointerleave", endDrag);
+  const img = $("stage").querySelector("img");
+  if (img.complete) fitView();
+  img.addEventListener("load", () => {
     fitView();
     if (selected) focusSelected();
   });

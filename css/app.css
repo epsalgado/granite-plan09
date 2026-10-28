@@ -357,26 +357,34 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   background: #d9e1ea;
   cursor: grab;
   touch-action: none;
+  user-select: none;
 }
 .viewport.drag { cursor: grabbing; }
 .stage {
   position: absolute;
   left: 0;
   top: 0;
-  transform-origin: 0 0;
-  will-change: transform;
+  width: 1600px;
+  pointer-events: none;
 }
 .stage img {
   display: block;
-  width: 1600px;
+  width: 100%;
+  height: auto;
   max-width: none;
   user-select: none;
   pointer-events: none;
+  -webkit-user-drag: none;
 }
-.marks { position: absolute; inset: 0; }
+.marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 .pin {
   position: absolute;
-  transform: translate(-50%, -110%);
+  margin-left: -14px;
+  margin-top: -22px;
   background: #e87722;
   color: #fff;
   font-size: 0.68rem;
@@ -387,18 +395,9 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   white-space: nowrap;
   z-index: 2;
-}
-.pin::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -5px;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: #e87722;
+  pointer-events: auto;
 }
 .pin.sel { background: #0b3a6e; z-index: 3; }
-.pin.sel::after { border-top-color: #0b3a6e; }
 .pin.code { background: #c45a0c; }
 .plan-card h2, .side h2 { font-size: 0.95rem; margin: 0 0 0.6rem; color: #fff; }
 
