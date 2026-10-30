@@ -26,6 +26,8 @@ let sheetChosen = false;
 let demoStarted = false;
 let requestSent = false;
 let lineFilter = "fittings";
+let compareState = null;
+let compareBusy = false;
 const BASE_W = 1600;
 const STEPS = ["drawing", "reading", "found", "choose", "send"];
 
@@ -648,6 +650,7 @@ function specialistHtml() {
     </tr>`)
     .join("");
   return `
+    ${compareHtml()}
     <div class="basket-head spec-head">
       <p class="spec-kicker">Specialist · Bluebeam-style check</p>
       <h2>Markups list</h2>
@@ -664,6 +667,212 @@ function specialistHtml() {
     <div class="send-actions">
       <button type="button" class="btn-ghost light" id="csvBtn">Export markups CSV</button>
       <span class="draft-meta spec-export-note">${lines.length} lines in this filter · not the customer request</span>
+    </div>`;
+}
+
+function normCode(s) {
+  const t = String(s == null ? "" : s).trim();
+  if (!t || t === "—" || t === "-" || t === "–" || t === "−") return "";
+  return t.toUpperCase();
+}
+
+function normSpace(s) {
+  return String(s == null ? "" : s).trim().toUpperCase();
+}
+
+function graniteDraftRows() {
+  return (job.lines || [])
+    .filter((ln) => (ln.floor || "") === "PLAN 09")
+    .map((ln) => ({
+      subject: normCode(ln.code),
+      space: normSpace(ln.room),
+      count: Number(ln.qty) || 0,
+      comment: ln.text || "",
+    }));
+}
+
+function sampleBluebeamRows() {
+  const rows = graniteDraftRows().map((r) => ({ ...r }));
+  const keep = rows.filter((r) => r.subject !== "IL.6" && r.subject !== "IL.7");
+  const tp = keep.find((r) => r.subject === "TP3" && r.space === "A0-025");
+  if (tp) tp.count = 2;
+  keep.push({
+    subject: "H2",
+    space: "A0-024",
+    count: 1,
+    comment: "Hylla H2 (specialist added this room)",
+  });
+  return keep;
+}
+
+const SAMPLE_BB_NOTE =
+  "Sample — not a real Revu file. Pretend they dropped IL.6 and IL.7, set TP3 in A0-025 to 2, and added H2 in A0-024.";
+
+function bucketRows(list) {
+  const map = new Map();
+  for (const r of list) {
+    const subject = normCode(r.subject);
+    const space = normSpace(r.space);
+    const key = subject + "|" + space;
+    if (!map.has(key)) {
+      map.set(key, { subject, space, count: 0, comment: r.comment || "" });
+    }
+    const b = map.get(key);
+    b.count += Number(r.count) || 1;
+    if (!b.comment && r.comment) b.comment = r.comment;
+  }
+  return map;
+}
+
+function compareLists(graniteRows, theirRows) {
+  const gMap = bucketRows(graniteRows);
+  const tMap = bucketRows(theirRows);
+  const same = [];
+  const different = [];
+  const onlyGranite = [];
+  const onlyBluebeam = [];
+  const usedG = new Set();
+  const usedT = new Set();
+
+  for (const [k, t] of tMap) {
+    if (!gMap.has(k)) continue;
+    const g = gMap.get(k);
+    usedG.add(k);
+    usedT.add(k);
+    const row = {
+      subject: t.subject || g.subject,
+      space: t.space || g.space,
+      graniteQty: g.count,
+      bluebeamQty: t.count,
+      comment: g.comment || t.comment || "",
+    };
+    if (g.count === t.count) same.push(row);
+    else {
+      row.note = "Count does not match";
+      different.push(row);
+    }
+  }
+
+  for (const [k, t] of tMap) {
+    if (usedT.has(k) || t.space) continue;
+    const gLeft = [...gMap.entries()].filter(([gk, g]) => !usedG.has(gk) && g.subject === t.subject);
+    if (!gLeft.length) continue;
+    const gSum = gLeft.reduce((n, [, g]) => n + g.count, 0);
+    gLeft.forEach(([gk]) => usedG.add(gk));
+    usedT.add(k);
+    const rooms = gLeft.map(([, g]) => g.space).filter(Boolean).join(", ");
+    const row = {
+      subject: t.subject,
+      space: rooms,
+      graniteQty: gSum,
+      bluebeamQty: t.count,
+      comment: "No Space in their file — rooms grouped",
+    };
+    if (gSum === t.count) same.push(row);
+    else different.push(row);
+  }
+
+  for (const [k, g] of gMap) {
+    if (usedG.has(k)) continue;
+    onlyGranite.push({
+      subject: g.subject,
+      space: g.space,
+      graniteQty: g.count,
+      bluebeamQty: 0,
+      comment: g.comment || "",
+    });
+  }
+  for (const [k, t] of tMap) {
+    if (usedT.has(k)) continue;
+    onlyBluebeam.push({
+      subject: t.subject,
+      space: t.space,
+      graniteQty: 0,
+      bluebeamQty: t.count,
+      comment: t.comment || "",
+    });
+  }
+  return { same, different, onlyGranite, onlyBluebeam };
+}
+
+function applyCompare(theirRows, meta) {
+  const result = compareLists(graniteDraftRows(), theirRows);
+  compareState = {
+    source: meta.source || "",
+    fileName: meta.fileName || "",
+    note: meta.note || "",
+    same: result.same,
+    different: result.different,
+    onlyGranite: result.onlyGranite,
+    onlyBluebeam: result.onlyBluebeam,
+  };
+}
+
+function cmpRowHtml(row) {
+  return `<tr data-cmp="1" data-room="${esc(row.space || "")}" data-code="${esc(row.subject || "")}">
+    <td>${esc(row.subject || "—")}</td>
+    <td>${esc(row.space || "—")}</td>
+    <td>${row.graniteQty}</td>
+    <td>${row.bluebeamQty}</td>
+    <td>${esc(row.note || row.comment || "")}</td>
+  </tr>`;
+}
+
+function cmpTable(title, rows, open) {
+  if (!rows.length) return "";
+  return `<details class="bb-block" ${open ? "open" : ""}>
+    <summary>${esc(title)} · ${rows.length}</summary>
+    <div class="draft-wrap bb-wrap">
+      <table class="draft">
+        <thead><tr><th>Subject</th><th>Space</th><th>Granite</th><th>Bluebeam</th><th>Note</th></tr></thead>
+        <tbody>${rows.map(cmpRowHtml).join("")}</tbody>
+      </table>
+    </div>
+  </details>`;
+}
+
+function compareHtml() {
+  const busy = compareBusy ? " disabled" : "";
+  let result = "";
+  if (compareState) {
+    const s = compareState;
+    if (s.source === "Could not compare") {
+      result = `<p class="bb-source bb-error">${esc(s.note)}</p>
+        <div class="send-actions">
+          <button type="button" class="btn-ghost light" id="bbClear">Clear check</button>
+        </div>`;
+    } else {
+      const label = s.fileName ? `${s.source} · ${s.fileName}` : s.source;
+      result = `
+        <div class="bb-pills">
+          <span class="bb-pill same">Same ${s.same.length}</span>
+          <span class="bb-pill diff">Different ${s.different.length}</span>
+          <span class="bb-pill granite">Only in Granite ${s.onlyGranite.length}</span>
+          <span class="bb-pill extra">Only in Bluebeam ${s.onlyBluebeam.length}</span>
+        </div>
+        <p class="bb-source">${esc(label)}${s.note ? " · " + esc(s.note) : ""}</p>
+        ${cmpTable("Different", s.different, true)}
+        ${cmpTable("Only in Granite", s.onlyGranite, true)}
+        ${cmpTable("Only in Bluebeam", s.onlyBluebeam, true)}
+        ${cmpTable("Same", s.same, false)}
+        <div class="send-actions">
+          <button type="button" class="btn-ghost light" id="bbCmpCsv">Download comparison CSV</button>
+          <button type="button" class="btn-ghost light" id="bbClear">Clear check</button>
+        </div>`;
+    }
+  }
+  return `
+    <div class="bb-box" id="bbDrop">
+      <p class="spec-kicker">Specialist · Compare with Bluebeam</p>
+      <h2>Check their save against this draft</h2>
+      <p>They keep counting in Revu. Upload the PDF they saved, or a Markup Summary CSV. This is a check, not a new take-off.</p>
+      <p class="need always">The pack had no specialist Revu PDF. Try the sample to see the check, or drop their file when they have one.</p>
+      <div class="bb-actions">
+        <button type="button" class="btn-orange" id="bbPick"${busy}>Upload PDF or CSV</button>
+        <button type="button" class="btn-ghost light" id="bbSample"${busy}>Try sample</button>
+        <button type="button" class="btn-ghost light" id="bbSampleCsv"${busy}>Download sample CSV</button>
+      </div>
+      ${result}
     </div>`;
 }
 
@@ -863,7 +1072,7 @@ function updateChrome() {
   const c = counts();
   const groups = questionGroups();
   if (specialist) {
-    banner.textContent = "Specialist check · Markups list · you still sign this draft";
+    banner.textContent = "Specialist check · Compare with Bluebeam · you still sign this draft";
     if (sheetTitle) sheetTitle.textContent = "PLAN 09 · specialist markups";
     $("flowStatus").textContent = "63-line API draft · not the customer basket";
     $("continueBtn").textContent = "Back to customer";
@@ -960,6 +1169,7 @@ function render(opts = {}) {
   });
   const csv = $("csvBtn");
   if (csv) csv.addEventListener("click", downloadCsv);
+  bindCompareUi();
   updateChrome();
   if (opts.zoom) focusSelected();
 }
@@ -977,6 +1187,356 @@ function pickOption(optId) {
 
 function csvCell(v) {
   return `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+}
+
+function unescapePdfString(raw) {
+  return raw
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
+    .replace(/\\t/g, "\t")
+    .replace(/\\\(/g, "(")
+    .replace(/\\\)/g, ")")
+    .replace(/\\\\/g, "\\");
+}
+
+function pdfDictString(chunk, key) {
+  const re = new RegExp("/" + key + "\\s*\\((?:\\\\.|[^\\\\)])*\\)");
+  const m = chunk.match(re);
+  if (m) {
+    const inner = m[0].slice(m[0].indexOf("(") + 1, -1);
+    return unescapePdfString(inner);
+  }
+  const hex = chunk.match(new RegExp("/" + key + "\\s*<([0-9A-Fa-f\\s]+)>"));
+  if (hex) {
+    const h = hex[1].replace(/\s/g, "");
+    let out = "";
+    for (let i = 0; i < h.length; i += 2) out += String.fromCharCode(parseInt(h.slice(i, i + 2), 16));
+    return out;
+  }
+  return "";
+}
+
+function extractPdfMarkups(bytes) {
+  const s = new TextDecoder("latin1").decode(bytes);
+  const objs = s.split(/\bendobj\b/);
+  const rows = [];
+  const skip = /Popup|Link|Widget|FileAttachment/;
+  for (const obj of objs) {
+    if (!/\/Type\s*\/Annot\b/.test(obj) && !/\/Subtype\s*\/(Square|Circle|Polygon|PolyLine|Ink|Stamp|FreeText|Highlight|Underline|StrikeOut|Caret|Text|Line)\b/.test(obj)) {
+      continue;
+    }
+    const subtype = (obj.match(/\/Subtype\s*\/(\w+)/) || [])[1] || "";
+    if (skip.test(subtype)) continue;
+    const subject = pdfDictString(obj, "Subj");
+    const contents = pdfDictString(obj, "Contents");
+    const code = normCode(subject) || normCode((contents.match(/^[A-Za-z0-9][A-Za-z0-9.\-]{0,12}/) || [""])[0]);
+    if (!code && !contents) continue;
+    rows.push({
+      subject: code,
+      space: normSpace(pdfDictString(obj, "Space")),
+      count: 1,
+      comment: contents || subject,
+    });
+  }
+  return rows;
+}
+
+function loadPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      resolve(window.pdfjsLib);
+    };
+    s.onerror = () => reject(new Error("Could not load PDF reader"));
+    document.head.appendChild(s);
+  });
+}
+
+async function extractPdfJsMarkups(bytes) {
+  const pdfjsLib = await loadPdfJs();
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(bytes) }).promise;
+  const rows = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const annots = await page.getAnnotations();
+    for (const a of annots) {
+      const subtype = a.subtype || "";
+      if (/Popup|Link|Widget/.test(subtype)) continue;
+      const contents = String(a.contents || (a.contentsObj && a.contentsObj.str) || "").trim();
+      const subject = normCode(a.subject || "");
+      const code = subject || normCode((contents.match(/^[A-Za-z0-9][A-Za-z0-9.\-]{0,12}/) || [""])[0]);
+      if (!code && !contents) continue;
+      rows.push({
+        subject: code,
+        space: "",
+        count: 1,
+        comment: contents || code,
+      });
+    }
+  }
+  return rows;
+}
+
+function parseDelimited(text, delim) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+    if (inQ) {
+      if (ch === '"' && next === '"') {
+        cell += '"';
+        i += 1;
+      } else if (ch === '"') {
+        inQ = false;
+      } else {
+        cell += ch;
+      }
+    } else if (ch === '"') {
+      inQ = true;
+    } else if (ch === delim) {
+      row.push(cell);
+      cell = "";
+    } else if (ch === "\n") {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+    } else if (ch !== "\r") {
+      cell += ch;
+    }
+  }
+  if (cell.length || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows;
+}
+
+function mapCsvHeader(h) {
+  const s = String(h || "")
+    .replace(/^\uFEFF/, "")
+    .trim()
+    .toLowerCase();
+  if (/^subj|ämne|^subject$/.test(s)) return "subject";
+  if (/comment|innehåll|contents|^text$/.test(s)) return "comment";
+  if (/^count$|^antal$|^qty$|^quantity$/.test(s)) return "count";
+  if (/space|rum|^room$/.test(s)) return "space";
+  return "";
+}
+
+function rowsFromCsv(text) {
+  const clean = text.replace(/^\uFEFF/, "");
+  const first = (clean.split(/\r?\n/)[0] || "");
+  const semi = (first.match(/;/g) || []).length;
+  const comma = (first.match(/,/g) || []).length;
+  const delim = semi > comma ? ";" : ",";
+  const table = parseDelimited(clean, delim).filter((r) => r.some((c) => String(c).trim()));
+  if (!table.length) return [];
+  const keys = table[0].map(mapCsvHeader);
+  const hasHead = keys.some(Boolean);
+  const body = hasHead ? table.slice(1) : table;
+  const idx = {
+    subject: keys.indexOf("subject"),
+    comment: keys.indexOf("comment"),
+    count: keys.indexOf("count"),
+    space: keys.indexOf("space"),
+  };
+  return body.map((r) => {
+    const subject = hasHead && idx.subject >= 0 ? r[idx.subject] : r[0];
+    const comment = hasHead && idx.comment >= 0 ? r[idx.comment] : r[1] || "";
+    const count = hasHead && idx.count >= 0 ? r[idx.count] : r[2];
+    const space = hasHead && idx.space >= 0 ? r[idx.space] : r[3];
+    return {
+      subject: normCode(subject),
+      comment: String(comment || "").trim(),
+      count: Number(count) || 1,
+      space: normSpace(space),
+    };
+  }).filter((r) => r.subject || r.comment);
+}
+
+function rowsFromMarkupDoc(text) {
+  const xmlish = /^\s*</.test(text) || /<markup/i.test(text);
+  if (!xmlish) return [];
+  const type = /<\?xml|<\/\w+>/.test(text) && !/<html/i.test(text) ? "text/xml" : "text/html";
+  const doc = new DOMParser().parseFromString(text, type);
+  const tables = [...doc.querySelectorAll("table")];
+  for (const table of tables) {
+    const ths = [...table.querySelectorAll("th")].map((th) => mapCsvHeader(th.textContent));
+    if (!ths.includes("subject") && !ths.includes("comment")) continue;
+    const rows = [];
+    table.querySelectorAll("tr").forEach((tr, i) => {
+      if (i === 0 && tr.querySelector("th")) return;
+      const cells = [...tr.querySelectorAll("td")].map((td) => td.textContent.trim());
+      if (!cells.length) return;
+      const get = (key, fallback) => {
+        const n = ths.indexOf(key);
+        return n >= 0 ? cells[n] : cells[fallback] || "";
+      };
+      rows.push({
+        subject: normCode(get("subject", 0)),
+        comment: get("comment", 1),
+        count: Number(get("count", 2)) || 1,
+        space: normSpace(get("space", 3)),
+      });
+    });
+    if (rows.length) return rows;
+  }
+  const nodes = [...doc.querySelectorAll("Markup, markup")];
+  if (nodes.length) {
+    return nodes.map((n) => ({
+      subject: normCode((n.querySelector("Subject, subject") || {}).textContent),
+      comment: ((n.querySelector("Comment, comment, Contents, contents") || {}).textContent || "").trim(),
+      count: Number((n.querySelector("Count, count") || {}).textContent) || 1,
+      space: normSpace((n.querySelector("Space, space, Room, room") || {}).textContent),
+    }));
+  }
+  return [];
+}
+
+function downloadText(filename, text, type) {
+  const blob = new Blob([text], { type: type || "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+function sampleSummaryCsv() {
+  const header = "Subject,Comment,Count,Space";
+  const rows = sampleBluebeamRows().map((r) =>
+    [r.subject, r.comment, r.count, r.space].map(csvCell).join(",")
+  );
+  return [header, ...rows].join("\n");
+}
+
+function runBbSample() {
+  applyCompare(sampleBluebeamRows(), {
+    source: "Sample",
+    fileName: "",
+    note: SAMPLE_BB_NOTE,
+  });
+  render({ zoom: false });
+}
+
+function clearCompare() {
+  compareState = null;
+  render({ zoom: false });
+}
+
+function downloadCompareCsv() {
+  if (!compareState) return;
+  const header = "status,subject,space,granite_qty,bluebeam_qty,note";
+  const packs = [
+    ["different", compareState.different],
+    ["only_granite", compareState.onlyGranite],
+    ["only_bluebeam", compareState.onlyBluebeam],
+    ["same", compareState.same],
+  ];
+  const rows = [];
+  packs.forEach(([status, list]) => {
+    list.forEach((r) => {
+      rows.push(
+        [status, r.subject, r.space, r.graniteQty, r.bluebeamQty, r.note || r.comment || ""].map(csvCell).join(",")
+      );
+    });
+  });
+  downloadText("granite-plan09-compare.csv", [header, ...rows].join("\n"), "text/csv");
+}
+
+function bindCompareUi() {
+  const pick = $("bbPick");
+  if (pick) pick.addEventListener("click", () => $("bbFile") && $("bbFile").click());
+  const sample = $("bbSample");
+  if (sample) sample.addEventListener("click", runBbSample);
+  const clear = $("bbClear");
+  if (clear) clear.addEventListener("click", clearCompare);
+  const cmp = $("bbCmpCsv");
+  if (cmp) cmp.addEventListener("click", downloadCompareCsv);
+  const sampCsv = $("bbSampleCsv");
+  if (sampCsv) sampCsv.addEventListener("click", () => downloadText("granite-plan09-sample-summary.csv", sampleSummaryCsv(), "text/csv"));
+  const drop = $("bbDrop");
+  if (drop) {
+    ["dragenter", "dragover"].forEach((ev) => {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.add("dragover");
+      });
+    });
+    drop.addEventListener("dragleave", () => drop.classList.remove("dragover"));
+    drop.addEventListener("drop", (e) => {
+      e.preventDefault();
+      drop.classList.remove("dragover");
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) ingestBluebeamFile(file);
+    });
+  }
+  $("side").querySelectorAll("tr[data-cmp]").forEach((el) => {
+    el.addEventListener("click", () => {
+      selected = el.dataset.room || el.dataset.code;
+      render({ zoom: true });
+    });
+  });
+}
+
+async function ingestBluebeamFile(file) {
+  if (!file || compareBusy) return;
+  compareBusy = true;
+  render({ zoom: false });
+  try {
+    const name = file.name || "upload";
+    const lower = name.toLowerCase();
+    const buf = await file.arrayBuffer();
+    let rows = [];
+    let source = "";
+    let note = "";
+    if (lower.endsWith(".pdf") || (file.type || "").includes("pdf")) {
+      rows = extractPdfMarkups(buf);
+      source = "PDF markups";
+      if (!rows.length) {
+        try {
+          rows = await extractPdfJsMarkups(buf);
+        } catch (err) {
+          rows = [];
+        }
+      }
+      if (!rows.length) {
+        throw new Error(
+          "This PDF has no markups we can read (plain drawing). In Revu: save after counting, or Markups List → Summary → CSV."
+        );
+      }
+      note = `${rows.length} markup${rows.length === 1 ? "" : "s"} read from the PDF.`;
+    } else {
+      const text = new TextDecoder("utf-8").decode(buf);
+      rows = rowsFromCsv(text);
+      if (!rows.length) rows = rowsFromMarkupDoc(text);
+      source = lower.endsWith(".xml") || /^\s*</.test(text) ? "Markup Summary XML" : "Markup Summary CSV";
+      if (!rows.length) {
+        throw new Error("No Subject / Count rows in that file. Export Markups List → Summary as CSV from Revu.");
+      }
+      note = `${rows.length} row${rows.length === 1 ? "" : "s"} from their summary.`;
+    }
+    applyCompare(rows, { source, fileName: name, note });
+  } catch (err) {
+    compareState = {
+      source: "Could not compare",
+      fileName: file.name || "",
+      note: err && err.message ? err.message : "Could not read that file.",
+      same: [],
+      different: [],
+      onlyGranite: [],
+      onlyBluebeam: [],
+    };
+  }
+  compareBusy = false;
+  render({ zoom: false });
 }
 
 function downloadCsv() {
@@ -1305,6 +1865,11 @@ $("pitchFromHero").addEventListener("click", () => enterFromHero({ pitch: true }
 $("pitchBtn").addEventListener("click", togglePitch);
 $("custBtn").addEventListener("click", () => setRole(false));
 $("specBtn").addEventListener("click", () => setRole(true));
+$("bbFile").addEventListener("change", (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (file) ingestBluebeamFile(file);
+});
 $("continueBtn").addEventListener("click", continueFlow);
 $("backBtn").addEventListener("click", backFlow);
 $("catalogBtn").addEventListener("click", () => (catalogOpen ? closeCatalog() : openCatalog()));
