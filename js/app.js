@@ -13,8 +13,6 @@ let step = "drawing";
 let specialist = false;
 let chooseIndex = 0;
 let selected = null;
-let pitchTimer = null;
-let pitching = false;
 let scale = 1;
 let panX = 0;
 let panY = 0;
@@ -1998,7 +1996,7 @@ function skipLandingRead() {
   history.replaceState(null, "", landingUrl("#overview"));
 }
 
-async function startDemo({ pitch = false } = {}) {
+async function startDemo() {
   showBanner("");
   try {
     if (!job) await loadAll();
@@ -2016,14 +2014,6 @@ async function startDemo({ pitch = false } = {}) {
   selected = null;
   specialist = false;
   setStep("found");
-  if (pitch) runPitch();
-}
-
-async function enterFromHero({ pitch = false } = {}) {
-  sheetChosen = true;
-  if (landingPhase === "reading") skipLandingRead();
-  if (landingPhase === "upload") await playLandingRead();
-  await startDemo({ pitch });
 }
 
 function continueFlow() {
@@ -2060,55 +2050,6 @@ function backFlow() {
   if (step === "send") setStep("choose");
   else if (step === "choose") setStep("found");
   else if (step === "found") goLanding("overview");
-}
-
-function setPitchCaption(text) {
-  const el = $("pitchCaption");
-  el.hidden = !text;
-  el.textContent = text || "";
-}
-
-function runPitch() {
-  stopPitch();
-  pitching = true;
-  document.body.classList.add("pitch");
-  $("pitchBtn").textContent = "Exit pitch";
-  const beats = [
-    { t: 0, caption: "1 · Four H2 rooms — we need the shelf length", step: "found", room: "A0-022" },
-    { t: 3500, caption: "1 · Four H2 rooms — we need the shelf length", step: "found", room: "A0-025" },
-    { t: 7000, caption: "2 · Choose: one question at a time", step: "choose", room: "A0-025" },
-    { t: 13000, caption: "3 · Send as a request, not an order", step: "send", room: "A0-025" },
-  ];
-  pitchTimer = beats.map((b) =>
-    setTimeout(() => {
-      if (!pitching) return;
-      specialist = false;
-      selected = b.room;
-      setStep(b.step);
-      setPitchCaption(b.caption);
-    }, b.t)
-  );
-}
-
-function stopPitch() {
-  pitching = false;
-  document.body.classList.remove("pitch");
-  $("pitchBtn").textContent = "Pitch mode";
-  setPitchCaption("");
-  if (pitchTimer) pitchTimer.forEach(clearTimeout);
-  pitchTimer = [];
-}
-
-function togglePitch() {
-  if (pitching) {
-    stopPitch();
-    return;
-  }
-  if (!$("app").classList.contains("on")) {
-    enterFromHero({ pitch: true });
-    return;
-  }
-  runPitch();
 }
 
 function onHash() {
@@ -2149,15 +2090,13 @@ function bootLanding() {
   }
 }
 
-$("tryExample").addEventListener("click", () => startDemo({ pitch: false }));
+$("tryExample").addEventListener("click", () => startDemo());
 $("uploadExample").addEventListener("click", choosePlan09);
 $("pick1091").addEventListener("click", (e) => {
   e.stopPropagation();
   choosePlan09();
 });
 $("skipRead").addEventListener("click", skipLandingRead);
-$("pitchFromHero").addEventListener("click", () => enterFromHero({ pitch: true }));
-$("pitchBtn").addEventListener("click", togglePitch);
 $("custBtn").addEventListener("click", () => setRole(false));
 $("specBtn").addEventListener("click", () => setRole(true));
 $("bbFile").addEventListener("change", (e) => {
