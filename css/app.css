@@ -465,6 +465,21 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   gap: 0.6rem;
 }
 .cat-drawer h2 { margin: 0; font-size: 1.1rem; }
+.cat-lang {
+  display: flex;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 0.12rem;
+}
+.cat-lang button {
+  background: transparent;
+  color: #d7e2ee;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.cat-lang button.on { background: #fff; color: var(--navy); }
 .cat-note { font-size: 0.78rem; color: #ffd7b0; margin: 0.45rem 0 0.7rem; }
 .cat-drawer input[type="search"] {
   width: 100%;

@@ -8,6 +8,7 @@ let extraSeq = 0;
 let catalogOpen = false;
 let catalogQuery = "";
 let catalogTag = "quoted";
+let catalogLang = "en";
 let step = "drawing";
 let specialist = false;
 let chooseIndex = 0;
@@ -364,7 +365,7 @@ function foundHtml() {
       <h2>${title} <small>${list.length}</small></h2>
       ${list.length ? list.map((it) => `
         <button type="button" class="found-row ${selected === it.room || selected === it.id ? "sel" : ""}" data-item="${it.id}" data-room="${esc(it.room || "")}">
-          <strong>${esc(it.title)}</strong>
+          <strong>${esc(itemTitle(it))}</strong>
           <span>${it.group === "added" ? "Added from catalog" : it.room ? esc(it.room) + (roomName(it.room) ? " · " + esc(roomName(it.room)) : "") : "From the sheet table"} · ${it.qty} ${it.qty > 1 ? "pcs" : "pc"}${it.choice && it.group === "need" ? " · " + esc(it.choice.name) : ""}</span>
         </button>`).join("") : `<p class="empty">None</p>`}
     </section>`;
@@ -415,10 +416,10 @@ function sendHtml() {
       const ch = it.choice || {};
       return `<tr>
         <td>${esc(it.room || "—")}</td>
-        <td>${esc(it.title)}</td>
+        <td>${esc(itemTitle(it))}</td>
         <td>${it.qty}</td>
         <td>${esc(ch.article || "question")}</td>
-        <td>${esc(ch.name || "")}</td>
+        <td>${esc(choiceName(it))}</td>
       </tr>`;
     })
     .join("");
@@ -490,18 +491,63 @@ function sideHtml() {
 }
 
 const CAT_TAGS = [
-  ["quoted", "In a quote"],
-  ["shelf", "Shelf"],
-  ["hook", "Hook"],
-  ["hygiene", "Hygiene"],
-  ["hatch", "Hatch"],
-  ["wc", "WC"],
-  ["door", "Door"],
-  ["all", "All"],
+  ["quoted", { en: "In a quote", sv: "I offert" }],
+  ["shelf", { en: "Shelf", sv: "Hylla" }],
+  ["hook", { en: "Hook", sv: "Krok" }],
+  ["hygiene", { en: "Hygiene", sv: "Hygien" }],
+  ["hatch", { en: "Hatch", sv: "Lucka" }],
+  ["wc", { en: "WC", sv: "WC" }],
+  ["door", { en: "Door", sv: "Dörr" }],
+  ["all", { en: "All", sv: "Alla" }],
 ];
 
 function articleBlob(it) {
-  return (it.a + " " + (it.n || "") + " " + (it.n2 || "") + " " + (it.t || []).join(" ")).toLowerCase();
+  return (
+    it.a +
+    " " +
+    (it.n || "") +
+    " " +
+    (it.n2 || "") +
+    " " +
+    (it.ne || "") +
+    " " +
+    (it.t || []).join(" ")
+  ).toLowerCase();
+}
+
+function articleLabel(it) {
+  if (catalogLang === "en" && it.ne) return it.ne;
+  return [it.n, it.n2].filter(Boolean).join(" · ");
+}
+
+function itemTitle(it) {
+  if (it.group === "added") {
+    return catalogLang === "sv" ? it.titleSv || it.title : it.titleEn || it.title;
+  }
+  return it.title;
+}
+
+function choiceName(it) {
+  const ch = it.choice || {};
+  if (it.group === "added") {
+    return catalogLang === "sv" ? ch.nameSv || ch.name || "" : ch.nameEn || ch.name || "";
+  }
+  return ch.name || "";
+}
+
+function applyCatalogChrome() {
+  const sv = catalogLang === "sv";
+  $("catTitle").textContent = sv ? "Katalog" : "Catalog";
+  $("catClose").textContent = sv ? "Stäng" : "Close";
+  $("catNote").textContent = sv
+    ? "Officiella namn är svenska. EN är en visningstext. Sök fungerar på båda språken."
+    : "Official names are Swedish. EN is a demo gloss. Search works in both.";
+  $("catSearch").placeholder = sv
+    ? "Sök svenska eller engelska (hylla, shelf, 309452…)"
+    : "Search Swedish or English (hylla, shelf, 309452…)";
+  $("catLang")
+    .querySelectorAll("[data-lang]")
+    .forEach((btn) => btn.classList.toggle("on", btn.dataset.lang === catalogLang));
 }
 
 function filteredArticles() {
@@ -519,29 +565,37 @@ function filteredArticles() {
 
 function renderCatalog() {
   if (!catalogOpen) return;
+  applyCatalogChrome();
+  const sv = catalogLang === "sv";
   $("catTags").innerHTML = CAT_TAGS.map(
     ([id, label]) =>
-      `<button type="button" class="filter-btn ${catalogTag === id ? "active" : ""}" data-cat-tag="${id}">${label}</button>`
+      `<button type="button" class="filter-btn ${catalogTag === id ? "active" : ""}" data-cat-tag="${id}">${label[catalogLang]}</button>`
   ).join("");
   const hits = filteredArticles();
   const quotedN = articles.filter((it) => (it.q || []).length).length;
   $("catCount").textContent = catalogQuery.trim()
-    ? `${hits.length}${hits.length === 60 ? "+" : ""} matches`
+    ? sv
+      ? `${hits.length}${hits.length === 60 ? "+" : ""} träffar`
+      : `${hits.length}${hits.length === 60 ? "+" : ""} matches`
     : catalogTag === "quoted"
-      ? `Showing ${hits.length} of ${quotedN} articles from the four quotes`
-      : `Showing ${hits.length} of ${articles.length} in this list`;
+      ? sv
+        ? `Visar ${hits.length} av ${quotedN} artiklar från offerterna`
+        : `Showing ${hits.length} of ${quotedN} articles from the four quotes`
+      : sv
+        ? `Visar ${hits.length} av ${articles.length} i listan`
+        : `Showing ${hits.length} of ${articles.length} in this list`;
   $("catList").innerHTML = hits.length
     ? hits
         .map((it) => {
           const inReq = flowItems.some((x) => x.choice && x.choice.article === it.a && x.group === "added");
           return `<button type="button" class="cat-row ${inReq ? "in" : ""}" data-add-art="${it.a}">
             <strong>Ahlsell ${esc(it.a)}</strong>
-            <span>${esc(it.n)}${it.n2 ? " · " + esc(it.n2) : ""}</span>
-            <em>${inReq ? "On the request" : "Add to request"} · ${esc(it.u || "ST")}${(it.q || []).length ? " · quoted" : ""}</em>
+            <span>${esc(articleLabel(it))}</span>
+            <em>${inReq ? (sv ? "På förfrågan" : "On the request") : (sv ? "Lägg till" : "Add to request")} · ${esc(it.u || "ST")}${(it.q || []).length ? (sv ? " · offert" : " · quoted") : ""}</em>
           </button>`;
         })
         .join("")
-    : `<p class="empty">Nothing in this list matches. Try an article number from the quote, or “shelf”.</p>`;
+    : `<p class="empty">${sv ? "Ingen träff. Prova artikelnummer, hylla eller shelf." : "Nothing in this list matches. Try an article number, hylla, or shelf."}</p>`;
   $("catTags").querySelectorAll("[data-cat-tag]").forEach((el) => {
     el.addEventListener("click", () => {
       catalogTag = el.dataset.catTag;
@@ -575,7 +629,8 @@ function addFromCatalog(article) {
     existing.qty += 1;
   } else {
     extraSeq += 1;
-    const name = [it.n, it.n2].filter(Boolean).join(" · ");
+    const nameSv = [it.n, it.n2].filter(Boolean).join(" · ");
+    const nameEn = it.ne || nameSv;
     flowItems.push({
       id: "extra-" + extraSeq,
       lineId: "extra-" + extraSeq,
@@ -583,12 +638,14 @@ function addFromCatalog(article) {
       kind: "catalog",
       room: "",
       qty: 1,
-      text: name,
-      title: name || "Ahlsell " + it.a,
+      text: nameSv,
+      title: nameEn || nameSv || "Ahlsell " + it.a,
+      titleSv: nameSv,
+      titleEn: nameEn,
       group: "added",
       question: "",
       options: [],
-      choice: { id: "cat-" + it.a, article: it.a, name: name || it.a },
+      choice: { id: "cat-" + it.a, article: it.a, name: nameEn || nameSv, nameSv, nameEn },
     });
   }
   render({ zoom: false });
@@ -693,7 +750,7 @@ function downloadCsv() {
   const c = counts();
   const header = "room,item,qty,article,choice";
   const rows = c.inBasket.map((it) =>
-    [it.room || "", it.title, it.qty, (it.choice && it.choice.article) || "", (it.choice && it.choice.name) || ""]
+    [it.room || "", itemTitle(it), it.qty, (it.choice && it.choice.article) || "", choiceName(it)]
       .map((v) => `"${String(v).replace(/"/g, '""')}"`)
       .join(",")
   );
@@ -960,6 +1017,13 @@ $("catOverlay").addEventListener("click", (e) => {
 $("catSearch").addEventListener("input", () => {
   catalogQuery = $("catSearch").value;
   renderCatalog();
+});
+$("catLang").querySelectorAll("[data-lang]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    catalogLang = btn.dataset.lang;
+    renderCatalog();
+    if (demoStarted && job) render({ zoom: false });
+  });
 });
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && catalogOpen) closeCatalog();

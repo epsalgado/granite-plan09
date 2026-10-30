@@ -25,7 +25,7 @@ Static HTML/CSS/JS. No build step. Pages settings: Framework **None**, output `/
 
 Customer path is a five-step flow: Drawing → Reading → Found → Choose → Send. Specialist view is a header toggle. Direct links: `#found`, `#choose`, `#send`.
 
-**Catalog** (header) searches `data/articles.json`: 7,800+ real Ahlsell article numbers from the school packing-protocol `ARTIKELLISTA` plus the four `reference-quote.csv` files. Not a live ahlsell.se download. Rebuild with `python3 scripts/build-articles.py`.
+**Catalog** (header) searches `data/articles.json`: 7,800+ real Ahlsell article numbers from the school packing-protocol `ARTIKELLISTA` plus the four `reference-quote.csv` files. SV/EN toggle; search matches Swedish names, English glosses, and article numbers. Not a live ahlsell.se download. Rebuild with `python3 scripts/build-articles.py`.
 
 ## Local
 

@@ -198,11 +198,15 @@
   <div class="cat-overlay" id="catOverlay" hidden>
     <aside class="cat-drawer" role="dialog" aria-label="Ahlsell article catalog">
       <header>
-        <h2>Catalog</h2>
+        <h2 id="catTitle">Catalog</h2>
+        <div class="cat-lang" id="catLang">
+          <button type="button" data-lang="sv">SV</button>
+          <button type="button" data-lang="en" class="on">EN</button>
+        </div>
         <button type="button" class="btn-ghost light" id="catClose">Close</button>
       </header>
-      <p class="cat-note">Hackathon article list — packing protocol plus the four quotes. Not a live Ahlsell.se download. Names are the official Swedish text.</p>
-      <input type="search" id="catSearch" placeholder="Search article number or name (shelf, hook, Tork…)" autocomplete="off" />
+      <p class="cat-note" id="catNote">Official names are Swedish. EN is a demo gloss. Search works in both.</p>
+      <input type="search" id="catSearch" placeholder="Search Swedish or English (hylla, shelf, 309452…)" autocomplete="off" />
       <div class="cat-tags" id="catTags"></div>
       <p class="cat-count" id="catCount"></p>
       <div class="cat-list" id="catList"></div>
