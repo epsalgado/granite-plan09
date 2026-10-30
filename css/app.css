@@ -480,12 +480,22 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
 .group.grey .found-row { opacity: 0.72; }
 .empty { font-size: 0.82rem; color: #9eb0c4; }
 .brief {
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
   background: rgba(255,255,255,0.08);
   border-radius: 12px;
   padding: 0.75rem 0.85rem;
   margin: 0 0 0.65rem;
+  border: 0;
   border-left: 3px solid rgba(255,255,255,0.2);
+  cursor: default;
 }
+button.brief { cursor: pointer; }
+button.brief:hover { background: rgba(255,255,255,0.12); }
+button.brief.sel { outline: 2px solid #fff; }
 .brief strong { display: block; margin-bottom: 0.25rem; }
 .brief p { margin: 0; font-size: 0.86rem; line-height: 1.4; opacity: 0.92; }
 .brief.ok { border-left-color: #9ee0c0; }

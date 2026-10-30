@@ -312,7 +312,7 @@ function drawMarks() {
   $("marks").innerHTML = visibleMarks()
     .map((m) => {
       const room = m.room || m.id;
-      const sel = room === selected || m.id === selected ? "sel" : "";
+      const sel = pinSelected(m) ? "sel" : "";
       const kind = String(m.label).startsWith("A0-")
         ? "room"
         : String(m.label).startsWith("IL")
@@ -390,11 +390,33 @@ function bindViewer() {
   img.addEventListener("load", fitView);
 }
 
+function markFor(id) {
+  if (!job || !id) return null;
+  const marks = job.marks || [];
+  const hit =
+    marks.find((m) => m.id === id) ||
+    marks.find((m) => m.room === id) ||
+    marks.find((m) => m.label === id) ||
+    marks.find((m) => m.code === id);
+  if (hit) return hit;
+  const it = (flowItems || []).find((x) => x.id === id || x.room === id || x.code === id);
+  if (!it) return null;
+  return (
+    marks.find((m) => m.id === it.room || m.room === it.room) ||
+    marks.find((m) => m.label === it.code || m.code === it.code || m.id === it.code) ||
+    null
+  );
+}
+
+function pinSelected(m) {
+  if (!selected) return false;
+  if (m.id === selected || m.room === selected || m.label === selected || m.code === selected) return true;
+  const it = (flowItems || []).find((x) => x.id === selected);
+  return !!(it && (it.room === m.id || it.room === m.room || it.code === m.label || it.code === m.code || it.code === m.id));
+}
+
 function focusSelected() {
-  if (!job) return;
-  const mark =
-    job.marks.find((m) => m.id === selected) ||
-    job.marks.find((m) => (m.room || m.id) === selected);
+  const mark = markFor(selected);
   if (mark) zoomTo(mark.x, mark.y, 2.4);
 }
 
@@ -428,20 +450,21 @@ function foundHtml() {
     <div class="basket-head">
       <p class="cust-kicker">Customer · what we found</p>
       <h2>Read this, then answer questions</h2>
-      <p>Pins on the drawing are rooms we found. You do not pick products here. Next we ask one question at a time.</p>
+      <p>Pins on the drawing are rooms we found. You do not pick products here. Click a card to zoom to it, then press Start questions.</p>
     </div>
-    <div class="brief ok">
+    <button type="button" class="brief ok ${selected === "IL.4" ? "sel" : ""}" data-zoom="IL.4">
       <strong>Already on the request</strong>
       <p>${c.ready.length} hatch types from the sheet table (${esc(hatchLabel)}). No question — they are already included.</p>
-    </div>
-    <div class="brief ask">
+      <p class="how">Click to see the hatch table on the drawing</p>
+    </button>
+    <button type="button" class="brief ask ${selected === "A0-026" ? "sel" : ""}" data-zoom="A0-026">
       <strong>We will ask you next</strong>
       <p>${esc(askBits.join(" · ") || "A few items still need a product.")}</p>
-      <p class="how">Press Start questions. Pick a product for the request, or say you don’t know.</p>
-    </div>
+      <p class="how">Click to see the rooms · then press Start questions</p>
+    </button>
     <div class="brief off">
       <strong>Left off this request</strong>
-      <p>${c.cant.length} lines stay off: doors, windows, other floors, and symbols with no type.</p>
+      <p>${c.cant.length} lines stay off: doors, windows, other floors, and symbols with no type. They are not on this request.</p>
     </div>`;
 }
 
@@ -820,7 +843,10 @@ function render(opts = {}) {
   const pillEl = $("sheetPill");
   if (pillEl) {
     if (step === "found") {
-      pillEl.textContent = "Pins mark rooms we found · no click needed yet";
+      const mark = markFor(selected);
+      pillEl.textContent = mark
+        ? `Showing ${mark.label || mark.id} on the drawing`
+        : "Click a card to zoom · then Start questions";
     } else if (step === "choose") {
       const g = currentGroup();
       const room = selected || (g && g.items[0] && g.items[0].room);
@@ -834,7 +860,13 @@ function render(opts = {}) {
   $("side").innerHTML = sideHtml();
   $("side").querySelectorAll("[data-item]").forEach((el) => {
     el.addEventListener("click", () => {
-      selected = el.dataset.room || el.dataset.item;
+      selected = el.dataset.room || el.dataset.code || el.dataset.item;
+      render({ zoom: true });
+    });
+  });
+  $("side").querySelectorAll("[data-zoom]").forEach((el) => {
+    el.addEventListener("click", () => {
+      selected = el.dataset.zoom;
       render({ zoom: true });
     });
   });
