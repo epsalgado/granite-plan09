@@ -438,16 +438,13 @@ function sendHtml() {
     </table>
     <p class="draft-meta">${c.need.length} still need an answer · ${c.cant.length} cannot be bought from this drawing</p>
     <div class="send-actions">
-      <button type="button" class="btn-ghost light" id="csvBtn">Download CSV</button>
+      <button type="button" class="btn-ghost light" id="csvBtn">Download request CSV</button>
       <span id="sentMsg" ${requestSent ? "" : "hidden"}>Sent. A specialist will check this floor.</span>
     </div>`;
 }
 
-function specialistHtml() {
-  const checks = (job.checks || [])
-    .map((c) => `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${esc(c.text)}</li>`)
-    .join("");
-  const lines = (job.lines || []).filter((ln) => {
+function filteredLines() {
+  return (job.lines || []).filter((ln) => {
     if (lineFilter === "all") return true;
     if (lineFilter === "fittings") return ["shelf", "kit", "hatch", "tap", "sanitary", "unknown"].includes(ln.kind);
     if (lineFilter === "noroom") return !ln.room;
@@ -456,6 +453,13 @@ function specialistHtml() {
     if (lineFilter === "doors") return ["door", "window", "frame"].includes(ln.kind);
     return true;
   });
+}
+
+function specialistHtml() {
+  const checks = (job.checks || [])
+    .map((c) => `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${esc(c.text)}</li>`)
+    .join("");
+  const lines = filteredLines();
   const filters = [
     ["fittings", "Fittings"],
     ["all", "All 63"],
@@ -487,6 +491,10 @@ function specialistHtml() {
         <thead><tr><th>Subject</th><th>Comment</th><th>Count</th><th>Space</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
+    </div>
+    <div class="send-actions">
+      <button type="button" class="btn-ghost light" id="csvBtn">Export markups CSV</button>
+      <span class="draft-meta spec-export-note">${lines.length} lines in this filter · not the customer request</span>
     </div>`;
 }
 
@@ -775,18 +783,31 @@ function pickOption(optId) {
   render({ zoom: true });
 }
 
+function csvCell(v) {
+  return `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+}
+
 function downloadCsv() {
-  const c = counts();
-  const header = "room,item,qty,article,choice";
-  const rows = c.inBasket.map((it) =>
-    [it.room || "", itemTitle(it), it.qty, (it.choice && it.choice.article) || "", choiceName(it)]
-      .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-      .join(",")
-  );
+  let header;
+  let rows;
+  let filename;
+  if (specialist) {
+    header = "subject,comment,count,space,kind,note";
+    rows = filteredLines().map((ln) =>
+      [ln.code || "", ln.text || "", ln.qty, ln.room || "", ln.kind || "", ln.need || ln.blocker || ""].map(csvCell).join(",")
+    );
+    filename = "granite-plan09-markups.csv";
+  } else {
+    header = "room,item,qty,article,choice";
+    rows = counts().inBasket.map((it) =>
+      [it.room || "", itemTitle(it), it.qty, (it.choice && it.choice.article) || "", choiceName(it)].map(csvCell).join(",")
+    );
+    filename = "granite-plan09-request.csv";
+  }
   const blob = new Blob([[header, ...rows].join("\n")], { type: "text/csv" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "granite-plan09-request.csv";
+  a.download = filename;
   a.click();
 }
 

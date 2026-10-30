@@ -852,6 +852,13 @@ table.compare th { background: var(--navy); color: #fff; }
   border-radius: 999px;
 }
 .filter-btn.active { background: var(--amber); border-color: var(--amber); }
+.app[data-role="specialist"] .filter-btn.active {
+  background: #1ec8c8;
+  border-color: #1ec8c8;
+  color: #042326;
+}
+.app[data-role="specialist"] table.draft th { background: #0d4f4f; }
+.spec-export-note { color: #8fe8e8; margin: 0; }
 .draft-wrap { overflow: auto; max-height: 320px; margin-bottom: 1rem; border-radius: 10px; }
 table.draft {
   width: 100%;
