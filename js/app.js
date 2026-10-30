@@ -298,11 +298,46 @@ function zoomTo(pctX, pctY, s = 2.5) {
   applyView();
 }
 
+function zoomToFit(marks) {
+  const vp = $("viewport");
+  if (!vp || !marks.length) return;
+  if (marks.length === 1) {
+    zoomTo(marks[0].x, marks[0].y, 2.4);
+    return;
+  }
+  const { w, h } = imgSize();
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const m of marks) {
+    minX = Math.min(minX, m.x);
+    maxX = Math.max(maxX, m.x);
+    minY = Math.min(minY, m.y);
+    maxY = Math.max(maxY, m.y);
+  }
+  const padX = Math.max((maxX - minX) * 0.35, 3);
+  const padY = Math.max((maxY - minY) * 0.35, 3);
+  minX -= padX;
+  maxX += padX;
+  minY -= padY;
+  maxY += padY;
+  const boxW = ((maxX - minX) / 100) * w;
+  const boxH = ((maxY - minY) / 100) * h;
+  const s = Math.min(vp.clientWidth / boxW, vp.clientHeight / boxH);
+  scale = Math.min(4.2, Math.max(0.85, s * 0.9));
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  panX = vp.clientWidth / 2 - (cx / 100) * w * scale;
+  panY = vp.clientHeight / 2 - (cy / 100) * h * scale;
+  applyView();
+}
+
 function visibleMarks() {
   return (job.marks || []).filter((m) => {
     const label = String(m.label || m.id);
     if (label.startsWith("A0-")) return true;
-    if (/^(H2|TP2|TP3|S1|IL)/.test(label)) return true;
+    if (/^(H2|TP2|TP3|S1|IL|AK)/.test(label)) return true;
     return false;
   });
 }
@@ -408,16 +443,57 @@ function markFor(id) {
   );
 }
 
+function groupFocusIds() {
+  if (step !== "choose") return null;
+  const g = currentGroup();
+  if (!g) return null;
+  const ids = new Set();
+  for (const it of g.items) {
+    if (it.room) ids.add(it.room);
+    if (it.code) ids.add(it.code);
+    if (it.id) ids.add(it.id);
+  }
+  return ids;
+}
+
 function pinSelected(m) {
+  const ids = groupFocusIds();
+  if (ids) {
+    return marksForFocus().some((x) => x.id === m.id);
+  }
   if (!selected) return false;
   if (m.id === selected || m.room === selected || m.label === selected || m.code === selected) return true;
   const it = (flowItems || []).find((x) => x.id === selected);
   return !!(it && (it.room === m.id || it.room === m.room || it.code === m.label || it.code === m.code || it.code === m.id));
 }
 
+function marksForFocus() {
+  const ids = groupFocusIds();
+  if (ids && job) {
+    const marks = job.marks || [];
+    const roomHits = marks.filter((m) => ids.has(m.id) || ids.has(m.room));
+    const codeHits = marks.filter((m) => ids.has(m.label) || ids.has(m.code));
+    if (roomHits.length && codeHits.length) {
+      const minX = Math.min(...roomHits.map((m) => m.x));
+      const maxX = Math.max(...roomHits.map((m) => m.x));
+      const minY = Math.min(...roomHits.map((m) => m.y));
+      const maxY = Math.max(...roomHits.map((m) => m.y));
+      const near = codeHits.filter(
+        (m) => m.x >= minX - 8 && m.x <= maxX + 8 && m.y >= minY - 8 && m.y <= maxY + 8
+      );
+      return [...roomHits, ...near];
+    }
+    if (roomHits.length) return roomHits;
+    if (codeHits.length) return codeHits;
+  }
+  const one = markFor(selected);
+  return one ? [one] : [];
+}
+
 function focusSelected() {
-  const mark = markFor(selected);
-  if (mark) zoomTo(mark.x, mark.y, 2.4);
+  const marks = marksForFocus();
+  if (!marks.length) return;
+  zoomToFit(marks);
 }
 
 function select(id) {
