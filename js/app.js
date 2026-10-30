@@ -652,11 +652,14 @@ function specialistHtml() {
   return `
     ${compareHtml()}
     <div class="basket-head spec-head">
-      <p class="spec-kicker">Specialist · Bluebeam-style check</p>
+      <p class="spec-kicker">Our draft · after you check</p>
       <h2>Markups list</h2>
       <p>${esc(job.apiNote)} Subject = code. Space = room. You still sign.</p>
     </div>
-    <ul class="checks">${checks}</ul>
+    <details class="bb-notes">
+      <summary>Draft notes · ${(job.checks || []).length}</summary>
+      <ul class="checks">${checks}</ul>
+    </details>
     <div class="filters">${filters}</div>
     <div class="draft-wrap">
       <table class="draft">
@@ -863,15 +866,17 @@ function compareHtml() {
   }
   return `
     <div class="bb-box" id="bbDrop">
-      <p class="spec-kicker">Specialist · Compare with Bluebeam</p>
-      <h2>Check their save against this draft</h2>
-      <p>They keep counting in Revu. Upload the PDF they saved, or a Markup Summary CSV. This is a check, not a new take-off.</p>
-      <p class="need always">The pack had no specialist Revu PDF. Try the sample to see the check, or drop their file when they have one.</p>
+      <p class="spec-kicker">Specialist tool · Bluebeam</p>
+      <h2>Upload your Bluebeam file</h2>
+      <p class="bb-lead">Drop the PDF you saved in Revu, or a Markup Summary CSV. We check it against this draft: same, missing, extra, different.</p>
+      <button type="button" class="bb-dropzone" id="bbPick"${busy}>
+        <strong>Drop your Bluebeam PDF or CSV here</strong>
+        <span>or click to choose · Revu save, or Markups List → Summary</span>
+      </button>
       <div class="bb-actions">
-        <button type="button" class="btn-orange" id="bbPick"${busy}>Upload PDF or CSV</button>
-        <button type="button" class="btn-ghost light" id="bbSample"${busy}>Try sample</button>
-        <button type="button" class="btn-ghost light" id="bbSampleCsv"${busy}>Download sample CSV</button>
+        <button type="button" class="btn-ghost light" id="bbSample"${busy}>No file with you? Try a sample check</button>
       </div>
+      <p class="bb-quiet">Want the CSV shape Revu exports? <button type="button" class="bb-link" id="bbSampleCsv"${busy}>Download a sample Summary</button></p>
       ${result}
     </div>`;
 }
@@ -1072,9 +1077,9 @@ function updateChrome() {
   const c = counts();
   const groups = questionGroups();
   if (specialist) {
-    banner.textContent = "Specialist check · Compare with Bluebeam · you still sign this draft";
-    if (sheetTitle) sheetTitle.textContent = "PLAN 09 · specialist markups";
-    $("flowStatus").textContent = "63-line API draft · not the customer basket";
+    banner.textContent = "Specialist tool · drop your Bluebeam PDF or CSV · we check it against this draft";
+    if (sheetTitle) sheetTitle.textContent = "PLAN 09 · upload Bluebeam to check";
+    $("flowStatus").textContent = "Drop their Revu PDF or Summary CSV on the right";
     $("continueBtn").textContent = "Back to customer";
     $("continueBtn").disabled = false;
     $("backBtn").disabled = true;
@@ -1119,11 +1124,16 @@ function render(opts = {}) {
       <div class="t-card warn"><strong>API draft</strong><b>63/69</b><span>${esc(job.apiNote)}</span></div>
       <div class="t-card ok"><strong>Email vs plan</strong><b>4 match</b><span>Named H2 rooms are here</span></div>
       <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>Never listed these shelves</span></div>
-      <div class="t-card extra"><strong>This path</strong><b>Specialist</b><span>Switch back to Customer for the request flow</span></div>`;
+      <div class="t-card ok"><strong>Bluebeam check</strong><b>Upload</b><span>Your Revu PDF or Summary CSV against this draft</span></div>`;
   }
   const pillEl = $("sheetPill");
   if (pillEl) {
-    if (step === "found") {
+    if (specialist) {
+      const mark = markFor(selected);
+      pillEl.textContent = mark
+        ? `Showing ${mark.label || mark.id} on the drawing`
+        : "Drop your Bluebeam file on the right to check this draft";
+    } else if (step === "found") {
       const mark = markFor(selected);
       pillEl.textContent = mark
         ? `Showing ${mark.label || mark.id} on the drawing`

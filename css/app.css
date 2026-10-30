@@ -375,6 +375,22 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+.role-switch button small {
+  display: inline;
+  margin-left: 0.28rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.08rem 0.32rem;
+  border-radius: 999px;
+  background: #1ec8c8;
+  color: #042326;
+  text-transform: uppercase;
+}
+.app[data-role="specialist"] .role-switch button.on small {
+  background: #042326;
+  color: #8fe8e8;
+}
 .role-switch button.on { background: #fff; color: var(--navy); }
 .app[data-role="specialist"] .role-switch button.on {
   background: #1ec8c8;
@@ -888,16 +904,75 @@ table.compare th { background: var(--navy); color: #fff; }
 .spec-export-note { color: #8fe8e8; margin: 0; }
 .bb-box {
   margin: 0 0 1.1rem;
-  padding: 0.85rem 0.9rem 1rem;
-  border: 1px solid #1ec8c8;
-  border-radius: 12px;
-  background: rgba(14, 70, 70, 0.45);
+  padding: 0.95rem 1rem 1.05rem;
+  border: 2px solid #1ec8c8;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(30, 200, 200, 0.18) 0%, rgba(14, 70, 70, 0.55) 100%);
+  box-shadow: 0 0 0 1px rgba(30, 200, 200, 0.25), 0 12px 28px rgba(0, 0, 0, 0.28);
 }
-.bb-box.dragover { outline: 2px dashed #1ec8c8; }
-.bb-box h2 { margin: 0 0 0.35rem; font-size: 1.05rem; }
-.bb-box > p { margin: 0 0 0.45rem; font-size: 0.82rem; color: rgba(255,255,255,0.82); }
+.bb-box.dragover { outline: 3px dashed #fff; }
+.bb-box h2 { margin: 0 0 0.4rem; font-size: 1.28rem; line-height: 1.2; }
+.bb-lead { margin: 0 0 0.7rem !important; font-size: 0.88rem !important; color: #fff !important; }
+.bb-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
+  min-height: 7.2rem;
+  margin: 0 0 0.65rem;
+  padding: 1rem 0.8rem;
+  border: 2px dashed #8fe8e8;
+  border-radius: 12px;
+  background: rgba(4, 35, 38, 0.55);
+  color: #fff;
+  text-align: center;
+}
+.bb-dropzone:hover, .bb-box.dragover .bb-dropzone {
+  background: rgba(30, 200, 200, 0.22);
+  border-color: #fff;
+}
+.bb-dropzone strong,
+.bb-dropzone span {
+  display: block;
+  width: 100%;
+}
+.bb-dropzone strong {
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+.bb-dropzone span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c8ffff;
+}
+.bb-quiet {
+  margin: 0.15rem 0 0.2rem !important;
+  font-size: 0.75rem !important;
+  color: rgba(255,255,255,0.7) !important;
+}
+.bb-link {
+  display: inline;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: #8fe8e8;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+}
+.bb-notes { margin: 0 0 0.7rem; }
+.bb-notes summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #8fe8e8;
+  padding: 0.2rem 0;
+}
 .app[data-role="specialist"] .bb-box .need.always { color: #c8ffff; }
-.bb-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.55rem 0 0.2rem; }
+.bb-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 0.15rem; }
 .bb-pills { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.7rem 0 0.4rem; }
 .bb-pill {
   font-size: 0.72rem;
