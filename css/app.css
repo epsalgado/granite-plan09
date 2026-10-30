@@ -447,7 +447,7 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   flex-shrink: 0;
 }
 .flow-bar .btn-orange { min-width: 10rem; }
-#backBtn:disabled { opacity: 0.35; cursor: default; }
+#backBtn:disabled, #continueBtn:disabled { opacity: 0.35; cursor: default; }
 
 .group { margin-bottom: 0.9rem; }
 .group h2 {
@@ -479,6 +479,28 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
 .group.amber .found-row { border-color: rgba(232,119,34,0.4); }
 .group.grey .found-row { opacity: 0.72; }
 .empty { font-size: 0.82rem; color: #9eb0c4; }
+.brief {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  margin: 0 0 0.65rem;
+  border-left: 3px solid rgba(255,255,255,0.2);
+}
+.brief strong { display: block; margin-bottom: 0.25rem; }
+.brief p { margin: 0; font-size: 0.86rem; line-height: 1.4; opacity: 0.92; }
+.brief.ok { border-left-color: #9ee0c0; }
+.brief.ask { border-left-color: var(--amber); }
+.brief.off { border-left-color: #8a9aab; opacity: 0.88; }
+.brief .how { margin-top: 0.45rem; color: #ffd7b0; font-weight: 700; opacity: 1; }
+.q-progress {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffd7b0;
+}
+.picked-note { color: #b8f0d0; font-weight: 700; margin: 0.7rem 0 0; }
 .ask { font-size: 1.05rem; font-weight: 700; margin: 0.4rem 0 0.5rem; }
 .choices { display: flex; flex-direction: column; gap: 0.45rem; }
 .choice {
@@ -493,6 +515,16 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
 #sentMsg { color: #b8f0d0; font-weight: 700; }
 .choice strong { display: block; }
 .choice span { display: block; font-size: 0.78rem; opacity: 0.8; margin-top: 0.25rem; }
+.choice .act {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffd7b0;
+  opacity: 1;
+  margin-bottom: 0.15rem;
+}
+.choice.skip .act { color: #c5d0dc; }
 .choice .art { color: #ffd7b0; font-weight: 700; opacity: 1; }
 .choice.sel { outline: 2px solid var(--amber); background: rgba(232,119,34,0.16); }
 .send-table { margin: 0.8rem 0; }

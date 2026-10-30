@@ -179,9 +179,65 @@ function queue() {
     .sort((a, b) => (order[a.kind] ?? 9) - (order[b.kind] ?? 9));
 }
 
-function currentChoose() {
-  const q = queue();
-  return q[Math.min(chooseIndex, Math.max(0, q.length - 1))] || null;
+function questionGroups() {
+  const map = new Map();
+  for (const it of queue()) {
+    const key =
+      it.kind === "kit"
+        ? "kit:" + (it.code || "kit")
+        : it.kind === "hatch"
+          ? "hatch:" + (it.code || "hatch")
+          : it.kind;
+    if (!map.has(key)) {
+      const title =
+        it.kind === "shelf"
+          ? "H2 shelves"
+          : it.kind === "kit"
+            ? it.code === "TP2"
+              ? "Wash-place kits TP2"
+              : "Wash-place kits TP3"
+            : it.kind === "hatch"
+              ? (it.code || "Hatch") + " hatches"
+              : "Elbow taps";
+      const question =
+        it.kind === "shelf"
+          ? "The drawing marks H2, but not the length. What should we put on the request?"
+          : it.kind === "kit"
+            ? `The drawing marks ${it.code || "a wash-place kit"}, but not the contents. What should we put on the request?`
+            : it.kind === "hatch"
+              ? "The sheet table lists 16 × IL.5 hatches. Put them on this floor’s request?"
+              : "Elbow taps are drawn. Put them on the request?";
+      map.set(key, {
+        key,
+        kind: it.kind,
+        code: it.code,
+        title,
+        question,
+        hint: it.hint,
+        options: it.options || [],
+        items: [],
+      });
+    }
+    map.get(key).items.push(it);
+  }
+  const order = ["shelf", "kit:TP3", "kit:TP2", "hatch:IL.5", "tap"];
+  return [...map.values()].sort((a, b) => {
+    const ia = order.indexOf(a.key);
+    const ib = order.indexOf(b.key);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+}
+
+function currentGroup() {
+  const groups = questionGroups();
+  if (!groups.length) return null;
+  return groups[Math.min(chooseIndex, groups.length - 1)];
+}
+
+function optionVerb(opt) {
+  const id = opt.id || "";
+  if (id.endsWith("unknown") || id === "hatch-no" || id === "tap-no") return "Send as a question";
+  return "Put on the request";
 }
 
 function counts() {
@@ -344,11 +400,6 @@ function focusSelected() {
 
 function select(id) {
   selected = id;
-  if (step === "choose") {
-    const q = queue();
-    const idx = q.findIndex((it) => it.room === id || it.code === id || it.id === id);
-    if (idx >= 0) chooseIndex = idx;
-  }
   render({ zoom: true });
 }
 
@@ -361,55 +412,77 @@ function groupClass(it) {
 
 function foundHtml() {
   const c = counts();
-  const block = (title, list, cls) => `
-    <section class="group ${cls}">
-      <h2>${title} <small>${list.length}</small></h2>
-      ${list.length ? list.map((it) => `
-        <button type="button" class="found-row ${selected === it.room || selected === it.id ? "sel" : ""}" data-item="${it.id}" data-room="${esc(it.room || "")}">
-          <strong>${esc(itemTitle(it))}</strong>
-          <span>${it.group === "added" ? "Added from catalog" : it.room ? esc(it.room) + (roomName(it.room) ? " · " + esc(roomName(it.room)) : "") : "From the sheet table"} · ${it.qty} ${it.qty > 1 ? "pcs" : "pc"}${it.choice && it.group === "need" ? " · " + esc(it.choice.name) : ""}</span>
-        </button>`).join("") : `<p class="empty">None</p>`}
-    </section>`;
+  const shelves = c.needAll.filter((it) => it.kind === "shelf").length;
+  const kits = c.needAll.filter((it) => it.kind === "kit").length;
+  const hatchesAsk = c.needAll.filter((it) => it.kind === "hatch").length;
+  const taps = c.needAll.filter((it) => it.kind === "tap").length;
+  const hatchReady = c.ready.filter((it) => it.kind === "hatch").map((it) => it.code).filter(Boolean);
+  const hatchLabel = hatchReady.length ? hatchReady.join(", ") : "named hatches";
+  const askBits = [
+    shelves ? `${shelves} shelves (no length)` : "",
+    kits ? `${kits} wash-place kits (no type)` : "",
+    hatchesAsk ? `${hatchesAsk} hatch line from the table` : "",
+    taps ? `${taps} elbow taps` : "",
+  ].filter(Boolean);
   return `
     <div class="basket-head">
-      <p class="cust-kicker">Customer request</p>
-      <h2>What we found on PLAN 09</h2>
-      <p>This is a first draft from one drawing. Nothing here is an order yet.</p>
+      <p class="cust-kicker">Customer · what we found</p>
+      <h2>Read this, then answer questions</h2>
+      <p>Pins on the drawing are rooms we found. You do not pick products here. Next we ask one question at a time.</p>
     </div>
-    ${block("Ready to choose", c.ready, "green")}
-    ${c.added.length ? block("Added from the catalog", c.added, "green") : ""}
-    ${block("Needs your answer", c.needAll, "amber")}
-    ${block("Can’t be bought from this drawing", c.cant.slice(0, 12), "grey")}
-    ${c.cant.length > 12 ? `<p class="draft-meta">${c.cant.length - 12} more stay off this request (doors, other floors).</p>` : ""}
-    <p class="draft-meta">Need something else? Open <strong>Catalog</strong> and search the hackathon article list.</p>`;
+    <div class="brief ok">
+      <strong>Already on the request</strong>
+      <p>${c.ready.length} hatch types from the sheet table (${esc(hatchLabel)}). No question — they are already included.</p>
+    </div>
+    <div class="brief ask">
+      <strong>We will ask you next</strong>
+      <p>${esc(askBits.join(" · ") || "A few items still need a product.")}</p>
+      <p class="how">Press Start questions. Pick a product for the request, or say you don’t know.</p>
+    </div>
+    <div class="brief off">
+      <strong>Left off this request</strong>
+      <p>${c.cant.length} lines stay off: doors, windows, other floors, and symbols with no type.</p>
+    </div>`;
 }
 
 function chooseHtml() {
-  const q = queue();
-  const it = currentChoose();
-  if (!it) {
-    return `<div class="basket-head"><h2>Choices done</h2><p>Continue to send the request.</p></div>`;
+  const groups = questionGroups();
+  const g = currentGroup();
+  if (!g) {
+    return `<div class="basket-head"><p class="cust-kicker">Customer · choose</p><h2>Questions done</h2><p>Press Review request to see the list before you send.</p></div>`;
   }
-  const n = q.filter((x) => x.choice).length;
-  const options = (it.options || [])
-    .map(
-      (opt) => `<button type="button" class="choice ${it.choice && it.choice.id === opt.id ? "sel" : ""}" data-opt="${opt.id}">
+  const rooms = [...new Set(g.items.map((it) => it.room).filter(Boolean))];
+  const picked = g.items[0] && g.items[0].choice;
+  const skip = picked && optionVerb(picked) === "Send as a question";
+  const options = (g.options || [])
+    .map((opt) => {
+      const verb = optionVerb(opt);
+      const on = picked && picked.id === opt.id;
+      return `<button type="button" class="choice ${on ? "sel" : ""} ${verb === "Send as a question" ? "skip" : ""}" data-opt="${opt.id}">
+        <span class="act">${esc(verb)}</span>
         <strong>${esc(opt.name)}</strong>
         ${opt.article ? `<span class="art">Ahlsell ${esc(opt.article)}</span>` : ""}
         ${opt.note ? `<span>${esc(opt.note)}</span>` : ""}
         ${opt.parts ? `<span>${opt.parts.map((p) => esc(p.name)).join(" · ")}</span>` : ""}
-      </button>`
-    )
+      </button>`;
+    })
     .join("");
+  const where = rooms.length ? rooms.join(", ") : "from the sheet table";
   return `
     <div class="basket-head">
-      <p class="cust-kicker">Customer request · choose</p>
-      <h2>${esc(it.title)}</h2>
-      <p>${n} of ${q.length} decided</p>
+      <p class="cust-kicker">Customer · choose</p>
+      <p class="q-progress">Question ${chooseIndex + 1} of ${groups.length}</p>
+      <h2>${esc(g.title)}</h2>
+      <p>${g.items.length} on PLAN 09 · ${esc(where)}</p>
     </div>
-    <p class="ask">${esc(it.question)}</p>
-    <p class="need always">${esc(it.hint || "")}</p>
-    <div class="choices">${options}</div>`;
+    <p class="ask">${esc(g.question)}</p>
+    <p class="need always">${esc(g.hint || "")}</p>
+    <div class="choices">${options}</div>
+    ${
+      picked
+        ? `<p class="picked-note">${skip ? "Saved as a question for Ahlsell." : "Saved on the request."} Press Next question.</p>`
+        : `<p class="need always">Pick one box. This is still not an order.</p>`
+    }`;
 }
 
 function sendHtml() {
@@ -693,24 +766,39 @@ function updateChrome() {
   const banner = $("roleBanner");
   const sheetTitle = $("sheetTitle");
   const c = counts();
-  const q = queue();
+  const groups = questionGroups();
   if (specialist) {
     banner.textContent = "Specialist check · Markups list · you still sign this draft";
     if (sheetTitle) sheetTitle.textContent = "PLAN 09 · specialist markups";
     $("flowStatus").textContent = "63-line API draft · not the customer basket";
     $("continueBtn").textContent = "Back to customer";
+    $("continueBtn").disabled = false;
     $("backBtn").disabled = true;
   } else {
     banner.textContent = "Customer request · simple path · still not an order";
     if (sheetTitle) sheetTitle.textContent = "A-40-1-1091 · PLAN 09";
     $("backBtn").disabled = false;
+    $("continueBtn").disabled = false;
     if (step === "found") {
-      $("flowStatus").textContent = `${c.need.length} need an answer · ${c.ready.length} ready${c.added.length ? " · " + c.added.length + " added" : ""} · ${c.cant.length} not from this drawing`;
-      $("continueBtn").textContent = "Choose products";
+      $("flowStatus").textContent = "Nothing to click yet · start the questions";
+      $("continueBtn").textContent = "Start questions";
     } else if (step === "choose") {
-      const n = q.filter((x) => x.choice).length;
-      $("flowStatus").textContent = `${n} of ${q.length} decided · ${c.inBasket.length} in the request`;
-      $("continueBtn").textContent = n >= q.length ? "Review request" : "Next";
+      const g = currentGroup();
+      const picked = g && g.items[0] && g.items[0].choice;
+      const last = chooseIndex >= groups.length - 1;
+      if (!g) {
+        $("flowStatus").textContent = "Questions done";
+        $("continueBtn").textContent = "Review request";
+      } else if (!picked) {
+        $("flowStatus").textContent = `Question ${chooseIndex + 1} of ${groups.length} · pick one box`;
+        $("continueBtn").textContent = "Pick one first";
+        $("continueBtn").disabled = true;
+      } else {
+        $("flowStatus").textContent = last
+          ? "Last answer saved · review the request"
+          : `Saved · ${chooseIndex + 1} of ${groups.length}`;
+        $("continueBtn").textContent = last ? "Review request" : "Next question";
+      }
     } else {
       $("flowStatus").textContent = `${c.inBasket.length} lines on the request · still not an order`;
       $("continueBtn").textContent = "Send request";
@@ -731,24 +819,23 @@ function render(opts = {}) {
   }
   const pillEl = $("sheetPill");
   if (pillEl) {
-    const it = flowItems.find((x) => x.id === selected || x.room === selected);
-    if (it) pillEl.textContent = `${it.room || it.code || ""} · ${it.title}`;
-    else pillEl.textContent = "Click a pin to see it in the list";
+    if (step === "found") {
+      pillEl.textContent = "Pins mark rooms we found · no click needed yet";
+    } else if (step === "choose") {
+      const g = currentGroup();
+      const room = selected || (g && g.items[0] && g.items[0].room);
+      pillEl.textContent = room ? `This question · ${room}` : "Pick one box on the right";
+    } else {
+      const it = flowItems.find((x) => x.id === selected || x.room === selected);
+      pillEl.textContent = it ? `${it.room || it.code || ""} · ${it.title}` : "Check the request list";
+    }
   }
   drawMarks();
   $("side").innerHTML = sideHtml();
   $("side").querySelectorAll("[data-item]").forEach((el) => {
     el.addEventListener("click", () => {
       selected = el.dataset.room || el.dataset.item;
-      const q = queue();
-      const idx = q.findIndex((it) => it.id === el.dataset.item);
-      if (idx >= 0) {
-        chooseIndex = idx;
-        if (step === "found") setStep("choose");
-        else render({ zoom: true });
-      } else {
-        render({ zoom: true });
-      }
+      render({ zoom: true });
     });
   });
   $("side").querySelectorAll("[data-opt]").forEach((el) => {
@@ -774,13 +861,13 @@ function render(opts = {}) {
 }
 
 function pickOption(optId) {
-  const it = currentChoose();
-  if (!it) return;
-  it.choice = (it.options || []).find((o) => o.id === optId) || { id: optId, name: optId };
-  const q = queue();
-  if (chooseIndex < q.length - 1) chooseIndex += 1;
-  const next = currentChoose();
-  selected = next ? next.room || next.id : selected;
+  const g = currentGroup();
+  if (!g) return;
+  const opt = (g.options || []).find((o) => o.id === optId) || { id: optId, name: optId };
+  g.items.forEach((it) => {
+    it.choice = opt;
+  });
+  selected = g.items[0].room || g.items[0].id;
   render({ zoom: true });
 }
 
@@ -824,13 +911,13 @@ function setStep(next, { silent = false } = {}) {
     if (location.hash !== hash) history.replaceState(null, "", hash);
   }
   if (next === "choose") {
-    const q = queue();
-    const undone = q.findIndex((it) => !it.choice);
+    const groups = questionGroups();
+    const undone = groups.findIndex((g) => !(g.items[0] && g.items[0].choice));
     chooseIndex = undone >= 0 ? undone : 0;
-    const it = currentChoose();
-    if (it) selected = it.room || it.id;
+    const g = currentGroup();
+    if (g) selected = g.items[0].room || g.items[0].id;
   }
-  if (next === "found") selected = selected || "A0-025";
+  if (next === "found") selected = null;
   render({ zoom: next === "choose" });
   requestAnimationFrame(() => requestAnimationFrame(fitView));
 }
@@ -962,7 +1049,7 @@ async function startDemo({ pitch = false } = {}) {
   $("landing").hidden = true;
   $("app").classList.add("on");
   bindViewer();
-  selected = "A0-025";
+  selected = null;
   specialist = false;
   setStep("found");
   if (pitch) runPitch();
@@ -985,12 +1072,13 @@ function continueFlow() {
     return;
   }
   if (step === "choose") {
-    const q = queue();
-    const it = currentChoose();
-    if (it && !it.choice && chooseIndex < q.length - 1) {
+    const groups = questionGroups();
+    const g = currentGroup();
+    if (g && !(g.items[0] && g.items[0].choice)) return;
+    if (chooseIndex < groups.length - 1) {
       chooseIndex += 1;
-      const next = currentChoose();
-      selected = next ? next.room || next.id : selected;
+      const next = currentGroup();
+      selected = next ? next.items[0].room || next.items[0].id : selected;
       render({ zoom: true });
       return;
     }
