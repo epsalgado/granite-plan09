@@ -371,6 +371,7 @@ function foundHtml() {
     </section>`;
   return `
     <div class="basket-head">
+      <p class="cust-kicker">Customer request</p>
       <h2>What we found on PLAN 09</h2>
       <p>This is a first draft from one drawing. Nothing here is an order yet.</p>
     </div>
@@ -378,7 +379,7 @@ function foundHtml() {
     ${c.added.length ? block("Added from the catalog", c.added, "green") : ""}
     ${block("Needs your answer", c.needAll, "amber")}
     ${block("Can’t be bought from this drawing", c.cant.slice(0, 12), "grey")}
-    ${c.cant.length > 12 ? `<p class="draft-meta">${c.cant.length - 12} more in specialist view (doors, other floors).</p>` : ""}
+    ${c.cant.length > 12 ? `<p class="draft-meta">${c.cant.length - 12} more stay off this request (doors, other floors).</p>` : ""}
     <p class="draft-meta">Need something else? Open <strong>Catalog</strong> and search the hackathon article list.</p>`;
 }
 
@@ -401,6 +402,7 @@ function chooseHtml() {
     .join("");
   return `
     <div class="basket-head">
+      <p class="cust-kicker">Customer request · choose</p>
       <h2>${esc(it.title)}</h2>
       <p>${n} of ${q.length} decided</p>
     </div>
@@ -425,6 +427,7 @@ function sendHtml() {
     .join("");
   return `
     <div class="basket-head">
+      <p class="cust-kicker">Customer request · send</p>
       <h2>Send PLAN 09 as a request</h2>
       <p>Not an order. An Ahlsell specialist still checks lengths, kit types and hatch quantities.</p>
     </div>
@@ -472,12 +475,16 @@ function specialistHtml() {
     </tr>`)
     .join("");
   return `
-    <div class="basket-head"><h2>Specialist view</h2><p>${esc(job.apiNote)}</p></div>
+    <div class="basket-head spec-head">
+      <p class="spec-kicker">Specialist · Bluebeam-style check</p>
+      <h2>Markups list</h2>
+      <p>${esc(job.apiNote)} Subject = code. Space = room. You still sign.</p>
+    </div>
     <ul class="checks">${checks}</ul>
     <div class="filters">${filters}</div>
     <div class="draft-wrap">
       <table class="draft">
-        <thead><tr><th>Code</th><th>Text</th><th>Qty</th><th>Room</th></tr></thead>
+        <thead><tr><th>Subject</th><th>Comment</th><th>Count</th><th>Space</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
@@ -652,32 +659,54 @@ function addFromCatalog(article) {
   renderCatalog();
 }
 
+function setRole(next) {
+  specialist = !!next;
+  if (catalogOpen) closeCatalog();
+  render({ zoom: false });
+}
+
 function updateChrome() {
   document.querySelectorAll(".steps a").forEach((a) => {
     const name = a.getAttribute("href").slice(1);
     a.classList.toggle("on", name === step);
     a.classList.toggle("done", STEPS.indexOf(name) < STEPS.indexOf(step));
   });
-  $("specBtn").classList.toggle("active", specialist);
+  $("app").dataset.role = specialist ? "specialist" : "customer";
+  $("custBtn").classList.toggle("on", !specialist);
+  $("specBtn").classList.toggle("on", specialist);
   $("catalogBtn").classList.toggle("active", catalogOpen);
   const addedN = flowItems.filter((it) => it.group === "added").length;
   $("catalogBtn").textContent = addedN ? `Catalog (${addedN})` : "Catalog";
   $("app").dataset.step = step;
+  $("steps").hidden = specialist;
+  $("specToolsLabel").hidden = !specialist;
+  $("trust").hidden = !specialist;
+  const banner = $("roleBanner");
+  const sheetTitle = $("sheetTitle");
   const c = counts();
   const q = queue();
-  if (step === "found") {
-    $("flowStatus").textContent = `${c.need.length} need an answer · ${c.ready.length} ready${c.added.length ? " · " + c.added.length + " added" : ""} · ${c.cant.length} not from this drawing`;
-    $("continueBtn").textContent = "Choose products";
-  } else if (step === "choose") {
-    const n = q.filter((x) => x.choice).length;
-    $("flowStatus").textContent = `${n} of ${q.length} decided · ${c.inBasket.length} in the request`;
-    $("continueBtn").textContent = n >= q.length ? "Review request" : "Next";
+  if (specialist) {
+    banner.textContent = "Specialist check · Markups list · you still sign this draft";
+    if (sheetTitle) sheetTitle.textContent = "PLAN 09 · specialist markups";
+    $("flowStatus").textContent = "63-line API draft · not the customer basket";
+    $("continueBtn").textContent = "Back to customer";
+    $("backBtn").disabled = true;
   } else {
-    $("flowStatus").textContent = `${c.inBasket.length} lines on the request · still not an order`;
-    $("continueBtn").textContent = "Send request";
+    banner.textContent = "Customer request · simple path · still not an order";
+    if (sheetTitle) sheetTitle.textContent = "A-40-1-1091 · PLAN 09";
+    $("backBtn").disabled = false;
+    if (step === "found") {
+      $("flowStatus").textContent = `${c.need.length} need an answer · ${c.ready.length} ready${c.added.length ? " · " + c.added.length + " added" : ""} · ${c.cant.length} not from this drawing`;
+      $("continueBtn").textContent = "Choose products";
+    } else if (step === "choose") {
+      const n = q.filter((x) => x.choice).length;
+      $("flowStatus").textContent = `${n} of ${q.length} decided · ${c.inBasket.length} in the request`;
+      $("continueBtn").textContent = n >= q.length ? "Review request" : "Next";
+    } else {
+      $("flowStatus").textContent = `${c.inBasket.length} lines on the request · still not an order`;
+      $("continueBtn").textContent = "Send request";
+    }
   }
-  $("backBtn").disabled = false;
-  $("trust").hidden = !specialist;
 }
 
 function render(opts = {}) {
@@ -689,7 +718,7 @@ function render(opts = {}) {
       <div class="t-card warn"><strong>API draft</strong><b>63/69</b><span>${esc(job.apiNote)}</span></div>
       <div class="t-card ok"><strong>Email vs plan</strong><b>4 match</b><span>Named H2 rooms are here</span></div>
       <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>Never listed these shelves</span></div>
-      <div class="t-card extra"><strong>This path</strong><b>Customer first</b><span>Specialist is a check, not a tab</span></div>`;
+      <div class="t-card extra"><strong>This path</strong><b>Specialist</b><span>Switch back to Customer for the request flow</span></div>`;
   }
   const pillEl = $("sheetPill");
   if (pillEl) {
@@ -900,6 +929,10 @@ async function enterFromHero({ pitch = false } = {}) {
 }
 
 function continueFlow() {
+  if (specialist) {
+    setRole(false);
+    return;
+  }
   if (step === "found") {
     setStep("choose");
     return;
@@ -1003,10 +1036,8 @@ $("pick1091").addEventListener("click", (e) => {
 $("skipRead").addEventListener("click", skipLandingRead);
 $("pitchFromHero").addEventListener("click", () => enterFromHero({ pitch: true }));
 $("pitchBtn").addEventListener("click", togglePitch);
-$("specBtn").addEventListener("click", () => {
-  specialist = !specialist;
-  render({ zoom: false });
-});
+$("custBtn").addEventListener("click", () => setRole(false));
+$("specBtn").addEventListener("click", () => setRole(true));
 $("continueBtn").addEventListener("click", continueFlow);
 $("backBtn").addEventListener("click", backFlow);
 $("catalogBtn").addEventListener("click", () => (catalogOpen ? closeCatalog() : openCatalog()));

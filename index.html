@@ -140,23 +140,28 @@
 
   <p class="boot-banner" id="bootBanner" hidden></p>
 
-  <div class="app" id="app">
+  <div class="app" id="app" data-role="customer">
     <header class="top">
       <div class="brand">Granite <span id="drawingName"></span></div>
-      <nav class="steps" id="steps" aria-label="Progress">
+      <nav class="steps" id="steps" aria-label="Customer progress">
         <a href="#drawing">Drawing</a>
         <a href="#reading">Reading</a>
         <a href="#found">Found</a>
         <a href="#choose">Choose</a>
         <a href="#send">Send</a>
       </nav>
+      <p class="spec-tools-label" id="specToolsLabel" hidden>Markups list · check the draft</p>
       <div class="top-tools">
+        <div class="role-switch" role="tablist" aria-label="Who is using this">
+          <button type="button" id="custBtn" class="on" data-role="customer">Customer</button>
+          <button type="button" id="specBtn" data-role="specialist">Specialist</button>
+        </div>
         <button type="button" class="btn-ghost light" id="catalogBtn">Catalog</button>
-        <button type="button" class="btn-ghost light" id="specBtn">Specialist view</button>
         <button type="button" class="btn-ghost light" id="pitchBtn">Pitch mode</button>
       </div>
     </header>
 
+    <p class="role-banner" id="roleBanner">Customer request · simple path · still not an order</p>
     <p class="pitch-caption" id="pitchCaption" hidden></p>
     <section class="trust" id="trust" hidden></section>
 
@@ -164,7 +169,7 @@
       <div class="plan-wrap" id="planWrap">
         <div class="plan-card">
           <div class="sheet-bar">
-            <span>A-40-1-1091 · PLAN 09</span>
+            <span id="sheetTitle">A-40-1-1091 · PLAN 09</span>
             <span class="zoom-tools">
               <button type="button" id="zoomOut" title="Zoom out">−</button>
               <button type="button" id="zoomFit" title="Fit page">Fit</button>
