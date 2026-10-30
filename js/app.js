@@ -22,6 +22,7 @@ let viewerBound = false;
 let landingPhase = "upload";
 let landingBusy = false;
 let readToken = 0;
+let sheetChosen = false;
 let demoStarted = false;
 let requestSent = false;
 let lineFilter = "fittings";
@@ -834,21 +835,36 @@ function setStep(next, { silent = false } = {}) {
   requestAnimationFrame(() => requestAnimationFrame(fitView));
 }
 
+function landingUrl(hash) {
+  return location.pathname + location.search + hash;
+}
+
 function goLanding(phase) {
   demoStarted = false;
   $("app").classList.remove("on");
   $("landing").hidden = false;
   $("landing").style.display = "";
+  if (phase !== "reading") {
+    readToken += 1;
+    landingBusy = false;
+  }
   if (phase === "reading") {
-    if (landingPhase === "upload") playLandingRead();
-    else setLandingPhase("reading");
-    history.replaceState(null, "", "#reading");
+    if (!sheetChosen) {
+      goLanding("upload");
+      return;
+    }
+    playLandingRead();
   } else if (phase === "overview") {
+    if (!sheetChosen) {
+      goLanding("upload");
+      return;
+    }
     setLandingPhase("overview");
-    history.replaceState(null, "", "#drawing");
+    history.replaceState(null, "", landingUrl("#overview"));
   } else {
+    sheetChosen = false;
     setLandingPhase("upload");
-    history.replaceState(null, "", "#drawing");
+    history.replaceState(null, "", landingUrl("#drawing"));
   }
 }
 
@@ -892,12 +908,18 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+function choosePlan09() {
+  sheetChosen = true;
+  playLandingRead();
+}
+
 async function playLandingRead() {
   if (landingBusy && landingPhase === "reading") return;
   landingBusy = true;
+  sheetChosen = true;
   const token = ++readToken;
   setLandingPhase("reading");
-  history.replaceState(null, "", "#reading");
+  history.replaceState(null, "", landingUrl("#reading"));
   loadAll().catch((err) => showBanner(String(err.message || err)));
   $("heroBar").style.width = "0%";
   for (let i = 0; i < READ_STEPS.length; i++) {
@@ -911,6 +933,7 @@ async function playLandingRead() {
   if (token !== readToken) return;
   markHeroSteps(READ_STEPS.length);
   setLandingPhase("overview");
+  history.replaceState(null, "", landingUrl("#overview"));
   landingBusy = false;
 }
 
@@ -921,6 +944,7 @@ function skipLandingRead() {
   $("heroBar").style.width = "100%";
   markHeroSteps(READ_STEPS.length);
   setLandingPhase("overview");
+  history.replaceState(null, "", landingUrl("#overview"));
 }
 
 async function startDemo({ pitch = false } = {}) {
@@ -933,6 +957,7 @@ async function startDemo({ pitch = false } = {}) {
     return;
   }
   demoStarted = true;
+  sheetChosen = true;
   $("landing").style.display = "none";
   $("landing").hidden = true;
   $("app").classList.add("on");
@@ -944,6 +969,7 @@ async function startDemo({ pitch = false } = {}) {
 }
 
 async function enterFromHero({ pitch = false } = {}) {
+  sheetChosen = true;
   if (landingPhase === "reading") skipLandingRead();
   if (landingPhase === "upload") await playLandingRead();
   await startDemo({ pitch });
@@ -1042,17 +1068,39 @@ function onHash() {
     goLanding("reading");
     return;
   }
+  if (h === "overview") {
+    goLanding("overview");
+    return;
+  }
   if (["found", "choose", "send"].includes(h)) {
+    if (!sheetChosen) {
+      goLanding("upload");
+      return;
+    }
     if (!demoStarted || !job) startDemo().then(() => setStep(h, { silent: true }));
     else setStep(h, { silent: true });
   }
 }
 
+function bootLanding() {
+  sheetChosen = false;
+  demoStarted = false;
+  landingBusy = false;
+  readToken += 1;
+  $("app").classList.remove("on");
+  $("landing").hidden = false;
+  $("landing").style.display = "";
+  setLandingPhase("upload");
+  if (location.hash !== "#drawing") {
+    history.replaceState(null, "", landingUrl("#drawing"));
+  }
+}
+
 $("tryExample").addEventListener("click", () => startDemo({ pitch: false }));
-$("uploadExample").addEventListener("click", () => playLandingRead());
+$("uploadExample").addEventListener("click", choosePlan09);
 $("pick1091").addEventListener("click", (e) => {
   e.stopPropagation();
-  playLandingRead();
+  choosePlan09();
 });
 $("skipRead").addEventListener("click", skipLandingRead);
 $("pitchFromHero").addEventListener("click", () => enterFromHero({ pitch: true }));
@@ -1092,8 +1140,8 @@ heroSheet.addEventListener("dragleave", () => heroSheet.classList.remove("dragov
 heroSheet.addEventListener("drop", (e) => {
   e.preventDefault();
   heroSheet.classList.remove("dragover");
-  if (landingPhase === "upload") playLandingRead();
+  if (landingPhase === "upload") choosePlan09();
 });
 
 window.addEventListener("hashchange", onHash);
-if (location.hash && location.hash !== "#drawing") onHash();
+bootLanding();
