@@ -1,0 +1,69 @@
+{
+  "note": "Taster catalog. Article numbers are from the project-4 specialist quote, not a live Ahlsell search.",
+  "shelf": [
+    {
+      "id": "shelf-a10",
+      "article": "309452",
+      "name": "Bathroom shelf A10 stainless 360 × 130 × 75 mm",
+      "unit": "st",
+      "note": "Ahlsell equivalent from the old quote. Confirm the drawn length with a specialist."
+    },
+    {
+      "id": "shelf-unknown",
+      "article": null,
+      "name": "I don’t know the length",
+      "unit": "st",
+      "note": "Keep it as a question on the request. Do not guess millimetres."
+    }
+  ],
+  "kit": [
+    {
+      "id": "kit-typ3",
+      "article": "TYP3",
+      "name": "Wash-place type 3 package",
+      "unit": "st",
+      "parts": [
+        { "article": "4029743301", "name": "Tork Mini M1 dispenser, white" },
+        { "article": "484536", "name": "Wall bracket for dispenser" },
+        { "article": "561904", "name": "Paper basket A366 white" },
+        { "article": "102906", "name": "Coat hook A1021 chrome 80 mm" }
+      ],
+      "note": "Typical type-3 contents from the specialist quote. Confirm against the type standard."
+    },
+    {
+      "id": "kit-typ2",
+      "article": "TYP2",
+      "name": "Wash-place type 2 package",
+      "unit": "st",
+      "parts": [
+        { "article": "4029743301", "name": "Tork Mini M1 dispenser, white" },
+        { "article": "561904", "name": "Paper basket A366 white" },
+        { "article": "102906", "name": "Coat hook A1021 chrome 80 mm" }
+      ],
+      "note": "Typical type-2 contents from the specialist quote."
+    },
+    {
+      "id": "kit-unknown",
+      "article": null,
+      "name": "I don’t know the type",
+      "unit": "st",
+      "note": "Send as a question. The type standard was not in this upload."
+    }
+  ],
+  "hatch": [
+    {
+      "id": "hatch-yes",
+      "article": null,
+      "name": "Yes — include these from the sheet table",
+      "unit": "st",
+      "note": "Quantities come from the schedule on PLAN 09, not from counting each hatch on the floor."
+    },
+    {
+      "id": "hatch-no",
+      "article": null,
+      "name": "Not this floor — leave them out",
+      "unit": "st",
+      "note": "PLAN 09 is the sheet name, not proof of the install floor."
+    }
+  ]
+}

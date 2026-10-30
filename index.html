@@ -32,7 +32,7 @@
 
       <div class="hero-copy" data-phase-copy="reading" hidden>
         <p class="badge">A-40-1-1091.pdf</p>
-        <h1>Reading PLAN 09<br /><em>like a specialist.</em></h1>
+        <h1>Reading PLAN 09<br /><em>on the drawing.</em></h1>
         <p class="lead" id="heroStatus">File received</p>
         <div class="bar hero-bar"><span id="heroBar"></span></div>
         <div class="actions">
@@ -44,18 +44,18 @@
         <p class="badge">PLAN 09 · 1 of 11 drawings · not a checkout</p>
         <h1>PLAN 09 is not an order.<br /><em>And here is why.</em></h1>
         <p class="lead">
-          Four shelves. No lengths. Wash-place kits with no contents.
-          The specialist view now has Wilmer’s recovered draft — 63 of 69 lines.
+          Four shelves with no length. Wash-place kits with no type.
+          Next we sort what you can choose, what needs an answer, and what this drawing cannot buy.
         </p>
         <div class="actions">
-          <button class="btn-orange" id="tryExample" type="button">Try PLAN 09</button>
-          <span class="micro">Open the real sheet · zoom and click pins</span>
+          <button class="btn-orange" id="tryExample" type="button">See what we found</button>
+          <span class="micro">One path · still a request, not an order</span>
         </div>
         <ul class="chips">
           <li>This floor only</li>
-          <li>0 lines ready to order</li>
-          <li>Click a room, see the gap</li>
-          <li>Specialist checks before anything is sent</li>
+          <li>Choose products from a taster catalog</li>
+          <li>Gaps stay visible</li>
+          <li>A specialist still checks before anything is sent</li>
         </ul>
       </div>
 
@@ -119,18 +119,18 @@
             </div>
             <ol class="hero-steps" id="heroSteps">
               <li>File received</li>
-              <li>Sorting the sheet</li>
-              <li>Finding room names</li>
-              <li>Matching H2 to the request</li>
-              <li>Flagging missing lengths</li>
-              <li>Nothing is ready to order</li>
+              <li>Reading room names</li>
+              <li>5 wash-place kits found</li>
+              <li>4 shelves found — no lengths</li>
+              <li>Hatch table on the right</li>
+              <li>Doors are another trade</li>
             </ol>
             <aside class="preview-list">
-              <header>This floor · PLAN 09 <small>0 ready to order</small></header>
-              <p>H2 shelf <b>no length</b></p>
-              <p>TP3 kit <b>no contents</b></p>
-              <p>IL.5 hatches <b>not in the list</b></p>
-              <footer>Ready to order <strong>0</strong></footer>
+              <header>This floor · PLAN 09 <small>not an order</small></header>
+              <p>4 shelves <b>need length</b></p>
+              <p>5 wash-place kits <b>need type</b></p>
+              <p>Hatches <b>from the table</b></p>
+              <footer>Ready to choose <strong>after you answer</strong></footer>
             </aside>
           </div>
         </div>
@@ -138,24 +138,29 @@
     </section>
   </main>
 
+  <p class="boot-banner" id="bootBanner" hidden></p>
+
   <div class="app" id="app">
     <header class="top">
-      <div class="brand">Granite Takeoff <span id="drawingName"></span></div>
+      <div class="brand">Granite <span id="drawingName"></span></div>
+      <nav class="steps" id="steps" aria-label="Progress">
+        <a href="#drawing">Drawing</a>
+        <a href="#reading">Reading</a>
+        <a href="#found">Found</a>
+        <a href="#choose">Choose</a>
+        <a href="#send">Send</a>
+      </nav>
       <div class="top-tools">
-        <div class="mode" role="tablist">
-          <button type="button" class="active" data-mode="customer">Customer</button>
-          <button type="button" data-mode="specialist">Specialist</button>
-        </div>
+        <button type="button" class="btn-ghost light" id="specBtn">Specialist view</button>
         <button type="button" class="btn-ghost light" id="pitchBtn">Pitch mode</button>
       </div>
     </header>
 
     <p class="pitch-caption" id="pitchCaption" hidden></p>
-
-    <section class="trust" id="trust"></section>
+    <section class="trust" id="trust" hidden></section>
 
     <div class="main">
-      <div class="plan-wrap">
+      <div class="plan-wrap" id="planWrap">
         <div class="plan-card">
           <div class="sheet-bar">
             <span>A-40-1-1091 · PLAN 09</span>
@@ -169,7 +174,7 @@
               <span class="lg code"></span> Product
               <span class="lg extra"></span> Extra
             </span>
-            <span class="reading-pill idle" id="sheetPill">Click a room to see why it is blocked</span>
+            <span class="reading-pill idle" id="sheetPill">Click a pin to see it in the list</span>
           </div>
           <div class="viewport" id="viewport">
             <div class="stage" id="stage">
@@ -182,24 +187,11 @@
       <aside class="side" id="side"></aside>
     </div>
 
-    <footer class="foot">
-      <span>Hook rails, curtains and other floors are not on this drawing — so they are not in this list.</span>
-      <button class="btn-orange" type="button" id="requestBtn">Send as request</button>
+    <footer class="flow-bar" id="flowBar">
+      <button class="btn-ghost light" type="button" id="backBtn">Back</button>
+      <span id="flowStatus">PLAN 09 · this floor only</span>
+      <button class="btn-orange" type="button" id="continueBtn">Continue</button>
     </footer>
-  </div>
-
-  <div class="modal" id="modal" role="dialog" aria-modal="true">
-    <div class="box">
-      <p class="stamp">PARTIAL · NOT SIGNED</p>
-      <h2>Send PLAN 09 to Ahlsell</h2>
-      <p>This is a <strong>request</strong>, not an order. A specialist still has to check lengths, kit contents and hatch quantities.</p>
-      <ul id="modalList"></ul>
-      <div class="actions">
-        <button class="btn-orange" type="button" id="sendBtn">Send request</button>
-        <button class="btn-ghost" type="button" id="closeModal">Back</button>
-      </div>
-      <p class="hint" id="sentMsg" hidden>Sent. Not an order — an Ahlsell specialist will check this floor.</p>
-    </div>
   </div>
 
   <script src="js/app.js"></script>

@@ -1,37 +1,185 @@
 const $ = (id) => document.getElementById(id);
 
 let job = null;
-let mode = "customer";
+let catalog = { shelf: [], kit: [], hatch: [] };
+let flowItems = [];
+let step = "drawing";
+let specialist = false;
+let chooseIndex = 0;
 let selected = null;
-let lineFilter = "fittings";
 let pitchTimer = null;
 let pitching = false;
 let scale = 1;
 let panX = 0;
 let panY = 0;
 let viewerBound = false;
+let landingPhase = "upload";
+let landingBusy = false;
+let readToken = 0;
+let demoStarted = false;
+let requestSent = false;
+let lineFilter = "fittings";
 const BASE_W = 1600;
+const STEPS = ["drawing", "reading", "found", "choose", "send"];
 
-async function load() {
-  const res = await fetch("data/job.json");
-  if (!res.ok) throw new Error("Could not load data/job.json");
-  job = await res.json();
+function showBanner(msg) {
+  const el = $("bootBanner");
+  if (!el) return;
+  el.hidden = !msg;
+  el.textContent = msg || "";
 }
 
-function trustHtml() {
-  const n = job.counts || {};
-  if (mode === "customer") {
-    return `
-      <div class="t-card"><strong>This sheet</strong><b>PLAN 09</b><span>1 of 11 drawings — this floor only</span></div>
-      <div class="t-card warn"><strong>Ready to order</strong><b>0</b><span>Lengths and kit lists are missing</span></div>
-      <div class="t-card warn"><strong>Blocked</strong><b>Shelves · kits · symbols</b><span>Drawn, but not specified enough to buy</span></div>
-      <div class="t-card extra"><strong>Not in the request</strong><b>Hatches</b><span>On this sheet anyway — not counted on the floor</span></div>`;
+function esc(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+async function loadJson(path) {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error("Could not load " + path + " (" + res.status + ")");
+  return res.json();
+}
+
+async function loadAll() {
+  job = await loadJson("data/job.json");
+  try {
+    catalog = await loadJson("data/catalog.json");
+  } catch (err) {
+    catalog = { shelf: [], kit: [], hatch: [] };
   }
-  return `
-      <div class="t-card warn"><strong>API draft</strong><b>${n.linesRecovered || 63}/${n.linesClaimed || 69}</b><span>${job.apiNote}</span></div>
-      <div class="t-card ok"><strong>Email vs plan</strong><b>4 match</b><span>Named H2 rooms are here · extra H2 is other floors</span></div>
-      <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>The specialist quote never listed these shelves</span></div>
-      <div class="t-card extra"><strong>Doors / other floors</strong><b>Hidden from customer</b><span>Still in the specialist table</span></div>`;
+  flowItems = buildFlowItems();
+}
+
+function roomName(id) {
+  const r = (job.rooms || []).find((x) => x.id === id);
+  return r ? r.name : "";
+}
+
+function plainTitle(ln) {
+  if (ln.kind === "shelf") return "Shelf H2";
+  if (ln.kind === "kit") return ln.code === "TP2" ? "Wash-place kit TP2" : "Wash-place kit TP3";
+  if (ln.kind === "hatch") return ln.code ? ln.code + " inspection hatch" : "Inspection hatch";
+  if (ln.kind === "tap") return "Elbow tap";
+  if (ln.kind === "sanitary") {
+    const names = {
+      "WC-stol": "WC",
+      "Tvättställ": "Washbasin",
+      "Stödarm": "Support arm",
+      "Utslagsback": "Slop sink",
+    };
+    return names[ln.text] || "Sanitary fitting";
+  }
+  if (ln.kind === "unknown") return ln.code ? ln.code + " — no product type" : "Unidentified mark";
+  if (ln.kind === "door") return "Door (other trade)";
+  if (ln.kind === "window") return "Window (other trade)";
+  if (ln.kind === "frame") return "Metal frame (other trade)";
+  if (ln.kind === "request") return (ln.code || "Item") + " on another floor";
+  return ln.text || ln.code || "Item";
+}
+
+function buildFlowItems() {
+  const items = [];
+  for (const ln of job.lines || []) {
+    const base = {
+      id: ln.id,
+      lineId: ln.id,
+      code: ln.code,
+      kind: ln.kind,
+      room: ln.room,
+      qty: ln.qty,
+      text: ln.text,
+      title: plainTitle(ln),
+      choice: null,
+      group: "cant",
+      question: "",
+      options: [],
+    };
+    if (ln.kind === "shelf" && ln.scope !== "request only") {
+      items.push({
+        ...base,
+        group: "need",
+        question: "What length is this shelf in " + (ln.room || "this room") + "?",
+        hint: "The floor plan marks H2. Length is on the room description, which was not uploaded.",
+        options: catalog.shelf || [],
+      });
+    } else if (ln.kind === "kit") {
+      items.push({
+        ...base,
+        group: "need",
+        question: "Which wash-place type is " + (ln.code || "this kit") + " in " + (ln.room || "this room") + "?",
+        hint: "TP2 / TP3 are package codes. Contents come from the type standard.",
+        options: catalog.kit || [],
+      });
+    } else if (ln.kind === "hatch" && ln.code === "IL.5") {
+      items.push({
+        ...base,
+        group: "need",
+        question: "The sheet table says 16 × IL.5 hatches. Are they for this floor?",
+        hint: "PLAN 09 is the sheet name, not proof they all install here.",
+        options: catalog.hatch || [],
+      });
+    } else if (ln.kind === "hatch") {
+      const hatchOpts = catalog.hatch || [];
+      items.push({
+        ...base,
+        group: "ready",
+        question: "Include " + (ln.code || "this hatch") + " from the sheet table?",
+        hint: "Named on the hatch schedule. Still not counted on the floor.",
+        options: hatchOpts,
+        choice: hatchOpts.find((o) => o.id === "hatch-yes") || hatchOpts[0] || null,
+      });
+    } else if (ln.kind === "tap" && ln.room) {
+      items.push({
+        ...base,
+        group: "need",
+        question: "Include the elbow tap in " + ln.room + " on the request?",
+        hint: "Drawn on the plan. Confirm the article with Ahlsell.",
+        options: [
+          { id: "tap-yes", article: null, name: "Yes — ask Ahlsell for the article", note: "No article number on this sheet." },
+          { id: "tap-no", article: null, name: "Leave it to the specialist", note: "Will stay off the customer list." },
+        ],
+      });
+    } else {
+      items.push({
+        ...base,
+        group: "cant",
+        reason:
+          ln.kind === "request"
+            ? "This room is in the email, not on PLAN 09."
+            : ln.kind === "unknown"
+              ? "No product type — do not invent an article."
+              : ln.kind === "sanitary"
+                ? "A symbol is drawn, but there is no type code."
+                : "Not Ahlsell fittings from this drawing (other trade or other floor).",
+      });
+    }
+  }
+  return items;
+}
+
+function queue() {
+  const order = { shelf: 0, kit: 1, hatch: 2, tap: 3 };
+  return flowItems
+    .filter((it) => it.group === "need")
+    .sort((a, b) => (order[a.kind] ?? 9) - (order[b.kind] ?? 9));
+}
+
+function currentChoose() {
+  const q = queue();
+  return q[Math.min(chooseIndex, Math.max(0, q.length - 1))] || null;
+}
+
+function counts() {
+  const decided = flowItems.filter((it) => it.choice && it.choice.article !== undefined && it.choice.id !== "hatch-no" && it.choice.id !== "tap-no" && it.choice.id !== "shelf-unknown" && it.choice.id !== "kit-unknown");
+  const questions = flowItems.filter((it) => it.choice && (it.choice.id || "").endsWith("unknown"));
+  const need = flowItems.filter((it) => it.group === "need" && !it.choice);
+  const needAll = flowItems.filter((it) => it.group === "need");
+  const ready = flowItems.filter((it) => it.group === "ready");
+  const cant = flowItems.filter((it) => it.group === "cant");
+  const inBasket = flowItems.filter((it) => it.choice && it.choice.id !== "hatch-no" && it.choice.id !== "tap-no");
+  return { decided, questions, need, needAll, ready, cant, inBasket };
 }
 
 function imgSize() {
@@ -55,6 +203,7 @@ function applyView() {
 
 function fitView() {
   const vp = $("viewport");
+  if (!vp) return;
   const { w, h } = imgSize();
   scale = Math.min(vp.clientWidth / w, vp.clientHeight / h) * 0.98;
   panX = (vp.clientWidth - w * scale) / 2;
@@ -89,6 +238,7 @@ function visibleMarks() {
 }
 
 function drawMarks() {
+  if (!$("marks") || !job) return;
   $("marks").innerHTML = visibleMarks()
     .map((m) => {
       const room = m.room || m.id;
@@ -105,9 +255,7 @@ function drawMarks() {
   $("marks").querySelectorAll(".pin").forEach((el) => {
     el.addEventListener("click", (e) => {
       e.stopPropagation();
-      const room = el.dataset.room;
-      if (job.rooms.some((r) => r.id === room)) select(room);
-      else select(el.dataset.id);
+      select(el.dataset.room || el.dataset.id);
     });
   });
 }
@@ -173,171 +321,220 @@ function bindViewer() {
 }
 
 function focusSelected() {
+  if (!job) return;
   const mark =
     job.marks.find((m) => m.id === selected) ||
     job.marks.find((m) => (m.room || m.id) === selected);
-  if (mark) zoomTo(mark.x, mark.y, 2.6);
+  if (mark) zoomTo(mark.x, mark.y, 2.4);
 }
 
-function qtyLabel(it) {
-  return it.qty > 1 ? `×${it.qty}` : "";
-}
-
-function lineMatchesFilter(line) {
-  if (lineFilter === "all") return true;
-  if (lineFilter === "fittings") {
-    return ["shelf", "kit", "hatch", "tap", "sanitary", "unknown"].includes(line.kind);
+function select(id) {
+  selected = id;
+  if (step === "choose") {
+    const q = queue();
+    const idx = q.findIndex((it) => it.room === id || it.code === id || it.id === id);
+    if (idx >= 0) chooseIndex = idx;
   }
-  if (lineFilter === "noroom") return !line.room;
-  if (lineFilter === "nocode") return !line.code;
-  if (lineFilter === "request") return line.kind === "request";
-  if (lineFilter === "doors") return ["door", "window", "frame"].includes(line.kind);
-  return true;
+  render({ zoom: true });
 }
 
-function esc(s) {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+function groupClass(it) {
+  if (it.choice && it.choice.id && it.choice.id !== "hatch-no" && it.choice.id !== "tap-no") return "green";
+  if (it.group === "need") return "amber";
+  if (it.group === "ready") return "green";
+  return "grey";
 }
 
-function draftTableHtml() {
-  const lines = (job.lines || []).filter(lineMatchesFilter);
-  const filters = [
-    ["fittings", "This floor (fittings)"],
-    ["all", "All recovered"],
-    ["noroom", "No room"],
-    ["nocode", "No code"],
-    ["doors", "Doors / frames"],
-    ["request", "Other floors"],
-  ]
+function foundHtml() {
+  const c = counts();
+  const block = (title, list, cls) => `
+    <section class="group ${cls}">
+      <h2>${title} <small>${list.length}</small></h2>
+      ${list.length ? list.map((it) => `
+        <button type="button" class="found-row ${selected === it.room || selected === it.id ? "sel" : ""}" data-item="${it.id}" data-room="${esc(it.room || "")}">
+          <strong>${esc(it.title)}</strong>
+          <span>${it.room ? esc(it.room) + (roomName(it.room) ? " · " + esc(roomName(it.room)) : "") : "From the sheet table"} · ${it.qty} ${it.qty > 1 ? "pcs" : "pc"}${it.choice && it.group === "need" ? " · " + esc(it.choice.name) : ""}</span>
+        </button>`).join("") : `<p class="empty">None</p>`}
+    </section>`;
+  return `
+    <div class="basket-head">
+      <h2>What we found on PLAN 09</h2>
+      <p>This is a first draft from one drawing. Nothing here is an order yet.</p>
+    </div>
+    ${block("Ready to choose", c.ready, "green")}
+    ${block("Needs your answer", c.needAll, "amber")}
+    ${block("Can’t be bought from this drawing", c.cant.slice(0, 12), "grey")}
+    ${c.cant.length > 12 ? `<p class="draft-meta">${c.cant.length - 12} more in specialist view (doors, other floors).</p>` : ""}`;
+}
+
+function chooseHtml() {
+  const q = queue();
+  const it = currentChoose();
+  if (!it) {
+    return `<div class="basket-head"><h2>Choices done</h2><p>Continue to send the request.</p></div>`;
+  }
+  const n = q.filter((x) => x.choice).length;
+  const options = (it.options || [])
     .map(
-      ([id, label]) =>
-        `<button type="button" class="filter-btn ${lineFilter === id ? "active" : ""}" data-filter="${id}">${label}</button>`
+      (opt) => `<button type="button" class="choice ${it.choice && it.choice.id === opt.id ? "sel" : ""}" data-opt="${opt.id}">
+        <strong>${esc(opt.name)}</strong>
+        ${opt.article ? `<span class="art">Ahlsell ${esc(opt.article)}</span>` : ""}
+        ${opt.note ? `<span>${esc(opt.note)}</span>` : ""}
+        ${opt.parts ? `<span>${opt.parts.map((p) => esc(p.name)).join(" · ")}</span>` : ""}
+      </button>`
     )
     .join("");
-  const rows = lines
-    .map((ln) => {
-      const sel = selected && (selected === ln.room || selected === ln.code || selected === ln.id);
-      return `<tr class="${sel ? "sel" : ""}" data-line="${ln.id}" data-room="${esc(ln.room || "")}" data-code="${esc(ln.code || "")}">
-        <td>${esc(ln.code || "—")}</td>
-        <td>${esc(ln.text)}</td>
-        <td>${ln.qty}</td>
-        <td>${esc(ln.room || "—")}</td>
-        <td>${esc(ln.scope)}</td>
-        <td><span class="blocker">${esc(ln.blocker)}</span></td>
+  return `
+    <div class="basket-head">
+      <h2>${esc(it.title)}</h2>
+      <p>${n} of ${q.length} decided</p>
+    </div>
+    <p class="ask">${esc(it.question)}</p>
+    <p class="need always">${esc(it.hint || "")}</p>
+    <div class="choices">${options}</div>`;
+}
+
+function sendHtml() {
+  const c = counts();
+  const rows = c.inBasket
+    .map((it) => {
+      const ch = it.choice || {};
+      return `<tr>
+        <td>${esc(it.room || "—")}</td>
+        <td>${esc(it.title)}</td>
+        <td>${it.qty}</td>
+        <td>${esc(ch.article || "question")}</td>
+        <td>${esc(ch.name || "")}</td>
       </tr>`;
     })
     .join("");
-  const notes = (job.notes || []).map((n) => `<li>! ${esc(n)}</li>`).join("");
   return `
-    <h2>Wilmer’s draft · ${lines.length} shown</h2>
-    <p class="draft-meta">${esc(job.apiNote)}</p>
+    <div class="basket-head">
+      <h2>Send PLAN 09 as a request</h2>
+      <p>Not an order. An Ahlsell specialist still checks lengths, kit types and hatch quantities.</p>
+    </div>
+    <p class="stamp">PARTIAL · NOT SIGNED</p>
+    <table class="draft send-table">
+      <thead><tr><th>Room</th><th>Item</th><th>Qty</th><th>Article</th><th>Your choice</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="5">Nothing added yet — you can still send the questions.</td></tr>`}</tbody>
+    </table>
+    <p class="draft-meta">${c.need.length} still need an answer · ${c.cant.length} cannot be bought from this drawing</p>
+    <div class="send-actions">
+      <button type="button" class="btn-ghost light" id="csvBtn">Download CSV</button>
+      <span id="sentMsg" ${requestSent ? "" : "hidden"}>Sent. A specialist will check this floor.</span>
+    </div>`;
+}
+
+function specialistHtml() {
+  const checks = (job.checks || [])
+    .map((c) => `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${esc(c.text)}</li>`)
+    .join("");
+  const lines = (job.lines || []).filter((ln) => {
+    if (lineFilter === "all") return true;
+    if (lineFilter === "fittings") return ["shelf", "kit", "hatch", "tap", "sanitary", "unknown"].includes(ln.kind);
+    if (lineFilter === "noroom") return !ln.room;
+    if (lineFilter === "nocode") return !ln.code;
+    if (lineFilter === "request") return ln.kind === "request";
+    if (lineFilter === "doors") return ["door", "window", "frame"].includes(ln.kind);
+    return true;
+  });
+  const filters = [
+    ["fittings", "Fittings"],
+    ["all", "All 63"],
+    ["noroom", "No room"],
+    ["nocode", "No code"],
+    ["doors", "Doors"],
+    ["request", "Other floors"],
+  ]
+    .map(([id, label]) => `<button type="button" class="filter-btn ${lineFilter === id ? "active" : ""}" data-filter="${id}">${label}</button>`)
+    .join("");
+  const rows = lines
+    .map((ln) => `<tr data-line="${ln.id}" data-room="${esc(ln.room || "")}" data-code="${esc(ln.code || "")}">
+      <td>${esc(ln.code || "—")}</td>
+      <td>${esc(ln.text)}</td>
+      <td>${ln.qty}</td>
+      <td>${esc(ln.room || "—")}</td>
+    </tr>`)
+    .join("");
+  return `
+    <div class="basket-head"><h2>Specialist view</h2><p>${esc(job.apiNote)}</p></div>
+    <ul class="checks">${checks}</ul>
     <div class="filters">${filters}</div>
     <div class="draft-wrap">
       <table class="draft">
-        <thead><tr><th>Code</th><th>Text</th><th>Qty</th><th>Room</th><th>Scope</th><th>Gap</th></tr></thead>
+        <thead><tr><th>Code</th><th>Text</th><th>Qty</th><th>Room</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
-    </div>
-    <h2>Notes from the run</h2>
-    <ul class="checks">${notes}</ul>`;
+    </div>`;
 }
 
 function sideHtml() {
-  if (mode === "specialist") {
-    const checks = job.checks
-      .map((c) => `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${esc(c.text)}</li>`)
-      .join("");
-    const rows = job.compare
-      .map((r) => `<tr><td>${esc(r.asked)}</td><td>${esc(r.drawn)}</td><td>${esc(r.basket)}</td></tr>`)
-      .join("");
-    return `
-      <h2>Check these before you sign</h2>
-      <ul class="checks">${checks}</ul>
-      <h2>Asked · on this drawing · in the list</h2>
-      <table class="compare">
-        <thead><tr><th>Asked</th><th>On this drawing</th><th>In the list</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      ${draftTableHtml()}
-      ${customerBasketHtml()}`;
-  }
-  return customerBasketHtml();
+  if (specialist) return specialistHtml();
+  if (step === "choose") return chooseHtml();
+  if (step === "send") return sendHtml();
+  return foundHtml();
 }
 
-function customerBasketHtml() {
-  const rooms = job.rooms
-    .map((r) => {
-      const open = r.id === selected;
-      return `<article class="basket-room ${open ? "sel" : ""}" data-room="${r.id}">
-        <h3>${r.id}<small>${r.name}</small></h3>
-        ${r.items
-          .map(
-            (it) => `<div class="line-block">
-              <div class="line">
-                <span><strong>${it.code}</strong> ${it.text} ${qtyLabel(it)}</span>
-                <span class="blocker">${it.blocker}</span>
-              </div>
-              ${open ? `<p class="need">${it.need}</p>` : ""}
-            </div>`
-          )
-          .join("")}
-      </article>`;
-    })
-    .join("");
-  const extraOpen = job.sheetExtras.some((x) => x.code === selected);
-  const extras = `<article class="basket-room extras ${extraOpen ? "sel" : ""}" data-extra="1">
-      <h3>On the sheet · no room</h3>
-      <p class="need always">Hatches from the table, plus symbols the draft could not tie to a room. Not in the customer Excel.</p>
-      ${job.sheetExtras
-        .map(
-          (it) => `<div class="line-block">
-            <div class="line">
-              <span><strong>${it.code}</strong> ${it.text} ${qtyLabel(it)}</span>
-            </div>
-            ${extraOpen && selected === it.code ? `<p class="need">${it.need}</p>` : ""}
-          </div>`
-        )
-        .join("")}
-    </article>`;
-  const intro =
-    mode === "specialist"
-      ? "Same rooms the customer sees. Sign nothing until the gaps are closed."
-      : "Nothing here is ready to order. Click a room to see it on the plan.";
-  return `<div class="basket-head">
-      <h2>This floor</h2>
-      <p>${intro}</p>
-    </div>${rooms}${extras}`;
+function updateChrome() {
+  document.querySelectorAll(".steps a").forEach((a) => {
+    const name = a.getAttribute("href").slice(1);
+    a.classList.toggle("on", name === step);
+    a.classList.toggle("done", STEPS.indexOf(name) < STEPS.indexOf(step));
+  });
+  $("specBtn").classList.toggle("active", specialist);
+  $("app").dataset.step = step;
+  const c = counts();
+  const q = queue();
+  if (step === "found") {
+    $("flowStatus").textContent = `${c.need.length} need an answer · ${c.ready.length} ready · ${c.cant.length} not from this drawing`;
+    $("continueBtn").textContent = "Choose products";
+  } else if (step === "choose") {
+    const n = q.filter((x) => x.choice).length;
+    $("flowStatus").textContent = `${n} of ${q.length} decided · ${c.inBasket.length} in the request`;
+    $("continueBtn").textContent = n >= q.length ? "Review request" : "Next";
+  } else {
+    $("flowStatus").textContent = `${c.inBasket.length} lines on the request · still not an order`;
+    $("continueBtn").textContent = "Send request";
+  }
+  $("backBtn").disabled = false;
+  $("trust").hidden = !specialist;
 }
 
 function render(opts = {}) {
+  if (!job) return;
   $("drawingName").textContent = "· " + job.drawing;
-  $("trust").className = "trust" + (mode === "specialist" ? " specialist" : "");
-  $("trust").innerHTML = trustHtml();
+  if (specialist) {
+    $("trust").hidden = false;
+    $("trust").innerHTML = `
+      <div class="t-card warn"><strong>API draft</strong><b>63/69</b><span>${esc(job.apiNote)}</span></div>
+      <div class="t-card ok"><strong>Email vs plan</strong><b>4 match</b><span>Named H2 rooms are here</span></div>
+      <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>Never listed these shelves</span></div>
+      <div class="t-card extra"><strong>This path</strong><b>Customer first</b><span>Specialist is a check, not a tab</span></div>`;
+  }
   const pillEl = $("sheetPill");
   if (pillEl) {
-    const room = job.rooms.find((r) => r.id === selected);
-    const extra = job.sheetExtras.find((x) => x.code === selected);
-    if (room) pillEl.textContent = `${room.id} · ${room.name}`;
-    else if (extra) pillEl.textContent = `${extra.code} · not in the request`;
-    else pillEl.textContent = "Click a room to see why it is blocked";
+    const it = flowItems.find((x) => x.id === selected || x.room === selected);
+    if (it) pillEl.textContent = `${it.room || it.code || ""} · ${it.title}`;
+    else pillEl.textContent = "Click a pin to see it in the list";
   }
   drawMarks();
   $("side").innerHTML = sideHtml();
-  $("side").querySelectorAll("[data-room]").forEach((el) => {
-    el.addEventListener("click", () => select(el.dataset.room));
-  });
-  $("side").querySelectorAll(".extras").forEach((el) => {
+  $("side").querySelectorAll("[data-item]").forEach((el) => {
     el.addEventListener("click", () => {
-      const m = job.marks.find((x) => x.id === "IL.5");
-      if (m) {
-        selected = "IL.5";
-        drawMarks();
-        zoomTo(m.x, m.y, 2.8);
+      selected = el.dataset.room || el.dataset.item;
+      const q = queue();
+      const idx = q.findIndex((it) => it.id === el.dataset.item);
+      if (idx >= 0) {
+        chooseIndex = idx;
+        if (step === "found") setStep("choose");
+        else render({ zoom: true });
+      } else {
+        render({ zoom: true });
       }
     });
+  });
+  $("side").querySelectorAll("[data-opt]").forEach((el) => {
+    el.addEventListener("click", () => pickOption(el.dataset.opt));
   });
   $("side").querySelectorAll("[data-filter]").forEach((el) => {
     el.addEventListener("click", (e) => {
@@ -347,45 +544,92 @@ function render(opts = {}) {
     });
   });
   $("side").querySelectorAll("tr[data-line]").forEach((el) => {
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      selected = el.dataset.room || el.dataset.code || el.dataset.line;
-      render();
+    el.addEventListener("click", () => {
+      selected = el.dataset.room || el.dataset.code;
+      render({ zoom: true });
     });
   });
-  if (opts.zoom !== false) focusSelected();
+  const csv = $("csvBtn");
+  if (csv) csv.addEventListener("click", downloadCsv);
+  updateChrome();
+  if (opts.zoom) focusSelected();
 }
 
-function select(id) {
-  selected = id;
-  render();
+function pickOption(optId) {
+  const it = currentChoose();
+  if (!it) return;
+  it.choice = (it.options || []).find((o) => o.id === optId) || { id: optId, name: optId };
+  const q = queue();
+  if (chooseIndex < q.length - 1) chooseIndex += 1;
+  const next = currentChoose();
+  selected = next ? next.room || next.id : selected;
+  render({ zoom: true });
 }
 
-function setMode(next) {
-  mode = next;
-  document.querySelectorAll(".mode button").forEach((b) => {
-    b.classList.toggle("active", b.dataset.mode === mode);
-  });
-  render({ zoom: false });
+function downloadCsv() {
+  const c = counts();
+  const header = "room,item,qty,article,choice";
+  const rows = c.inBasket.map((it) =>
+    [it.room || "", it.title, it.qty, (it.choice && it.choice.article) || "", (it.choice && it.choice.name) || ""]
+      .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+      .join(",")
+  );
+  const blob = new Blob([[header, ...rows].join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "granite-plan09-request.csv";
+  a.click();
 }
 
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
+function setStep(next, { silent = false } = {}) {
+  if (!STEPS.includes(next)) return;
+  if (next === "drawing" || next === "reading") {
+    goLanding(next);
+    return;
+  }
+  step = next;
+  if (!silent) {
+    const hash = "#" + next;
+    if (location.hash !== hash) history.replaceState(null, "", hash);
+  }
+  if (next === "choose") {
+    const q = queue();
+    const undone = q.findIndex((it) => !it.choice);
+    chooseIndex = undone >= 0 ? undone : 0;
+    const it = currentChoose();
+    if (it) selected = it.room || it.id;
+  }
+  if (next === "found") selected = selected || "A0-025";
+  render({ zoom: next === "choose" });
+  requestAnimationFrame(() => requestAnimationFrame(fitView));
+}
+
+function goLanding(phase) {
+  demoStarted = false;
+  $("app").classList.remove("on");
+  $("landing").hidden = false;
+  $("landing").style.display = "";
+  if (phase === "reading") {
+    if (landingPhase === "upload") playLandingRead();
+    else setLandingPhase("reading");
+    history.replaceState(null, "", "#reading");
+  } else if (phase === "overview") {
+    setLandingPhase("overview");
+    history.replaceState(null, "", "#drawing");
+  } else {
+    setLandingPhase("upload");
+    history.replaceState(null, "", "#drawing");
+  }
 }
 
 const READ_STEPS = [
-  [10, "File received"],
-  [28, "Sorting the sheet"],
-  [48, "Finding room names"],
-  [68, "Matching H2 to the request"],
-  [86, "Flagging missing lengths"],
-  [100, "Nothing is ready to order"],
+  [12, "File received"],
+  [28, "Reading room names"],
+  [48, "5 wash-place kits found"],
+  [68, "4 shelves found — no lengths"],
+  [86, "Hatch table on the right"],
+  [100, "Doors are another trade"],
 ];
-
-let landingPhase = "upload";
-let landingBusy = false;
-let readToken = 0;
-let demoStarted = false;
 
 function setLandingPhase(phase) {
   landingPhase = phase;
@@ -399,10 +643,10 @@ function setLandingPhase(phase) {
     pill.textContent = "Empty";
     label.textContent = "No file";
   } else if (phase === "reading") {
-    pill.textContent = "AI reading…";
+    pill.textContent = "Reading…";
     label.textContent = "A-40-1-1091 · PLAN 09";
   } else {
-    pill.textContent = "Gaps found";
+    pill.textContent = "Draft ready";
     label.textContent = "A-40-1-1091 · PLAN 09";
   }
 }
@@ -414,12 +658,17 @@ function markHeroSteps(activeIdx) {
   });
 }
 
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 async function playLandingRead() {
-  if (landingBusy || landingPhase !== "upload") return;
+  if (landingBusy && landingPhase === "reading") return;
   landingBusy = true;
   const token = ++readToken;
   setLandingPhase("reading");
-  load().catch(() => {});
+  history.replaceState(null, "", "#reading");
+  loadAll().catch((err) => showBanner(String(err.message || err)));
   $("heroBar").style.width = "0%";
   for (let i = 0; i < READ_STEPS.length; i++) {
     if (token !== readToken) return;
@@ -427,7 +676,7 @@ async function playLandingRead() {
     $("heroStatus").textContent = text;
     $("heroBar").style.width = pct + "%";
     markHeroSteps(i);
-    await sleep(i === 0 ? 700 : 1200);
+    await sleep(i === 0 ? 600 : 1000);
   }
   if (token !== readToken) return;
   markHeroSteps(READ_STEPS.length);
@@ -445,18 +694,22 @@ function skipLandingRead() {
 }
 
 async function startDemo({ pitch = false } = {}) {
-  if (demoStarted) return;
+  showBanner("");
+  try {
+    if (!job) await loadAll();
+  } catch (err) {
+    showBanner("Could not start: " + (err.message || err));
+    demoStarted = false;
+    return;
+  }
   demoStarted = true;
-  await load();
   $("landing").style.display = "none";
+  $("landing").hidden = true;
   $("app").classList.add("on");
   bindViewer();
   selected = "A0-025";
-  mode = "customer";
-  setMode("customer");
-  requestAnimationFrame(() => {
-    requestAnimationFrame(fitView);
-  });
+  specialist = false;
+  setStep("found");
   if (pitch) runPitch();
 }
 
@@ -464,6 +717,36 @@ async function enterFromHero({ pitch = false } = {}) {
   if (landingPhase === "reading") skipLandingRead();
   if (landingPhase === "upload") await playLandingRead();
   await startDemo({ pitch });
+}
+
+function continueFlow() {
+  if (step === "found") {
+    setStep("choose");
+    return;
+  }
+  if (step === "choose") {
+    const q = queue();
+    const it = currentChoose();
+    if (it && !it.choice && chooseIndex < q.length - 1) {
+      chooseIndex += 1;
+      const next = currentChoose();
+      selected = next ? next.room || next.id : selected;
+      render({ zoom: true });
+      return;
+    }
+    setStep("send");
+    return;
+  }
+  if (step === "send") {
+    requestSent = true;
+    render({ zoom: false });
+  }
+}
+
+function backFlow() {
+  if (step === "send") setStep("choose");
+  else if (step === "choose") setStep("found");
+  else if (step === "found") goLanding("overview");
 }
 
 function setPitchCaption(text) {
@@ -478,25 +761,20 @@ function runPitch() {
   document.body.classList.add("pitch");
   $("pitchBtn").textContent = "Exit pitch";
   const beats = [
-    { t: 0, caption: "1 · Four H2 rooms on this floor — lengths unknown", room: "A0-022", mode: "customer" },
-    { t: 3500, caption: "1 · Four H2 rooms on this floor — lengths unknown", room: "A0-023", mode: "customer" },
-    { t: 7000, caption: "1 · Four H2 rooms on this floor — lengths unknown", room: "A0-025", mode: "customer" },
-    { t: 10500, caption: "1 · Four H2 rooms on this floor — lengths unknown", room: "A0-026", mode: "customer" },
-    { t: 14000, caption: "2 · Specialist: check these first. H2 is not even in the quote.", room: "A0-025", mode: "specialist" },
-    { t: 20000, caption: "3 · Request quote = partial, not signed.", room: "A0-025", mode: "specialist", modal: true },
+    { t: 0, caption: "1 · Four H2 rooms — we need the shelf length", step: "found", room: "A0-022" },
+    { t: 3500, caption: "1 · Four H2 rooms — we need the shelf length", step: "found", room: "A0-025" },
+    { t: 7000, caption: "2 · Choose: one question at a time", step: "choose", room: "A0-025" },
+    { t: 13000, caption: "3 · Send as a request, not an order", step: "send", room: "A0-025" },
   ];
-  pitchTimer = [];
-  beats.forEach((b) => {
-    pitchTimer.push(
-      setTimeout(() => {
-        if (!pitching) return;
-        setMode(b.mode);
-        select(b.room);
-        setPitchCaption(b.caption);
-        if (b.modal) openModal();
-      }, b.t)
-    );
-  });
+  pitchTimer = beats.map((b) =>
+    setTimeout(() => {
+      if (!pitching) return;
+      specialist = false;
+      selected = b.room;
+      setStep(b.step);
+      setPitchCaption(b.caption);
+    }, b.t)
+  );
 }
 
 function stopPitch() {
@@ -506,7 +784,6 @@ function stopPitch() {
   setPitchCaption("");
   if (pitchTimer) pitchTimer.forEach(clearTimeout);
   pitchTimer = [];
-  $("modal").classList.remove("on");
 }
 
 function togglePitch() {
@@ -521,16 +798,20 @@ function togglePitch() {
   runPitch();
 }
 
-function openModal() {
-  $("modalList").innerHTML = `
-    <li>Included: 4 rooms with H2 + TP3 (A0-022, 023, 025, 026)</li>
-    <li>Included: A0-006 with TP2 × 3, WC/basin symbols, elbow taps</li>
-    <li>Included as extra / flagged: hatch schedule IL.4–7</li>
-    <li>Blocked: H2 lengths, kit contents, unverified hatch floor, codes with no product</li>
-    <li>Not in the customer list: doors/windows, and H1/H2 on other floors</li>
-    <li>Draft recovered: 63 of 69 API lines (export was cut)</li>`;
-  $("sentMsg").hidden = true;
-  $("modal").classList.add("on");
+function onHash() {
+  const h = (location.hash || "#drawing").slice(1);
+  if (h === "drawing") {
+    goLanding("upload");
+    return;
+  }
+  if (h === "reading") {
+    goLanding("reading");
+    return;
+  }
+  if (["found", "choose", "send"].includes(h)) {
+    if (!demoStarted || !job) startDemo().then(() => setStep(h, { silent: true }));
+    else setStep(h, { silent: true });
+  }
 }
 
 $("tryExample").addEventListener("click", () => startDemo({ pitch: false }));
@@ -542,6 +823,12 @@ $("pick1091").addEventListener("click", (e) => {
 $("skipRead").addEventListener("click", skipLandingRead);
 $("pitchFromHero").addEventListener("click", () => enterFromHero({ pitch: true }));
 $("pitchBtn").addEventListener("click", togglePitch);
+$("specBtn").addEventListener("click", () => {
+  specialist = !specialist;
+  render({ zoom: false });
+});
+$("continueBtn").addEventListener("click", continueFlow);
+$("backBtn").addEventListener("click", backFlow);
 
 const heroSheet = $("heroSheet");
 ["dragenter", "dragover"].forEach((ev) => {
@@ -557,15 +844,5 @@ heroSheet.addEventListener("drop", (e) => {
   if (landingPhase === "upload") playLandingRead();
 });
 
-document.querySelectorAll(".mode button").forEach((b) => {
-  b.addEventListener("click", () => {
-    if (pitching) stopPitch();
-    setMode(b.dataset.mode);
-  });
-});
-
-$("requestBtn").addEventListener("click", openModal);
-$("closeModal").addEventListener("click", () => $("modal").classList.remove("on"));
-$("sendBtn").addEventListener("click", () => {
-  $("sentMsg").hidden = false;
-});
+window.addEventListener("hashchange", onHash);
+if (location.hash && location.hash !== "#drawing") onHash();

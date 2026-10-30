@@ -23,6 +23,8 @@ git clone https://github.com/epsalgado/granite-plan09.git
 
 Static HTML/CSS/JS. No build step. Pages settings: Framework **None**, output `/`, branch `main`.
 
+Customer path is a five-step flow: Drawing → Reading → Found → Choose → Send. Specialist view is a header toggle. Direct links: `#found`, `#choose`, `#send`.
+
 ## Local
 
 Open `index.html` in a browser, or from this folder:
