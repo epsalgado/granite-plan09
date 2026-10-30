@@ -151,6 +151,7 @@
         <a href="#send">Send</a>
       </nav>
       <div class="top-tools">
+        <button type="button" class="btn-ghost light" id="catalogBtn">Catalog</button>
         <button type="button" class="btn-ghost light" id="specBtn">Specialist view</button>
         <button type="button" class="btn-ghost light" id="pitchBtn">Pitch mode</button>
       </div>
@@ -192,6 +193,20 @@
       <span id="flowStatus">PLAN 09 · this floor only</span>
       <button class="btn-orange" type="button" id="continueBtn">Continue</button>
     </footer>
+  </div>
+
+  <div class="cat-overlay" id="catOverlay" hidden>
+    <aside class="cat-drawer" role="dialog" aria-label="Ahlsell article catalog">
+      <header>
+        <h2>Catalog</h2>
+        <button type="button" class="btn-ghost light" id="catClose">Close</button>
+      </header>
+      <p class="cat-note">Hackathon article list — packing protocol plus the four quotes. Not a live Ahlsell.se download. Names are the official Swedish text.</p>
+      <input type="search" id="catSearch" placeholder="Search article number or name (shelf, hook, Tork…)" autocomplete="off" />
+      <div class="cat-tags" id="catTags"></div>
+      <p class="cat-count" id="catCount"></p>
+      <div class="cat-list" id="catList"></div>
+    </aside>
   </div>
 
   <script src="js/app.js"></script>

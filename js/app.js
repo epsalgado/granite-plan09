@@ -2,7 +2,12 @@ const $ = (id) => document.getElementById(id);
 
 let job = null;
 let catalog = { shelf: [], kit: [], hatch: [] };
+let articles = [];
 let flowItems = [];
+let extraSeq = 0;
+let catalogOpen = false;
+let catalogQuery = "";
+let catalogTag = "quoted";
 let step = "drawing";
 let specialist = false;
 let chooseIndex = 0;
@@ -48,6 +53,12 @@ async function loadAll() {
     catalog = await loadJson("data/catalog.json");
   } catch (err) {
     catalog = { shelf: [], kit: [], hatch: [] };
+  }
+  try {
+    const pack = await loadJson("data/articles.json");
+    articles = pack.items || [];
+  } catch (err) {
+    articles = [];
   }
   flowItems = buildFlowItems();
 }
@@ -177,9 +188,10 @@ function counts() {
   const need = flowItems.filter((it) => it.group === "need" && !it.choice);
   const needAll = flowItems.filter((it) => it.group === "need");
   const ready = flowItems.filter((it) => it.group === "ready");
+  const added = flowItems.filter((it) => it.group === "added");
   const cant = flowItems.filter((it) => it.group === "cant");
   const inBasket = flowItems.filter((it) => it.choice && it.choice.id !== "hatch-no" && it.choice.id !== "tap-no");
-  return { decided, questions, need, needAll, ready, cant, inBasket };
+  return { decided, questions, need, needAll, ready, added, cant, inBasket };
 }
 
 function imgSize() {
@@ -353,7 +365,7 @@ function foundHtml() {
       ${list.length ? list.map((it) => `
         <button type="button" class="found-row ${selected === it.room || selected === it.id ? "sel" : ""}" data-item="${it.id}" data-room="${esc(it.room || "")}">
           <strong>${esc(it.title)}</strong>
-          <span>${it.room ? esc(it.room) + (roomName(it.room) ? " · " + esc(roomName(it.room)) : "") : "From the sheet table"} · ${it.qty} ${it.qty > 1 ? "pcs" : "pc"}${it.choice && it.group === "need" ? " · " + esc(it.choice.name) : ""}</span>
+          <span>${it.group === "added" ? "Added from catalog" : it.room ? esc(it.room) + (roomName(it.room) ? " · " + esc(roomName(it.room)) : "") : "From the sheet table"} · ${it.qty} ${it.qty > 1 ? "pcs" : "pc"}${it.choice && it.group === "need" ? " · " + esc(it.choice.name) : ""}</span>
         </button>`).join("") : `<p class="empty">None</p>`}
     </section>`;
   return `
@@ -362,9 +374,11 @@ function foundHtml() {
       <p>This is a first draft from one drawing. Nothing here is an order yet.</p>
     </div>
     ${block("Ready to choose", c.ready, "green")}
+    ${c.added.length ? block("Added from the catalog", c.added, "green") : ""}
     ${block("Needs your answer", c.needAll, "amber")}
     ${block("Can’t be bought from this drawing", c.cant.slice(0, 12), "grey")}
-    ${c.cant.length > 12 ? `<p class="draft-meta">${c.cant.length - 12} more in specialist view (doors, other floors).</p>` : ""}`;
+    ${c.cant.length > 12 ? `<p class="draft-meta">${c.cant.length - 12} more in specialist view (doors, other floors).</p>` : ""}
+    <p class="draft-meta">Need something else? Open <strong>Catalog</strong> and search the hackathon article list.</p>`;
 }
 
 function chooseHtml() {
@@ -475,6 +489,112 @@ function sideHtml() {
   return foundHtml();
 }
 
+const CAT_TAGS = [
+  ["quoted", "In a quote"],
+  ["shelf", "Shelf"],
+  ["hook", "Hook"],
+  ["hygiene", "Hygiene"],
+  ["hatch", "Hatch"],
+  ["wc", "WC"],
+  ["door", "Door"],
+  ["all", "All"],
+];
+
+function articleBlob(it) {
+  return (it.a + " " + (it.n || "") + " " + (it.n2 || "") + " " + (it.t || []).join(" ")).toLowerCase();
+}
+
+function filteredArticles() {
+  const terms = catalogQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const out = [];
+  for (const it of articles) {
+    if (catalogTag === "quoted" && !(it.q || []).length) continue;
+    if (catalogTag !== "all" && catalogTag !== "quoted" && !(it.t || []).includes(catalogTag)) continue;
+    if (terms.length && !terms.every((t) => articleBlob(it).includes(t))) continue;
+    out.push(it);
+    if (out.length >= 60) break;
+  }
+  return out;
+}
+
+function renderCatalog() {
+  if (!catalogOpen) return;
+  $("catTags").innerHTML = CAT_TAGS.map(
+    ([id, label]) =>
+      `<button type="button" class="filter-btn ${catalogTag === id ? "active" : ""}" data-cat-tag="${id}">${label}</button>`
+  ).join("");
+  const hits = filteredArticles();
+  const quotedN = articles.filter((it) => (it.q || []).length).length;
+  $("catCount").textContent = catalogQuery.trim()
+    ? `${hits.length}${hits.length === 60 ? "+" : ""} matches`
+    : catalogTag === "quoted"
+      ? `Showing ${hits.length} of ${quotedN} articles from the four quotes`
+      : `Showing ${hits.length} of ${articles.length} in this list`;
+  $("catList").innerHTML = hits.length
+    ? hits
+        .map((it) => {
+          const inReq = flowItems.some((x) => x.choice && x.choice.article === it.a && x.group === "added");
+          return `<button type="button" class="cat-row ${inReq ? "in" : ""}" data-add-art="${it.a}">
+            <strong>Ahlsell ${esc(it.a)}</strong>
+            <span>${esc(it.n)}${it.n2 ? " · " + esc(it.n2) : ""}</span>
+            <em>${inReq ? "On the request" : "Add to request"} · ${esc(it.u || "ST")}${(it.q || []).length ? " · quoted" : ""}</em>
+          </button>`;
+        })
+        .join("")
+    : `<p class="empty">Nothing in this list matches. Try an article number from the quote, or “shelf”.</p>`;
+  $("catTags").querySelectorAll("[data-cat-tag]").forEach((el) => {
+    el.addEventListener("click", () => {
+      catalogTag = el.dataset.catTag;
+      renderCatalog();
+    });
+  });
+  $("catList").querySelectorAll("[data-add-art]").forEach((el) => {
+    el.addEventListener("click", () => addFromCatalog(el.dataset.addArt));
+  });
+}
+
+function openCatalog() {
+  if (!job) return;
+  catalogOpen = true;
+  $("catOverlay").hidden = false;
+  renderCatalog();
+  $("catSearch").value = catalogQuery;
+  $("catSearch").focus();
+}
+
+function closeCatalog() {
+  catalogOpen = false;
+  $("catOverlay").hidden = true;
+}
+
+function addFromCatalog(article) {
+  const it = articles.find((x) => x.a === article);
+  if (!it) return;
+  const existing = flowItems.find((x) => x.group === "added" && x.choice && x.choice.article === it.a);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    extraSeq += 1;
+    const name = [it.n, it.n2].filter(Boolean).join(" · ");
+    flowItems.push({
+      id: "extra-" + extraSeq,
+      lineId: "extra-" + extraSeq,
+      code: it.a,
+      kind: "catalog",
+      room: "",
+      qty: 1,
+      text: name,
+      title: name || "Ahlsell " + it.a,
+      group: "added",
+      question: "",
+      options: [],
+      choice: { id: "cat-" + it.a, article: it.a, name: name || it.a },
+    });
+  }
+  render({ zoom: false });
+  renderCatalog();
+}
+
 function updateChrome() {
   document.querySelectorAll(".steps a").forEach((a) => {
     const name = a.getAttribute("href").slice(1);
@@ -482,11 +602,14 @@ function updateChrome() {
     a.classList.toggle("done", STEPS.indexOf(name) < STEPS.indexOf(step));
   });
   $("specBtn").classList.toggle("active", specialist);
+  $("catalogBtn").classList.toggle("active", catalogOpen);
+  const addedN = flowItems.filter((it) => it.group === "added").length;
+  $("catalogBtn").textContent = addedN ? `Catalog (${addedN})` : "Catalog";
   $("app").dataset.step = step;
   const c = counts();
   const q = queue();
   if (step === "found") {
-    $("flowStatus").textContent = `${c.need.length} need an answer · ${c.ready.length} ready · ${c.cant.length} not from this drawing`;
+    $("flowStatus").textContent = `${c.need.length} need an answer · ${c.ready.length} ready${c.added.length ? " · " + c.added.length + " added" : ""} · ${c.cant.length} not from this drawing`;
     $("continueBtn").textContent = "Choose products";
   } else if (step === "choose") {
     const n = q.filter((x) => x.choice).length;
@@ -829,6 +952,18 @@ $("specBtn").addEventListener("click", () => {
 });
 $("continueBtn").addEventListener("click", continueFlow);
 $("backBtn").addEventListener("click", backFlow);
+$("catalogBtn").addEventListener("click", () => (catalogOpen ? closeCatalog() : openCatalog()));
+$("catClose").addEventListener("click", closeCatalog);
+$("catOverlay").addEventListener("click", (e) => {
+  if (e.target === $("catOverlay")) closeCatalog();
+});
+$("catSearch").addEventListener("input", () => {
+  catalogQuery = $("catSearch").value;
+  renderCatalog();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && catalogOpen) closeCatalog();
+});
 
 const heroSheet = $("heroSheet");
 ["dragenter", "dragover"].forEach((ev) => {
