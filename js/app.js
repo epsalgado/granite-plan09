@@ -301,10 +301,9 @@ function zoomTo(pctX, pctY, s = 2.5) {
 function zoomToFit(marks) {
   const vp = $("viewport");
   if (!vp || !marks.length) return;
-  if (marks.length === 1) {
-    zoomTo(marks[0].x, marks[0].y, 2.4);
-    return;
-  }
+  const vw = vp.clientWidth;
+  const vh = vp.clientHeight;
+  if (vw < 40 || vh < 40) return;
   const { w, h } = imgSize();
   let minX = Infinity;
   let maxX = -Infinity;
@@ -316,20 +315,18 @@ function zoomToFit(marks) {
     minY = Math.min(minY, m.y);
     maxY = Math.max(maxY, m.y);
   }
-  const padX = Math.max((maxX - minX) * 0.35, 3);
-  const padY = Math.max((maxY - minY) * 0.35, 3);
-  minX -= padX;
-  maxX += padX;
-  minY -= padY;
-  maxY += padY;
-  const boxW = ((maxX - minX) / 100) * w;
-  const boxH = ((maxY - minY) / 100) * h;
-  const s = Math.min(vp.clientWidth / boxW, vp.clientHeight / boxH);
-  scale = Math.min(4.2, Math.max(0.85, s * 0.9));
+  const spanX = Math.max(maxX - minX, 16);
+  const spanY = Math.max(maxY - minY, 12);
+  const marginPx = 64;
+  const scaleX = (vw - 2 * marginPx) / ((spanX / 100) * w);
+  const scaleY = (vh - 2 * marginPx) / ((spanY / 100) * h);
+  let s = Math.min(scaleX, scaleY);
+  if (!isFinite(s) || s <= 0) s = 1;
+  scale = Math.min(2.8, Math.max(0.4, s));
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
-  panX = vp.clientWidth / 2 - (cx / 100) * w * scale;
-  panY = vp.clientHeight / 2 - (cy / 100) * h * scale;
+  panX = vw / 2 - (cx / 100) * w * scale;
+  panY = vh / 2 - (cy / 100) * h * scale;
   applyView();
 }
 
@@ -457,9 +454,14 @@ function groupFocusIds() {
 }
 
 function pinSelected(m) {
-  const ids = groupFocusIds();
-  if (ids) {
-    return marksForFocus().some((x) => x.id === m.id);
+  if (step === "choose") {
+    const g = currentGroup();
+    if (g) {
+      const rooms = new Set(g.items.map((it) => it.room).filter(Boolean));
+      const codes = new Set(g.items.map((it) => it.code).filter(Boolean));
+      if (rooms.has(m.id) || rooms.has(m.label) || rooms.has(m.room)) return true;
+      if (codes.has(m.label) || codes.has(m.code)) return true;
+    }
   }
   if (!selected) return false;
   if (m.id === selected || m.room === selected || m.label === selected || m.code === selected) return true;
@@ -468,22 +470,16 @@ function pinSelected(m) {
 }
 
 function marksForFocus() {
-  const ids = groupFocusIds();
-  if (ids && job) {
+  const g = step === "choose" ? currentGroup() : null;
+  if (g && job) {
     const marks = job.marks || [];
-    const roomHits = marks.filter((m) => ids.has(m.id) || ids.has(m.room));
-    const codeHits = marks.filter((m) => ids.has(m.label) || ids.has(m.code));
-    if (roomHits.length && codeHits.length) {
-      const minX = Math.min(...roomHits.map((m) => m.x));
-      const maxX = Math.max(...roomHits.map((m) => m.x));
-      const minY = Math.min(...roomHits.map((m) => m.y));
-      const maxY = Math.max(...roomHits.map((m) => m.y));
-      const near = codeHits.filter(
-        (m) => m.x >= minX - 8 && m.x <= maxX + 8 && m.y >= minY - 8 && m.y <= maxY + 8
-      );
-      return [...roomHits, ...near];
-    }
+    const rooms = [...new Set(g.items.map((it) => it.room).filter(Boolean))];
+    const roomHits = rooms
+      .map((r) => marks.find((m) => m.id === r || m.label === r))
+      .filter(Boolean);
     if (roomHits.length) return roomHits;
+    const codes = [...new Set(g.items.map((it) => it.code).filter(Boolean))];
+    const codeHits = marks.filter((m) => codes.includes(m.label) || codes.includes(m.code));
     if (codeHits.length) return codeHits;
   }
   const one = markFor(selected);
@@ -1027,7 +1023,12 @@ function setStep(next, { silent = false } = {}) {
   }
   if (next === "found") selected = null;
   render({ zoom: next === "choose" });
-  requestAnimationFrame(() => requestAnimationFrame(fitView));
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      if (next === "choose") focusSelected();
+      else fitView();
+    })
+  );
 }
 
 function landingUrl(hash) {
@@ -1188,6 +1189,7 @@ function continueFlow() {
       const next = currentGroup();
       selected = next ? next.items[0].room || next.items[0].id : selected;
       render({ zoom: true });
+      requestAnimationFrame(() => requestAnimationFrame(focusSelected));
       return;
     }
     setStep("send");
