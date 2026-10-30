@@ -859,6 +859,7 @@ function compareHtml() {
         ${cmpTable("Only in Bluebeam", s.onlyBluebeam, true)}
         ${cmpTable("Same", s.same, false)}
         <div class="send-actions">
+          <button type="button" class="btn-orange" id="bbCmpXls">Download comparison Excel</button>
           <button type="button" class="btn-ghost light" id="bbCmpCsv">Download comparison CSV</button>
           <button type="button" class="btn-ghost light" id="bbClear">Clear check</button>
         </div>`;
@@ -1412,11 +1413,288 @@ function rowsFromMarkupDoc(text) {
 }
 
 function downloadText(filename, text, type) {
-  const blob = new Blob([text], { type: type || "text/plain" });
+  downloadBlob(filename, new Blob([text], { type: type || "text/plain" }));
+}
+
+function downloadBlob(filename, blob) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = filename;
   a.click();
+}
+
+function xmlEsc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function crc32(bytes) {
+  if (!crc32.t) {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      t[i] = c >>> 0;
+    }
+    crc32.t = t;
+  }
+  let c = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) c = crc32.t[(c ^ bytes[i]) & 255] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+function zipStore(files) {
+  const enc = new TextEncoder();
+  const locals = [];
+  const centrals = [];
+  let offset = 0;
+  files.forEach((f) => {
+    const name = enc.encode(f.name);
+    const data = typeof f.data === "string" ? enc.encode(f.data) : f.data;
+    const crc = crc32(data);
+    const local = new Uint8Array(30 + name.length + data.length);
+    const v = new DataView(local.buffer);
+    v.setUint32(0, 0x04034b50, true);
+    v.setUint16(4, 20, true);
+    v.setUint16(6, 0x800, true);
+    v.setUint16(8, 0, true);
+    v.setUint32(14, crc, true);
+    v.setUint32(18, data.length, true);
+    v.setUint32(22, data.length, true);
+    v.setUint16(26, name.length, true);
+    local.set(name, 30);
+    local.set(data, 30 + name.length);
+    const central = new Uint8Array(46 + name.length);
+    const cv = new DataView(central.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true);
+    cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0x800, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, data.length, true);
+    cv.setUint32(24, data.length, true);
+    cv.setUint16(28, name.length, true);
+    cv.setUint32(42, offset, true);
+    central.set(name, 46);
+    locals.push(local);
+    centrals.push(central);
+    offset += local.length;
+  });
+  const cdStart = offset;
+  const cdSize = centrals.reduce((n, p) => n + p.length, 0);
+  const end = new Uint8Array(22);
+  const ev = new DataView(end.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, cdSize, true);
+  ev.setUint32(16, cdStart, true);
+  const out = new Uint8Array(cdStart + cdSize + 22);
+  let o = 0;
+  locals.forEach((p) => {
+    out.set(p, o);
+    o += p.length;
+  });
+  centrals.forEach((p) => {
+    out.set(p, o);
+    o += p.length;
+  });
+  out.set(end, o);
+  return out;
+}
+
+function xlsxCell(ref, value, style, type) {
+  if (type === "n") {
+    return `<c r="${ref}" s="${style}" t="n"><v>${value || 0}</v></c>`;
+  }
+  return `<c r="${ref}" s="${style}" t="inlineStr"><is><t xml:space="preserve">${xmlEsc(value)}</t></is></c>`;
+}
+
+function xlsxRow(r, cells) {
+  return `<row r="${r}">${cells.join("")}</row>`;
+}
+
+function colLetter(n) {
+  let s = "";
+  let x = n;
+  while (x > 0) {
+    const m = (x - 1) % 26;
+    s = String.fromCharCode(65 + m) + s;
+    x = Math.floor((x - 1) / 26);
+  }
+  return s;
+}
+
+function xlsxSheet(rows, { freeze = false, filter = false, widths = [] } = {}) {
+  const maxCol = Math.max(1, ...rows.map((r) => r.length));
+  const maxRow = Math.max(1, rows.length);
+  const cols = widths
+    .map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`)
+    .join("");
+  const data = rows
+    .map((row, ri) => {
+      const r = ri + 1;
+      const cells = row.map((cell, ci) => {
+        const ref = colLetter(ci + 1) + r;
+        const style = cell.s == null ? 0 : cell.s;
+        if (cell.t === "n") return xlsxCell(ref, cell.v, style, "n");
+        return xlsxCell(ref, cell.v, style, "s");
+      });
+      return xlsxRow(r, cells);
+    })
+    .join("");
+  const views = freeze
+    ? `<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>`
+    : "";
+  const auto = filter ? `<autoFilter ref="A1:${colLetter(maxCol)}${maxRow}"/>` : "";
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${views}${
+    cols ? `<cols>${cols}</cols>` : ""
+  }<sheetData>${data}</sheetData>${auto}</worksheet>`;
+}
+
+function comparePacks() {
+  return [
+    ["Different", "different", 3, compareState.different],
+    ["Only in Granite", "only_granite", 4, compareState.onlyGranite],
+    ["Only in Bluebeam", "only_bluebeam", 5, compareState.onlyBluebeam],
+    ["Same", "same", 2, compareState.same],
+  ];
+}
+
+function compareLineRows(statusLabel, style, list) {
+  return list.map((r) => [
+    { v: statusLabel, s: style },
+    { v: r.subject || "—", s: style },
+    { v: r.space || "—", s: style },
+    { v: r.graniteQty, t: "n", s: style },
+    { v: r.bluebeamQty, t: "n", s: style },
+    { v: r.note || r.comment || "", s: style },
+  ]);
+}
+
+function buildCompareXlsx() {
+  const s = compareState;
+  const header = [
+    { v: "Status", s: 1 },
+    { v: "Subject", s: 1 },
+    { v: "Space", s: 1 },
+    { v: "Granite qty", s: 1 },
+    { v: "Bluebeam qty", s: 1 },
+    { v: "Note", s: 1 },
+  ];
+  const widths = [18, 16, 14, 14, 16, 56];
+  const source = [s.source, s.fileName, s.note].filter(Boolean).join(" · ");
+  const summary = xlsxSheet(
+    [
+      [{ v: "PLAN 09 Bluebeam check", s: 6 }],
+      [{ v: source, s: 0 }],
+      [],
+      [{ v: "Status", s: 1 }, { v: "Lines", s: 1 }],
+      [{ v: "Different", s: 3 }, { v: s.different.length, t: "n", s: 3 }],
+      [{ v: "Only in Granite", s: 4 }, { v: s.onlyGranite.length, t: "n", s: 4 }],
+      [{ v: "Only in Bluebeam", s: 5 }, { v: s.onlyBluebeam.length, t: "n", s: 5 }],
+      [{ v: "Same", s: 2 }, { v: s.same.length, t: "n", s: 2 }],
+      [],
+      [{ v: "Open the other sheets for the lines. You still sign. This is a check, not a new take-off.", s: 0 }],
+    ],
+    { widths: [22, 14] }
+  );
+  const allRows = [header];
+  const sheets = [{ name: "Summary", xml: summary }];
+  comparePacks().forEach(([label, , style, list]) => {
+    const body = compareLineRows(label, style, list);
+    body.forEach((row) => allRows.push(row));
+    sheets.push({
+      name: label.slice(0, 31),
+      xml: xlsxSheet([header, ...body], { freeze: true, filter: true, widths }),
+    });
+  });
+  sheets.splice(1, 0, {
+    name: "All lines",
+    xml: xlsxSheet(allRows, { freeze: true, filter: true, widths }),
+  });
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts>
+    <font><sz val="11"/><name val="Calibri"/></font>
+    <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>
+    <font><b/><sz val="16"/><name val="Calibri"/></font>
+  </fonts>
+  <fills>
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF0D4F4F"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFE3F3EA"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFFFE0C2"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFD4F5F5"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFFDE8E6"/></patternFill></fill>
+  </fills>
+  <borders>
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border>
+      <left style="thin"/><right style="thin"/><top style="thin"/><bottom style="thin"/><diagonal/>
+    </border>
+  </borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="7">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>
+    <xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyFill="1" applyBorder="1"/>
+    <xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1"/>
+    <xf numFmtId="0" fontId="0" fillId="5" borderId="1" xfId="0" applyFill="1" applyBorder="1"/>
+    <xf numFmtId="0" fontId="0" fillId="6" borderId="1" xfId="0" applyFill="1" applyBorder="1"/>
+    <xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+  </cellXfs>
+</styleSheet>`;
+  const types =
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+    `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+    `<Default Extension="xml" ContentType="application/xml"/>` +
+    `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>` +
+    `<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>` +
+    sheets
+      .map(
+        (_, i) =>
+          `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`
+      )
+      .join("") +
+    `</Types>`;
+  const rootRels =
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+    `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>` +
+    `</Relationships>`;
+  const wbRels =
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+    sheets
+      .map(
+        (_, i) =>
+          `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`
+      )
+      .join("") +
+    `<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>` +
+    `</Relationships>`;
+  const workbook =
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">` +
+    `<sheets>` +
+    sheets.map((sh, i) => `<sheet name="${xmlEsc(sh.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("") +
+    `</sheets></workbook>`;
+  const files = [
+    { name: "[Content_Types].xml", data: types },
+    { name: "_rels/.rels", data: rootRels },
+    { name: "xl/workbook.xml", data: workbook },
+    { name: "xl/_rels/workbook.xml.rels", data: wbRels },
+    { name: "xl/styles.xml", data: styles },
+    ...sheets.map((sh, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: sh.xml })),
+  ];
+  return zipStore(files);
 }
 
 function sampleSummaryCsv() {
@@ -1444,21 +1722,26 @@ function clearCompare() {
 function downloadCompareCsv() {
   if (!compareState) return;
   const header = "status,subject,space,granite_qty,bluebeam_qty,note";
-  const packs = [
-    ["different", compareState.different],
-    ["only_granite", compareState.onlyGranite],
-    ["only_bluebeam", compareState.onlyBluebeam],
-    ["same", compareState.same],
-  ];
   const rows = [];
-  packs.forEach(([status, list]) => {
+  comparePacks().forEach(([label, , , list]) => {
     list.forEach((r) => {
       rows.push(
-        [status, r.subject, r.space, r.graniteQty, r.bluebeamQty, r.note || r.comment || ""].map(csvCell).join(",")
+        [label, r.subject, r.space, r.graniteQty, r.bluebeamQty, r.note || r.comment || ""].map(csvCell).join(",")
       );
     });
   });
   downloadText("granite-plan09-compare.csv", [header, ...rows].join("\n"), "text/csv");
+}
+
+function downloadCompareExcel() {
+  if (!compareState) return;
+  const bytes = buildCompareXlsx();
+  downloadBlob(
+    "granite-plan09-compare.xlsx",
+    new Blob([bytes], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    })
+  );
 }
 
 function bindCompareUi() {
@@ -1468,6 +1751,8 @@ function bindCompareUi() {
   if (sample) sample.addEventListener("click", runBbSample);
   const clear = $("bbClear");
   if (clear) clear.addEventListener("click", clearCompare);
+  const xls = $("bbCmpXls");
+  if (xls) xls.addEventListener("click", downloadCompareExcel);
   const cmp = $("bbCmpCsv");
   if (cmp) cmp.addEventListener("click", downloadCompareCsv);
   const sampCsv = $("bbSampleCsv");

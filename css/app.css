@@ -442,7 +442,8 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   background: #042326;
   border-top: 1px solid #1ec8c8;
 }
-.app[data-role="specialist"] .flow-bar .btn-orange {
+.app[data-role="specialist"] .flow-bar .btn-orange,
+.app[data-role="specialist"] .bb-box .btn-orange {
   background: #1ec8c8;
   color: #042326;
 }
