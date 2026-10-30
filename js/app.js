@@ -3,6 +3,7 @@ const $ = (id) => document.getElementById(id);
 let job = null;
 let mode = "customer";
 let selected = null;
+let lineFilter = "fittings";
 let pitchTimer = null;
 let pitching = false;
 let scale = 1;
@@ -18,18 +19,19 @@ async function load() {
 }
 
 function trustHtml() {
+  const n = job.counts || {};
   if (mode === "customer") {
     return `
       <div class="t-card"><strong>This sheet</strong><b>PLAN 09</b><span>1 of 11 drawings — this floor only</span></div>
       <div class="t-card warn"><strong>Ready to order</strong><b>0</b><span>Lengths and kit lists are missing</span></div>
-      <div class="t-card warn"><strong>Blocked</strong><b>4 shelves · 7 kits</b><span>Drawn, but not specified enough to buy</span></div>
+      <div class="t-card warn"><strong>Blocked</strong><b>Shelves · kits · symbols</b><span>Drawn, but not specified enough to buy</span></div>
       <div class="t-card extra"><strong>Not in the request</strong><b>Hatches</b><span>On this sheet anyway — not counted on the floor</span></div>`;
   }
   return `
-      <div class="t-card warn"><strong>Pack</strong><b>1 PDF</b><span>Room description and type standard missing</span></div>
-      <div class="t-card ok"><strong>Email vs plan</strong><b>4 match</b><span>The named H2 rooms are here · 8 more on other plans</span></div>
+      <div class="t-card warn"><strong>API draft</strong><b>${n.linesRecovered || 63}/${n.linesClaimed || 69}</b><span>${job.apiNote}</span></div>
+      <div class="t-card ok"><strong>Email vs plan</strong><b>4 match</b><span>Named H2 rooms are here · extra H2 is other floors</span></div>
       <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>The specialist quote never listed these shelves</span></div>
-      <div class="t-card extra"><strong>Hatches</strong><b>Table</b><span>Quantities from the sheet schedule, not a floor count</span></div>`;
+      <div class="t-card extra"><strong>Doors / other floors</strong><b>Hidden from customer</b><span>Still in the specialist table</span></div>`;
 }
 
 function imgSize() {
@@ -77,12 +79,21 @@ function zoomTo(pctX, pctY, s = 2.5) {
   applyView();
 }
 
+function visibleMarks() {
+  return (job.marks || []).filter((m) => {
+    const label = String(m.label || m.id);
+    if (label.startsWith("A0-")) return true;
+    if (/^(H2|TP2|TP3|S1|IL)/.test(label)) return true;
+    return false;
+  });
+}
+
 function drawMarks() {
-  $("marks").innerHTML = job.marks
+  $("marks").innerHTML = visibleMarks()
     .map((m) => {
       const room = m.room || m.id;
       const sel = room === selected || m.id === selected ? "sel" : "";
-      const kind = m.label.startsWith("A0-")
+      const kind = String(m.label).startsWith("A0-")
         ? "room"
         : String(m.label).startsWith("IL")
           ? "extra"
@@ -172,13 +183,75 @@ function qtyLabel(it) {
   return it.qty > 1 ? `×${it.qty}` : "";
 }
 
+function lineMatchesFilter(line) {
+  if (lineFilter === "all") return true;
+  if (lineFilter === "fittings") {
+    return ["shelf", "kit", "hatch", "tap", "sanitary", "unknown"].includes(line.kind);
+  }
+  if (lineFilter === "noroom") return !line.room;
+  if (lineFilter === "nocode") return !line.code;
+  if (lineFilter === "request") return line.kind === "request";
+  if (lineFilter === "doors") return ["door", "window", "frame"].includes(line.kind);
+  return true;
+}
+
+function esc(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function draftTableHtml() {
+  const lines = (job.lines || []).filter(lineMatchesFilter);
+  const filters = [
+    ["fittings", "This floor (fittings)"],
+    ["all", "All recovered"],
+    ["noroom", "No room"],
+    ["nocode", "No code"],
+    ["doors", "Doors / frames"],
+    ["request", "Other floors"],
+  ]
+    .map(
+      ([id, label]) =>
+        `<button type="button" class="filter-btn ${lineFilter === id ? "active" : ""}" data-filter="${id}">${label}</button>`
+    )
+    .join("");
+  const rows = lines
+    .map((ln) => {
+      const sel = selected && (selected === ln.room || selected === ln.code || selected === ln.id);
+      return `<tr class="${sel ? "sel" : ""}" data-line="${ln.id}" data-room="${esc(ln.room || "")}" data-code="${esc(ln.code || "")}">
+        <td>${esc(ln.code || "—")}</td>
+        <td>${esc(ln.text)}</td>
+        <td>${ln.qty}</td>
+        <td>${esc(ln.room || "—")}</td>
+        <td>${esc(ln.scope)}</td>
+        <td><span class="blocker">${esc(ln.blocker)}</span></td>
+      </tr>`;
+    })
+    .join("");
+  const notes = (job.notes || []).map((n) => `<li>! ${esc(n)}</li>`).join("");
+  return `
+    <h2>Wilmer’s draft · ${lines.length} shown</h2>
+    <p class="draft-meta">${esc(job.apiNote)}</p>
+    <div class="filters">${filters}</div>
+    <div class="draft-wrap">
+      <table class="draft">
+        <thead><tr><th>Code</th><th>Text</th><th>Qty</th><th>Room</th><th>Scope</th><th>Gap</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <h2>Notes from the run</h2>
+    <ul class="checks">${notes}</ul>`;
+}
+
 function sideHtml() {
   if (mode === "specialist") {
     const checks = job.checks
-      .map((c) => `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${c.text}</li>`)
+      .map((c) => `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${esc(c.text)}</li>`)
       .join("");
     const rows = job.compare
-      .map((r) => `<tr><td>${r.asked}</td><td>${r.drawn}</td><td>${r.basket}</td></tr>`)
+      .map((r) => `<tr><td>${esc(r.asked)}</td><td>${esc(r.drawn)}</td><td>${esc(r.basket)}</td></tr>`)
       .join("");
     return `
       <h2>Check these before you sign</h2>
@@ -188,6 +261,7 @@ function sideHtml() {
         <thead><tr><th>Asked</th><th>On this drawing</th><th>In the list</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
+      ${draftTableHtml()}
       ${customerBasketHtml()}`;
   }
   return customerBasketHtml();
@@ -215,8 +289,8 @@ function customerBasketHtml() {
     .join("");
   const extraOpen = job.sheetExtras.some((x) => x.code === selected);
   const extras = `<article class="basket-room extras ${extraOpen ? "sel" : ""}" data-extra="1">
-      <h3>On the sheet · not in the request</h3>
-      <p class="need always">Hatch table on this PDF. These were not in the customer Excel, and the quantities were not counted on the floor.</p>
+      <h3>On the sheet · no room</h3>
+      <p class="need always">Hatches from the table, plus symbols the draft could not tie to a room. Not in the customer Excel.</p>
       ${job.sheetExtras
         .map(
           (it) => `<div class="line-block">
@@ -263,6 +337,20 @@ function render(opts = {}) {
         drawMarks();
         zoomTo(m.x, m.y, 2.8);
       }
+    });
+  });
+  $("side").querySelectorAll("[data-filter]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      lineFilter = el.dataset.filter;
+      render({ zoom: false });
+    });
+  });
+  $("side").querySelectorAll("tr[data-line]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selected = el.dataset.room || el.dataset.code || el.dataset.line;
+      render();
     });
   });
   if (opts.zoom !== false) focusSelected();
@@ -436,9 +524,11 @@ function togglePitch() {
 function openModal() {
   $("modalList").innerHTML = `
     <li>Included: 4 rooms with H2 + TP3 (A0-022, 023, 025, 026)</li>
-    <li>Included: A0-006 with TP2 × 3</li>
+    <li>Included: A0-006 with TP2 × 3, WC/basin symbols, elbow taps</li>
     <li>Included as extra / flagged: hatch schedule IL.4–7</li>
-    <li>Blocked: H2 lengths, kit contents, unverified hatch floor</li>`;
+    <li>Blocked: H2 lengths, kit contents, unverified hatch floor, codes with no product</li>
+    <li>Not in the customer list: doors/windows, and H1/H2 on other floors</li>
+    <li>Draft recovered: 63 of 69 API lines (export was cut)</li>`;
   $("sentMsg").hidden = true;
   $("modal").classList.add("on");
 }

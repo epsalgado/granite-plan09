@@ -1,96 +1,1729 @@
 {
   "drawing": "A-40-1-1091.pdf",
   "title": "PLAN 09 — health centre ground floor",
-  "job": "9d01abee754977639447e9fc8feac564aab2da2a370f9ae1a16f6b375834fdf7",
+  "job": "9d01abee754977639447e9fc0feac564aab2da2a370f9ae1a16f6b375834fd7f",
   "packNote": "1 of 11 drawings in the project pack",
+  "apiNote": "63 of 69 lines recovered from Wilmer’s export (end of file was cut).",
   "askedForThisSheet": {
-    "H2_rooms": ["A0-022", "A0-023", "A0-025", "A0-026"],
+    "H2_rooms": [
+      "A0-022",
+      "A0-023",
+      "A0-025",
+      "A0-026"
+    ],
     "H2_building_total": 12
   },
   "quoteHasH2": false,
+  "counts": {
+    "linesRecovered": 63,
+    "linesClaimed": 69,
+    "notesClaimed": 12,
+    "readyToOrder": 0
+  },
   "marks": [
-    { "id": "A0-022", "label": "A0-022", "code": "H2", "x": 64.7, "y": 61.8 },
-    { "id": "A0-023", "label": "A0-023", "code": "H2", "x": 55.6, "y": 60.1 },
-    { "id": "A0-025", "label": "A0-025", "code": "H2", "x": 41.7, "y": 57.7 },
-    { "id": "A0-026", "label": "A0-026", "code": "H2", "x": 33.9, "y": 53.5 },
-    { "id": "A0-006", "label": "A0-006", "code": "TP2", "x": 51.3, "y": 35.7 },
-    { "id": "H2a", "label": "H2", "code": "H2", "room": "A0-026", "x": 37.1, "y": 67.7 },
-    { "id": "H2b", "label": "H2", "code": "H2", "room": "A0-023", "x": 59.8, "y": 64.3 },
-    { "id": "H2c", "label": "H2", "code": "H2", "room": "A0-022", "x": 67.3, "y": 68.0 },
-    { "id": "H2d", "label": "H2", "code": "H2", "room": "A0-025", "x": 48.5, "y": 54.4 },
-    { "id": "TP3a", "label": "TP3", "code": "TP3", "room": "A0-026", "x": 35.9, "y": 51.7 },
-    { "id": "TP3b", "label": "TP3", "code": "TP3", "room": "A0-025", "x": 39.3, "y": 53.7 },
-    { "id": "TP3c", "label": "TP3", "code": "TP3", "room": "A0-023", "x": 58.6, "y": 55.9 },
-    { "id": "TP3d", "label": "TP3", "code": "TP3", "room": "A0-022", "x": 66.1, "y": 59.0 },
-    { "id": "TP2a", "label": "TP2", "code": "TP2", "room": "A0-006", "x": 43.0, "y": 39.1 },
-    { "id": "TP2b", "label": "TP2", "code": "TP2", "room": "A0-006", "x": 46.6, "y": 39.1 },
-    { "id": "TP2c", "label": "TP2", "code": "TP2", "room": "A0-006", "x": 57.9, "y": 39.3 },
-    { "id": "IL.4", "label": "IL.4", "code": "IL.4", "x": 86.0, "y": 47.0 },
-    { "id": "IL.5", "label": "IL.5", "code": "IL.5", "x": 86.0, "y": 48.4 },
-    { "id": "IL.6", "label": "IL.6", "code": "IL.6", "x": 86.0, "y": 49.8 },
-    { "id": "IL.7", "label": "IL.7", "code": "IL.7", "x": 86.0, "y": 51.2 }
-  ],
-  "rooms": [
     {
-      "id": "A0-022",
-      "name": "BVC rum",
-      "items": [
-        { "code": "H2", "text": "Shelf", "qty": 1, "blocker": "No length", "need": "The floor plan marks an H2 shelf. Length and spec are on the room description — that file was not uploaded." },
-        { "code": "TP3", "text": "Wash-place kit", "qty": 1, "blocker": "Kit unknown", "need": "TP3 is a package code. What is inside it comes from the type standard, which is not in this upload." }
-      ]
+      "id": "A0-026",
+      "label": "A0-026",
+      "code": "room",
+      "x": 33.9,
+      "y": 53.5
+    },
+    {
+      "id": "A0-025",
+      "label": "A0-025",
+      "code": "room",
+      "x": 41.7,
+      "y": 57.7
     },
     {
       "id": "A0-023",
-      "name": "BVC rum",
+      "label": "A0-023",
+      "code": "room",
+      "x": 55.6,
+      "y": 60.1
+    },
+    {
+      "id": "A0-022",
+      "label": "A0-022",
+      "code": "room",
+      "x": 64.7,
+      "y": 61.8
+    },
+    {
+      "id": "A0-006",
+      "label": "A0-006",
+      "code": "room",
+      "x": 51.3,
+      "y": 35.7
+    },
+    {
+      "id": "A0-004",
+      "label": "A0-004",
+      "code": "room",
+      "x": 29.1,
+      "y": 24.1
+    },
+    {
+      "id": "A0-024",
+      "label": "A0-024",
+      "code": "room",
+      "x": 50.0,
+      "y": 49.7
+    },
+    {
+      "id": "A0-002",
+      "label": "A0-002",
+      "code": "room",
+      "x": 22.6,
+      "y": 38.2
+    },
+    {
+      "id": "A0-008a",
+      "label": "A0-008a",
+      "code": "room",
+      "x": 69.4,
+      "y": 34.0
+    },
+    {
+      "id": "A0-009a",
+      "label": "A0-009a",
+      "code": "room",
+      "x": 69.8,
+      "y": 20.3
+    },
+    {
+      "id": "A0-009b",
+      "label": "A0-009b",
+      "code": "room",
+      "x": 69.8,
+      "y": 25.4
+    },
+    {
+      "id": "A0-027",
+      "label": "A0-027",
+      "code": "room",
+      "x": 28.5,
+      "y": 55.2
+    },
+    {
+      "id": "A0-028",
+      "label": "A0-028",
+      "code": "room",
+      "x": 28.5,
+      "y": 66.8
+    },
+    {
+      "id": "A0-030",
+      "label": "A0-030",
+      "code": "room",
+      "x": 20.4,
+      "y": 69.5
+    },
+    {
+      "id": "A0-029",
+      "label": "A0-029",
+      "code": "room",
+      "x": 20.7,
+      "y": 82.4
+    },
+    {
+      "id": "A0-005",
+      "label": "A0-005",
+      "code": "room",
+      "x": 22.7,
+      "y": 23.7
+    },
+    {
+      "id": "H2_0",
+      "label": "H2",
+      "code": "H2",
+      "x": 37.1,
+      "y": 67.7
+    },
+    {
+      "id": "H2_1",
+      "label": "H2",
+      "code": "H2",
+      "x": 59.8,
+      "y": 64.3
+    },
+    {
+      "id": "H2_2",
+      "label": "H2",
+      "code": "H2",
+      "x": 67.3,
+      "y": 68.0
+    },
+    {
+      "id": "H2_3",
+      "label": "H2",
+      "code": "H2",
+      "x": 48.5,
+      "y": 54.4
+    },
+    {
+      "id": "TP3_0",
+      "label": "TP3",
+      "code": "TP3",
+      "x": 35.9,
+      "y": 51.7
+    },
+    {
+      "id": "TP3_1",
+      "label": "TP3",
+      "code": "TP3",
+      "x": 39.3,
+      "y": 53.7
+    },
+    {
+      "id": "TP3_2",
+      "label": "TP3",
+      "code": "TP3",
+      "x": 66.1,
+      "y": 59.0
+    },
+    {
+      "id": "TP3_3",
+      "label": "TP3",
+      "code": "TP3",
+      "x": 58.6,
+      "y": 55.9
+    },
+    {
+      "id": "TP2_0",
+      "label": "TP2",
+      "code": "TP2",
+      "x": 43.0,
+      "y": 39.1
+    },
+    {
+      "id": "TP2_1",
+      "label": "TP2",
+      "code": "TP2",
+      "x": 46.6,
+      "y": 39.1
+    },
+    {
+      "id": "TP2_2",
+      "label": "TP2",
+      "code": "TP2",
+      "x": 57.9,
+      "y": 39.3
+    },
+    {
+      "id": "S1_0",
+      "label": "S1",
+      "code": "S1",
+      "x": 59.8,
+      "y": 68.2
+    },
+    {
+      "id": "S1_1",
+      "label": "S1",
+      "code": "S1",
+      "x": 38.4,
+      "y": 64.5
+    },
+    {
+      "id": "S1_2",
+      "label": "S1",
+      "code": "S1",
+      "x": 26.9,
+      "y": 81.9
+    },
+    {
+      "id": "AK_2",
+      "label": "AK",
+      "code": "AK",
+      "x": 30.5,
+      "y": 57.7
+    },
+    {
+      "id": "AK_3",
+      "label": "AK",
+      "code": "AK",
+      "x": 26.9,
+      "y": 64.9
+    },
+    {
+      "id": "AK_4",
+      "label": "AK",
+      "code": "AK",
+      "x": 30.5,
+      "y": 66.9
+    },
+    {
+      "id": "AK_5",
+      "label": "AK",
+      "code": "AK",
+      "x": 31.0,
+      "y": 78.1
+    },
+    {
+      "id": "IL.4",
+      "label": "IL.4",
+      "code": "IL.4",
+      "x": 86.0,
+      "y": 47.0
+    },
+    {
+      "id": "IL.5",
+      "label": "IL.5",
+      "code": "IL.5",
+      "x": 86.0,
+      "y": 48.4
+    },
+    {
+      "id": "IL.6",
+      "label": "IL.6",
+      "code": "IL.6",
+      "x": 86.0,
+      "y": 49.8
+    },
+    {
+      "id": "IL.7",
+      "label": "IL.7",
+      "code": "IL.7",
+      "x": 86.0,
+      "y": 51.2
+    }
+  ],
+  "rooms": [
+    {
+      "id": "A0-026",
+      "name": "BEH RUM",
       "items": [
-        { "code": "H2", "text": "Shelf", "qty": 1, "blocker": "No length", "need": "Same gap as the other H2 rooms: the shelf is drawn, the length is not." },
-        { "code": "TP3", "text": "Wash-place kit", "qty": 1, "blocker": "Kit unknown", "need": "Need the type standard before this can become a product list." }
+        {
+          "code": "TP3",
+          "text": "Wash-place kit",
+          "qty": 1,
+          "blocker": "Kit unknown",
+          "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+          "lineId": "L06"
+        },
+        {
+          "code": "H2",
+          "text": "Shelf",
+          "qty": 1,
+          "blocker": "No length",
+          "need": "The floor plan marks the shelf. Length and spec are on the room description — that file was not uploaded.",
+          "lineId": "L10"
+        }
       ]
     },
     {
       "id": "A0-025",
       "name": "BVC",
       "items": [
-        { "code": "H2", "text": "Shelf", "qty": 1, "blocker": "No length", "need": "The floor plan marks an H2 shelf. Length and spec are on the room description — that file was not uploaded." },
-        { "code": "TP3", "text": "Wash-place kit", "qty": 1, "blocker": "Kit unknown", "need": "TP3 is a package code. What is inside it comes from the type standard, which is not in this upload." }
+        {
+          "code": "TP3",
+          "text": "Wash-place kit",
+          "qty": 1,
+          "blocker": "Kit unknown",
+          "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+          "lineId": "L07"
+        },
+        {
+          "code": "H2",
+          "text": "Shelf",
+          "qty": 1,
+          "blocker": "No length",
+          "need": "The floor plan marks the shelf. Length and spec are on the room description — that file was not uploaded.",
+          "lineId": "L11"
+        },
+        {
+          "code": "S1",
+          "text": "S1",
+          "qty": 1,
+          "blocker": "No product type",
+          "need": "The draft has a mark but no product type. Do not invent an article.",
+          "lineId": "L14"
+        },
+        {
+          "code": "—",
+          "text": "Unidentified articulated arm with circular head",
+          "qty": 1,
+          "blocker": "No product type",
+          "need": "The draft has a mark but no product type. Do not invent an article.",
+          "lineId": "L34"
+        }
       ]
     },
     {
-      "id": "A0-026",
-      "name": "BEH RUM",
+      "id": "A0-023",
+      "name": "BVC rum",
       "items": [
-        { "code": "H2", "text": "Shelf", "qty": 1, "blocker": "No length", "need": "The floor plan marks an H2 shelf. Length and spec are on the room description — that file was not uploaded." },
-        { "code": "TP3", "text": "Wash-place kit", "qty": 1, "blocker": "Kit unknown", "need": "TP3 is a package code. What is inside it comes from the type standard, which is not in this upload." }
+        {
+          "code": "TP3",
+          "text": "Wash-place kit",
+          "qty": 1,
+          "blocker": "Kit unknown",
+          "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+          "lineId": "L08"
+        },
+        {
+          "code": "H2",
+          "text": "Shelf",
+          "qty": 1,
+          "blocker": "No length",
+          "need": "The floor plan marks the shelf. Length and spec are on the room description — that file was not uploaded.",
+          "lineId": "L12"
+        },
+        {
+          "code": "S1",
+          "text": "S1",
+          "qty": 1,
+          "blocker": "No product type",
+          "need": "The draft has a mark but no product type. Do not invent an article.",
+          "lineId": "L15"
+        },
+        {
+          "code": "—",
+          "text": "Unidentified articulated arm with circular head",
+          "qty": 1,
+          "blocker": "No product type",
+          "need": "The draft has a mark but no product type. Do not invent an article.",
+          "lineId": "L35"
+        }
+      ]
+    },
+    {
+      "id": "A0-022",
+      "name": "BVC rum",
+      "items": [
+        {
+          "code": "TP3",
+          "text": "Wash-place kit",
+          "qty": 1,
+          "blocker": "Kit unknown",
+          "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+          "lineId": "L09"
+        },
+        {
+          "code": "H2",
+          "text": "Shelf",
+          "qty": 1,
+          "blocker": "No length",
+          "need": "The floor plan marks the shelf. Length and spec are on the room description — that file was not uploaded.",
+          "lineId": "L13"
+        }
       ]
     },
     {
       "id": "A0-006",
       "name": "ÖBEH / AVLAST",
       "items": [
-        { "code": "TP2", "text": "Wash-place kit", "qty": 3, "blocker": "Kit unknown", "need": "Three wash-places in this room. TP2 contents also need the type standard — not a guess from the floor plan." }
+        {
+          "code": "TP2",
+          "text": "Wash-place kit",
+          "qty": 3,
+          "blocker": "Kit unknown",
+          "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+          "lineId": "L05"
+        }
+      ]
+    },
+    {
+      "id": "A0-004",
+      "name": "WC",
+      "items": [
+        {
+          "code": "—",
+          "text": "WC-stol",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L19"
+        },
+        {
+          "code": "—",
+          "text": "Tvättställ",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L20"
+        },
+        {
+          "code": "—",
+          "text": "Stödarm",
+          "qty": 2,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L21"
+        }
+      ]
+    },
+    {
+      "id": "A0-024",
+      "name": "WC / RWC",
+      "items": [
+        {
+          "code": "—",
+          "text": "WC-stol",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L22"
+        },
+        {
+          "code": "—",
+          "text": "Tvättställ",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L23"
+        },
+        {
+          "code": "—",
+          "text": "Stödarm",
+          "qty": 2,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L24"
+        }
+      ]
+    },
+    {
+      "id": "A0-002",
+      "name": "Slop sink",
+      "items": [
+        {
+          "code": "—",
+          "text": "Utslagsback",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L25"
+        }
+      ]
+    },
+    {
+      "id": "A0-008a",
+      "name": "WC",
+      "items": [
+        {
+          "code": "—",
+          "text": "WC-stol",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L30"
+        },
+        {
+          "code": "—",
+          "text": "Tvättställ",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L31"
+        }
+      ]
+    },
+    {
+      "id": "A0-009a",
+      "name": "WC",
+      "items": [
+        {
+          "code": "—",
+          "text": "WC-stol",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L26"
+        },
+        {
+          "code": "—",
+          "text": "Tvättställ",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L27"
+        }
+      ]
+    },
+    {
+      "id": "A0-009b",
+      "name": "WC",
+      "items": [
+        {
+          "code": "—",
+          "text": "WC-stol",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L28"
+        },
+        {
+          "code": "—",
+          "text": "Tvättställ",
+          "qty": 1,
+          "blocker": "No type code",
+          "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+          "lineId": "L29"
+        }
+      ]
+    },
+    {
+      "id": "A0-027",
+      "name": "Near entrance",
+      "items": [
+        {
+          "code": "AK",
+          "text": "Elbow tap",
+          "qty": 1,
+          "blocker": "Check spec",
+          "need": "Elbow tap is drawn. Confirm article and whether it belongs in this fittings quote.",
+          "lineId": "L16"
+        }
+      ]
+    },
+    {
+      "id": "A0-028",
+      "name": "Entrance",
+      "items": [
+        {
+          "code": "AK",
+          "text": "Elbow tap",
+          "qty": 2,
+          "blocker": "Check spec",
+          "need": "Elbow tap is drawn. Confirm article and whether it belongs in this fittings quote.",
+          "lineId": "L17"
+        }
+      ]
+    },
+    {
+      "id": "A0-030",
+      "name": "Amalgam / ELC",
+      "items": [
+        {
+          "code": "EFT20.1V",
+          "text": "EFT20.1V, ELC",
+          "qty": 1,
+          "blocker": "No product type",
+          "need": "The draft has a mark but no product type. Do not invent an article.",
+          "lineId": "L48"
+        }
+      ]
+    },
+    {
+      "id": "A0-029",
+      "name": "Compressor",
+      "items": [
+        {
+          "code": "UDS11.1V",
+          "text": "UDS11.1V, KOMPRESSORRUM",
+          "qty": 1,
+          "blocker": "No product type",
+          "need": "The draft has a mark but no product type. Do not invent an article.",
+          "lineId": "L54"
+        }
       ]
     }
   ],
   "sheetExtras": [
-    { "code": "IL.4", "text": "Inspection hatch 300×300", "qty": 2, "need": "From the hatch table on this sheet, not counted on the floor." },
-    { "code": "IL.5", "text": "Frame / hatch UNI INB", "qty": 16, "need": "Table says 16. PLAN 09 is the source sheet — not proof they all install on this floor." },
-    { "code": "IL.6", "text": "Vent cabinet hatch 250×250", "qty": 1, "need": "From the hatch table, not a room count." },
-    { "code": "IL.7", "text": "Inspection hatch 300×300", "qty": 2, "need": "From the hatch table, not a room count." }
+    {
+      "code": "IL.4",
+      "text": "HILA Inspektionslucka 300x300 mm",
+      "qty": 2,
+      "need": "From the hatch table on this sheet, not counted on the floor.",
+      "kind": "hatch",
+      "lineId": "L01"
+    },
+    {
+      "code": "IL.5",
+      "text": "IL.5 LK Ram/lucka UNI INB UNI 550 590 x 580 x 26 mm",
+      "qty": 16,
+      "need": "From the hatch table on this sheet, not counted on the floor.",
+      "kind": "hatch",
+      "lineId": "L02"
+    },
+    {
+      "code": "IL.6",
+      "text": "LK Ventilskåp med tillhörande lucka 250 x 250 X 95 mm",
+      "qty": 1,
+      "need": "From the hatch table on this sheet, not counted on the floor.",
+      "kind": "hatch",
+      "lineId": "L03"
+    },
+    {
+      "code": "IL.7",
+      "text": "IL.7 HILA Inspektionslucka 300x300 mm",
+      "qty": 2,
+      "need": "From the hatch table on this sheet, not counted on the floor.",
+      "kind": "hatch",
+      "lineId": "L04"
+    },
+    {
+      "code": "AK",
+      "text": "ARMBÅGSKONTAKT outside entrance",
+      "qty": 1,
+      "need": "Elbow tap is drawn. Confirm article and whether it belongs in this fittings quote.",
+      "kind": "tap",
+      "lineId": "L18"
+    },
+    {
+      "code": "—",
+      "text": "WC-stol, partially shown east of A0-008a",
+      "qty": 1,
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "kind": "sanitary",
+      "lineId": "L32"
+    },
+    {
+      "code": "—",
+      "text": "Tvättställ, partially shown east of A0-008a",
+      "qty": 1,
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "kind": "sanitary",
+      "lineId": "L33"
+    }
+  ],
+  "otherFloors": [
+    {
+      "code": "H1",
+      "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "room": "A1-029",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "lineId": "L57"
+    },
+    {
+      "code": "H1",
+      "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "room": "A1-045",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "lineId": "L58"
+    },
+    {
+      "code": "H1",
+      "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "room": "A2-030",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "lineId": "L59"
+    },
+    {
+      "code": "H1",
+      "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "room": "A3-035",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "lineId": "L60"
+    },
+    {
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "room": "A1-016",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "lineId": "L61"
+    },
+    {
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "room": "A1-017",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "lineId": "L62"
+    },
+    {
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "room": "A1-020",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "lineId": "L63"
+    }
+  ],
+  "lines": [
+    {
+      "id": "L01",
+      "code": "IL.4",
+      "text": "HILA Inspektionslucka 300x300 mm",
+      "qty": 2,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "hatch",
+      "blocker": "Table qty",
+      "need": "From the hatch table on this sheet, not counted on the floor.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L02",
+      "code": "IL.5",
+      "text": "IL.5 LK Ram/lucka UNI INB UNI 550 590 x 580 x 26 mm",
+      "qty": 16,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "hatch",
+      "blocker": "Table qty",
+      "need": "From the hatch table on this sheet, not counted on the floor.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L03",
+      "code": "IL.6",
+      "text": "LK Ventilskåp med tillhörande lucka 250 x 250 X 95 mm",
+      "qty": 1,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "hatch",
+      "blocker": "Table qty",
+      "need": "From the hatch table on this sheet, not counted on the floor.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L04",
+      "code": "IL.7",
+      "text": "IL.7 HILA Inspektionslucka 300x300 mm",
+      "qty": 2,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "hatch",
+      "blocker": "Table qty",
+      "need": "From the hatch table on this sheet, not counted on the floor.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L05",
+      "code": "TP2",
+      "text": "TVÄTTPLATSUTRUSTNING",
+      "qty": 3,
+      "unit": "st",
+      "room": "A0-006",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "kit",
+      "blocker": "Kit unknown",
+      "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L06",
+      "code": "TP3",
+      "text": "TVÄTTPLATSUTRUSTNING",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-026",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "kit",
+      "blocker": "Kit unknown",
+      "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L07",
+      "code": "TP3",
+      "text": "TVÄTTPLATSUTRUSTNING",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-025",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "kit",
+      "blocker": "Kit unknown",
+      "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L08",
+      "code": "TP3",
+      "text": "TVÄTTPLATSUTRUSTNING",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-023",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "kit",
+      "blocker": "Kit unknown",
+      "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L09",
+      "code": "TP3",
+      "text": "TVÄTTPLATSUTRUSTNING",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-022",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "kit",
+      "blocker": "Kit unknown",
+      "need": "This is a package code. What is inside it comes from the type standard, which is not in this upload.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L10",
+      "code": "H2",
+      "text": "Hylla H2; length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-026",
+      "floor": "PLAN 09",
+      "scope": "drawings and request",
+      "kind": "shelf",
+      "blocker": "No length",
+      "need": "The floor plan marks the shelf. Length and spec are on the room description — that file was not uploaded.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L11",
+      "code": "H2",
+      "text": "Hylla H2; length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-025",
+      "floor": "PLAN 09",
+      "scope": "drawings and request",
+      "kind": "shelf",
+      "blocker": "No length",
+      "need": "The floor plan marks the shelf. Length and spec are on the room description — that file was not uploaded.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L12",
+      "code": "H2",
+      "text": "Hylla H2; length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-023",
+      "floor": "PLAN 09",
+      "scope": "drawings and request",
+      "kind": "shelf",
+      "blocker": "No length",
+      "need": "The floor plan marks the shelf. Length and spec are on the room description — that file was not uploaded.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L13",
+      "code": "H2",
+      "text": "Hylla H2; length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-022",
+      "floor": "PLAN 09",
+      "scope": "drawings and request",
+      "kind": "shelf",
+      "blocker": "No length",
+      "need": "The floor plan marks the shelf. Length and spec are on the room description — that file was not uploaded.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L14",
+      "code": "S1",
+      "text": "S1; description unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-025",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "unknown",
+      "blocker": "No product type",
+      "need": "The draft has a mark but no product type. Do not invent an article.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L15",
+      "code": "S1",
+      "text": "S1; description unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-023",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "unknown",
+      "blocker": "No product type",
+      "need": "The draft has a mark but no product type. Do not invent an article.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L16",
+      "code": "AK",
+      "text": "ARMBÅGSKONTAKT",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-027",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "tap",
+      "blocker": "Check spec",
+      "need": "Elbow tap is drawn. Confirm article and whether it belongs in this fittings quote.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L17",
+      "code": "AK",
+      "text": "ARMBÅGSKONTAKT",
+      "qty": 2,
+      "unit": "st",
+      "room": "A0-028",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "tap",
+      "blocker": "Check spec",
+      "need": "Elbow tap is drawn. Confirm article and whether it belongs in this fittings quote.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L18",
+      "code": "AK",
+      "text": "ARMBÅGSKONTAKT outside entrance",
+      "qty": 1,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "tap",
+      "blocker": "Check spec",
+      "need": "Elbow tap is drawn. Confirm article and whether it belongs in this fittings quote.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L19",
+      "code": null,
+      "text": "WC-stol",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-004",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L20",
+      "code": null,
+      "text": "Tvättställ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-004",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L21",
+      "code": null,
+      "text": "Stödarm",
+      "qty": 2,
+      "unit": "st",
+      "room": "A0-004",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L22",
+      "code": null,
+      "text": "WC-stol",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-024",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L23",
+      "code": null,
+      "text": "Tvättställ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-024",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L24",
+      "code": null,
+      "text": "Stödarm",
+      "qty": 2,
+      "unit": "st",
+      "room": "A0-024",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L25",
+      "code": null,
+      "text": "Utslagsback",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-002",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L26",
+      "code": null,
+      "text": "WC-stol",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-009a",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L27",
+      "code": null,
+      "text": "Tvättställ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-009a",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L28",
+      "code": null,
+      "text": "WC-stol",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-009b",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L29",
+      "code": null,
+      "text": "Tvättställ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-009b",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L30",
+      "code": null,
+      "text": "WC-stol",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-008a",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L31",
+      "code": null,
+      "text": "Tvättställ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-008a",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L32",
+      "code": null,
+      "text": "WC-stol, partially shown east of A0-008a",
+      "qty": 1,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L33",
+      "code": null,
+      "text": "Tvättställ, partially shown east of A0-008a",
+      "qty": 1,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "sanitary",
+      "blocker": "No type code",
+      "need": "A sanitary symbol is drawn, but there is no type code. Need the setting-out / type standard.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L34",
+      "code": null,
+      "text": "Unidentified articulated arm with circular head; product type to be confirmed",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-025",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "unknown",
+      "blocker": "No product type",
+      "need": "The draft has a mark but no product type. Do not invent an article.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L35",
+      "code": null,
+      "text": "Unidentified articulated arm with circular head; product type to be confirmed",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-023",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "unknown",
+      "blocker": "No product type",
+      "need": "The draft has a mark but no product type. Do not invent an article.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L36",
+      "code": "DT9.4H",
+      "text": "DÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-005",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L37",
+      "code": "DT9.4H",
+      "text": "DÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-002",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L38",
+      "code": "DT10.1H",
+      "text": "DÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-004",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L39",
+      "code": "DT10.8V",
+      "text": "DÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-006",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L40",
+      "code": "DT9.2H",
+      "text": "DÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-009a",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L41",
+      "code": "DT9.2V",
+      "text": "DÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-009b",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L42",
+      "code": "DT9.2H",
+      "text": "DÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-008a",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L43",
+      "code": "DT9.2H",
+      "text": "DÖRR AV TRÄ at right match line",
+      "qty": 1,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L44",
+      "code": "PDT13.2V",
+      "text": "PARDÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-026",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L45",
+      "code": "PDT13.2V",
+      "text": "PARDÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-025",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L46",
+      "code": "PDT13.2H",
+      "text": "PARDÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-023",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L47",
+      "code": "DT10.5H",
+      "text": "DÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-024",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L48",
+      "code": "EFT20.1V",
+      "text": "EFT20.1V, ELC; description unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-030",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "unknown",
+      "blocker": "No product type",
+      "need": "The draft has a mark but no product type. Do not invent an article.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L49",
+      "code": "DT6.1V",
+      "text": "DÖRR AV TRÄ, DATA",
+      "qty": 1,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L50",
+      "code": "PDT15.2V",
+      "text": "PARDÖRR AV TRÄ",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-022",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L51",
+      "code": "IMP11.1H",
+      "text": "INVÄNDIGT METALLPARTI",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-028",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "frame",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L52",
+      "code": "UMP11.2V",
+      "text": "UTVÄNDIGT METALLPARTI",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-028",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "frame",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L53",
+      "code": "DT10.11V",
+      "text": "DÖRR AV TRÄ, AMALGAMAVSKILJNING",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-030",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "door",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L54",
+      "code": "UDS11.1V",
+      "text": "UDS11.1V, KOMPRESSORRUM; description unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-029",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "unknown",
+      "blocker": "No product type",
+      "need": "The draft has a mark but no product type. Do not invent an article.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L55",
+      "code": "FÖ12.1V",
+      "text": "FÖNSTER ÖPPNINGSBART",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-026",
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "window",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L56",
+      "code": "FÖ12.1V",
+      "text": "FÖNSTER ÖPPNINGSBART at right match line",
+      "qty": 1,
+      "unit": "st",
+      "room": null,
+      "floor": "PLAN 09",
+      "scope": "drawings",
+      "kind": "window",
+      "blocker": "Not fittings",
+      "need": "Read from the drawing. Usually another trade — not Ahlsell sakvaror.",
+      "source": "A-40-1-1091.pdf"
+    },
+    {
+      "id": "L57",
+      "code": "H1",
+      "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-029",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L58",
+      "code": "H1",
+      "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-045",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L59",
+      "code": "H1",
+      "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A2-030",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L60",
+      "code": "H1",
+      "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A3-035",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L61",
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-016",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L62",
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-017",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L63",
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-020",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    }
+  ],
+  "notes": [
+    "Only A-40-1-1091.pdf page 1 was in this job. The other 10 drawings were not uploaded.",
+    "Room description, type standard, customer Excel and the old quote were not supplied to the API.",
+    "The four H2 rooms named for this sheet (A0-022, 023, 025, 026) match the request. Lengths are missing.",
+    "Shelf lines from the request on other floors (H1 / extra H2) are provisional — not on PLAN 09.",
+    "IL hatch quantities come from the schedule on this sheet, not from counting each hatch on the floor. PLAN 09 is the sheet name, not proof of the install floor.",
+    "Some sanitary symbols have no type code. They were not merged just because the code is empty.",
+    "Partially shown WC / basin east of A0-008a were counted once, with no room.",
+    "S1, EFT20.1V and UDS11.1V have no description. Do not invent a product.",
+    "Uncoded articulated-arm symbols in BVC rooms stay unidentified. Confirm whether they belong to another coded assembly.",
+    "The copy of this result was cut at the end: 63 of 69 lines recovered. The last request-only H2 rooms and the raw notes list are incomplete."
   ],
   "checks": [
-    { "id": "pack", "ok": false, "text": "Only this PDF was uploaded. Ten other drawings, the room description and the type standard are missing." },
-    { "id": "h2match", "ok": true, "text": "The four H2 rooms in the email are on this plan (A0-022, 023, 025, 026)." },
-    { "id": "h2len", "ok": false, "text": "H2 is drawn, but length is not on this floor plan." },
-    { "id": "kits", "ok": false, "text": "TP3 / TP2 are package codes. Contents need the type standard." },
-    { "id": "il", "ok": false, "text": "Hatch quantities come from a table on the sheet, not from counting rooms." },
-    { "id": "quote", "ok": false, "text": "The customer asked for H2. The old specialist quote never listed H2." },
-    { "id": "scope", "ok": true, "text": "Hook rails, curtains and other floors stay out of this basket." },
-    { "id": "draft", "ok": false, "text": "The raw API draft also has symbols with no room and codes with no product type — do not treat those as ready." }
+    {
+      "id": "pack",
+      "ok": false,
+      "text": "Only this PDF was uploaded. Ten other drawings, the room description and the type standard are missing."
+    },
+    {
+      "id": "h2match",
+      "ok": true,
+      "text": "The four H2 rooms in the email are on this plan (A0-022, 023, 025, 026)."
+    },
+    {
+      "id": "h2len",
+      "ok": false,
+      "text": "H2 is drawn, but length is not on this floor plan."
+    },
+    {
+      "id": "kits",
+      "ok": false,
+      "text": "TP3 / TP2 are package codes. Contents need the type standard."
+    },
+    {
+      "id": "il",
+      "ok": false,
+      "text": "Hatch quantities come from a table on the sheet, not from counting rooms."
+    },
+    {
+      "id": "nocode",
+      "ok": false,
+      "text": "17 lines have no type code (WC, basin, support arms, unidentified arms)."
+    },
+    {
+      "id": "noroom",
+      "ok": false,
+      "text": "10 lines have no room (hatches, match-line items, one elbow tap)."
+    },
+    {
+      "id": "unknown",
+      "ok": false,
+      "text": "S1, EFT20.1V, UDS11.1V and two articulated arms have no product type."
+    },
+    {
+      "id": "quote",
+      "ok": false,
+      "text": "The customer asked for H2. The old specialist quote never listed H2."
+    },
+    {
+      "id": "doors",
+      "ok": true,
+      "text": "Doors, windows and metal frames are in the draft but kept out of the customer basket (other trade)."
+    },
+    {
+      "id": "other",
+      "ok": true,
+      "text": "Request-only H1/H2 on other floors stay out of this basket."
+    },
+    {
+      "id": "trunc",
+      "ok": false,
+      "text": "Export was cut: 63 of 69 lines recovered. Do not treat the missing 6 as empty."
+    }
   ],
   "compare": [
-    { "asked": "4 H2 rooms named for this sheet", "drawn": "4 found here", "basket": "Listed — length missing" },
-    { "asked": "12 H2 in the whole-building Excel", "drawn": "8 sit on other plans", "basket": "Not this floor" },
-    { "asked": "Wash-places in those rooms", "drawn": "4× TP3 + 3× TP2", "basket": "Listed — kit contents missing" },
-    { "asked": "Hatches (not in the Excel)", "drawn": "IL.4–7 table on this sheet", "basket": "Shown as extra — not counted on the floor" }
+    {
+      "asked": "4 H2 rooms named for this sheet",
+      "drawn": "4 found here",
+      "basket": "Listed — length missing"
+    },
+    {
+      "asked": "12 H2 in the whole-building Excel",
+      "drawn": "4 on this plan; more only in the request",
+      "basket": "Other floors hidden from customer"
+    },
+    {
+      "asked": "Wash-places in those rooms",
+      "drawn": "4× TP3 + 3× TP2",
+      "basket": "Listed — kit contents missing"
+    },
+    {
+      "asked": "Hatches (not in the Excel)",
+      "drawn": "IL.4–7 table on this sheet",
+      "basket": "Shown as extra — not counted on the floor"
+    },
+    {
+      "asked": "WC / basin symbols",
+      "drawn": "Several rooms + 2 with no room",
+      "basket": "Listed as symbols — no type code"
+    },
+    {
+      "asked": "Doors / windows",
+      "drawn": "Many DT / PDT / FÖ marks",
+      "basket": "Specialist only — not fittings"
+    }
   ]
 }

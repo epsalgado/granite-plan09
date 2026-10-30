@@ -592,6 +592,37 @@ table.compare th, table.compare td {
 }
 table.compare th { background: var(--navy); color: #fff; }
 
+.draft-meta { margin: 0 0 0.45rem; font-size: 0.78rem; color: #ffd7b0; }
+.filters { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0 0 0.55rem; }
+.filter-btn {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 0.28rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+.filter-btn.active { background: var(--amber); border-color: var(--amber); }
+.draft-wrap { overflow: auto; max-height: 320px; margin-bottom: 1rem; border-radius: 10px; }
+table.draft {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  background: #fff;
+  color: var(--ink);
+}
+table.draft th, table.draft td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.35rem 0.4rem;
+  text-align: left;
+  vertical-align: top;
+}
+table.draft th { background: var(--navy); color: #fff; position: sticky; top: 0; }
+table.draft tr { cursor: pointer; }
+table.draft tr.sel td { background: #fff1e4; }
+table.draft .blocker { display: inline-block; }
+
 .modal {
   display: none;
   position: fixed;
