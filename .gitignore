@@ -2,10 +2,12 @@ img/labels.json
 api.txt
 .py-tts/
 .venv-tts/
+.venv-edge/
 files/demo-video/frames/*.mp4
 files/demo-video/frames/concat.txt
 files/demo-video/cut-work/
 files/demo-video/cut-preview/
+files/demo-video/granite-plan09-dream-silent.mp4
 .DS_Store
 *.log
 .idea/
