@@ -17,18 +17,26 @@ SRC = ROOT / "data" / "A-40-1-1091.pdf"
 JOB = ROOT / "data" / "job.json"
 OUT = ROOT / "files" / "granite-plan09-FIRST-CRACK-for-Revu.pdf"
 
-# Codes we can place on this sheet (text is in the PDF). Skip doors / other trade.
-PLACE = ["H2", "TP3", "TP2", "S1", "IL.4", "IL.5", "IL.6", "IL.7", "AK"]
 COLOUR = {
     "H2": (0.91, 0.47, 0.13),
     "TP3": (0.12, 0.78, 0.78),
     "TP2": (0.12, 0.78, 0.78),
     "S1": (0.95, 0.78, 0.22),
     "AK": (0.72, 0.45, 0.95),
-    "IL.4": (0.55, 0.58, 0.62),
-    "IL.5": (0.55, 0.58, 0.62),
-    "IL.6": (0.55, 0.58, 0.62),
-    "IL.7": (0.55, 0.58, 0.62),
+    "NEED": (0.90, 0.22, 0.16),
+    "CHECK": (0.91, 0.47, 0.13),
+    "OTHER": (0.45, 0.50, 0.55),
+    "DOOR": (0.45, 0.50, 0.55),
+}
+NOTE_FOCUS = {
+    "h2match": "A0-026",
+    "h2len": "A0-026",
+    "kits": "A0-025",
+    "il": None,
+    "unknown": "A0-025",
+    "quote": "A0-026",
+    "nocode": "A0-004",
+    "noroom": None,
 }
 PAD = 8.0
 LEGEND_Y = 500.0
@@ -87,10 +95,6 @@ def other_lines(job: dict):
     return [ln for ln in job.get("lines") or [] if (ln.get("floor") or "") != "PLAN 09"]
 
 
-def boxed_line(ln: dict) -> bool:
-    return str(ln.get("code") or "").upper() in {c.upper() for c in PLACE}
-
-
 def add_inventory(doc: fitz.Document, job: dict, n_marks: int) -> None:
     page = doc.new_page(width=842, height=595)
     page.draw_rect(page.rect, color=(0.02, 0.15, 0.16), fill=(0.02, 0.15, 0.16))
@@ -106,63 +110,42 @@ def add_inventory(doc: fitz.Document, job: dict, n_marks: int) -> None:
             align=fitz.TEXT_ALIGN_LEFT,
         )
 
-    p09 = plan09_lines(job)
-    boxed = [ln for ln in p09 if boxed_line(ln)]
-    nocode = [ln for ln in p09 if not boxed_line(ln) and not (ln.get("code") or "").strip()]
-    other_trade = [ln for ln in p09 if (ln.get("kind") or "") in ("door", "window", "frame")]
-    leftover = [
-        ln
-        for ln in p09
-        if not boxed_line(ln)
-        and (ln.get("code") or "").strip()
-        and (ln.get("kind") or "") not in ("door", "window", "frame")
-    ]
-    other = other_lines(job)
-    notes = job.get("checks") or []
-    missing = max(0, int((job.get("counts") or {}).get("linesClaimed") or 69) - len(job.get("lines") or []))
-
-    put((40, 32, 800, 58), "FULL DRAFT  ·  what is on the PDF and what is not", 16, (1, 1, 1), True)
+    put((40, 32, 800, 70), "MARKUPS LIST  ·  how to read the first crack", 16, (1, 1, 1), True)
     put(
-        (40, 58, 800, 88),
-        f"API claimed 69 lines · {len(job.get('lines') or [])} recovered · {n_marks} boxes on page 3. "
-        "This page stays with you in Revu so the missing lines are not a mystery.",
-        10,
+        (40, 72, 800, 120),
+        f"All {n_marks} draft items are already in Revu’s Markups List. "
+        "You do not copy them in. Filter by Subject. Fill in NEED and CHECK. You still sign.",
+        12,
         (0.85, 1, 1),
     )
-
-    on_pdf = (
-        "ON PAGE 3 — boxed, Author Granite\n"
-        f"{n_marks} boxes  ·  {len(boxed)} draft lines\n"
-        "H2 shelves (4)  ·  TP3 kits (4)  ·  TP2 kits (3)\n"
-        "S1 (3)  ·  elbow taps AK (4)  ·  hatch table IL.4–7 (4)\n"
-        "Filter Markups List by Subject. Delete wrong. Add missing."
-    )
-    off_pdf = (
-        "NOT BOXED — still part of the draft\n"
-        f"{len(nocode)} lines with no type code (WC, basin, support arms).\n"
-        f"{len(other_trade)} doors / windows / metal frames (other trade).\n"
-        f"{len(leftover)} weak marks (arms, EFT, UDS).\n"
-        f"{len(other)} lines on other floors (not this sheet).\n"
-        f"{missing} lines cut from the API export.\n"
-        f"{len(notes)} draft notes — also in Granite."
-    )
-    put((40, 96, 400, 250), on_pdf, 11, (0.72, 1, 0.86))
-    put((420, 96, 802, 250), off_pdf, 11, (1, 0.85, 0.7))
-
-    note_txt = "DRAFT NOTES — check these first\n" + "\n".join(
-        ("OK  " if n.get("ok") else "!!  ") + (n.get("text") or "") for n in notes
-    )
-    put((40, 258, 802, 430), note_txt, 8.5, (0.9, 0.98, 0.98))
-
-    nocode_txt = "NO TYPE CODE (no box — look in Granite list / add in Revu if it is your job)\n" + ", ".join(
-        f"{ln.get('room') or '—'} {(ln.get('text') or '')[:28]}" for ln in nocode
-    )
-    put((40, 434, 802, 500), nocode_txt, 8, (1, 0.82, 0.78))
     put(
-        (40, 508, 802, 558),
-        "Revu = first crack on the drawing. Granite = the rest of the draft + notes + compare after you save.\n"
-        "You still sign. Nothing on this page is an order.",
-        11,
+        (40, 128, 800, 280),
+        "Subject  ·  what it means\n"
+        "H2 / TP3 / IL.5 / AK …  a counted mark on this sheet. Confirm qty and spec.\n"
+        "NEED                     no type code or missing length/kit. You fill this in.\n"
+        "CHECK                    a draft note. Verify before you sign.\n"
+        "OTHER                    on another floor. Keep on the list, not this sheet.\n"
+        "DT / PDT / FÖ / IMP      door, window, frame. Other trade — confirm if yours.\n"
+        "\n"
+        "Author of every first-crack box: Granite. Your adds will show your name.",
+        12,
+        (1, 1, 1),
+    )
+    put(
+        (40, 300, 800, 430),
+        "Work the list, not page 1.\n"
+        "1. Open page 3. Alt+L (Markups List).\n"
+        "2. Filter Subject = NEED, then CHECK.\n"
+        "3. Edit Comment / add a product. Delete what is wrong.\n"
+        "4. Save. Drop the save back into Granite.\n"
+        "5. Still not an order until you sign.",
+        12,
+        (0.85, 1, 1),
+    )
+    put(
+        (40, 480, 800, 548),
+        "FIRST CRACK  ·  FILL NEED AND CHECK  ·  STILL NOT AN ORDER",
+        14,
         (1, 0.72, 0.27),
         True,
     )
@@ -187,16 +170,16 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
     box((56, 86, 786, 148), "Not a quote. Not signed.", 36, (1, 1, 1), bold=True)
     box(
         (56, 150, 786, 210),
-        "This PDF is the BoM API draft stamped on PLAN 09\nso a specialist can open it in Bluebeam Revu.",
+        "This PDF is the BoM API draft as Revu markups.\nEvery recovered line is already in the Markups List.",
         16,
         (0.85, 1, 1),
     )
     box(
         (56, 220, 786, 360),
         "What to do\n"
-        "1. Read page 2 — the full draft: boxed, not boxed, and notes.\n"
-        "2. Open page 3 in Revu. The Markups List is the first crack.\n"
-        "3. Delete, add, or change. New marks show your author.\n"
+        "1. Open page 3 in Revu. Alt+L — that list is the first crack.\n"
+        "2. Filter NEED and CHECK. Those need your input. Do not re-type them.\n"
+        "3. Delete wrong. Fill missing. New marks show your author.\n"
         "4. Save. Drop that save back into Granite to compare.\n"
         "5. You still sign the quote. Granite does not.",
         13,
@@ -204,10 +187,9 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
     )
     box(
         (56, 370, 786, 470),
-        f"A-40-1-1091  ·  PLAN 09  ·  {n_marks} boxes on page 3\n"
-        "Author of every draft box: Granite\n"
-        "Page 2 lists everything that is not boxed, so you are not guessing.\n"
-        "Lengths and kit contents are still questions — check those first.",
+        f"A-40-1-1091  ·  PLAN 09  ·  {n_marks} markups in the list\n"
+        "Author Granite. Page 2 is only a legend for the Subjects.\n"
+        "NEED = missing info. CHECK = a note. OTHER = not this sheet.",
         12,
         (0.85, 1, 1),
     )
@@ -225,7 +207,7 @@ def add_banner(page: fitz.Page) -> None:
     page.draw_rect(bar, color=(0.91, 0.47, 0.13), fill=(0.91, 0.47, 0.13))
     page.insert_textbox(
         bar + (10, 4, -10, -4),
-        "GRANITE FIRST CRACK  ·  not a quote  ·  page 2 = full list  ·  this page = boxed draft  ·  delete / add / save  ·  drop the save back into Granite",
+        "GRANITE FIRST CRACK  ·  whole draft is in the Markups List  ·  filter NEED and CHECK  ·  fill those in  ·  you still sign",
         fontsize=11,
         fontname="hebo",
         color=(1, 1, 1),
@@ -233,35 +215,130 @@ def add_banner(page: fitz.Page) -> None:
     )
 
 
+def hits_for(page: fitz.Page, code: str):
+    return [fitz.Rect(r) for r in unique_hits(page, code)]
+
+
+def room_point(rooms, name: str):
+    name = (name or "").strip()
+    for n, pt in rooms:
+        if n.upper() == name.upper():
+            return pt
+    return None
+
+
+def pick_hit(hits, rooms, room: str):
+    if not hits:
+        return None
+    pt = room_point(rooms, room)
+    if pt:
+        hits.sort(key=lambda r: (r.x0 - pt.x) ** 2 + (r.y0 - pt.y) ** 2)
+    return hits.pop(0)
+
+
+def write_box(page: fitz.Page, rect: fitz.Rect, subject: str, content: str, rgb, name: str) -> None:
+    annot = page.add_rect_annot(rect)
+    annot.set_colors(stroke=rgb)
+    annot.set_border(width=1.5)
+    annot.set_opacity(0.95)
+    annot.set_info(title="Granite", subject=subject, content=content)
+    try:
+        annot.set_name(name)
+    except Exception:
+        pass
+    annot.update()
+
+
 def stamp(page: fitz.Page, job: dict) -> int:
     rooms = rooms_on_page(page)
+    pool = {}
+    for ln in job.get("lines") or []:
+        code = str(ln.get("code") or "").strip()
+        if code and code not in pool:
+            pool[code] = hits_for(page, code)
+    room_slots = defaultdict(int)
+    strip = 0
     n = 0
-    for code in PLACE:
-        note = line_note(job, code)
-        rgb = COLOUR.get(code, (0.12, 0.78, 0.78))
-        for i, hit in enumerate(unique_hits(page, code), start=1):
-            rect = fitz.Rect(hit.x0 - PAD, hit.y0 - PAD, hit.x1 + PAD, hit.y1 + PAD)
-            room = nearest_room(rect.tl, rooms) if not code.startswith("IL") else ""
-            space = f" Space {room}." if room else ""
-            content = (
-                f"{code} · {note}{space} "
-                "FIRST CRACK — not signed. Check in Revu. Delete if wrong. Add if missing."
-            )
-            annot = page.add_rect_annot(rect)
-            annot.set_colors(stroke=rgb)
-            annot.set_border(width=1.6)
-            annot.set_opacity(0.95)
-            annot.set_info(
-                title="Granite",
-                subject=code,
-                content=content,
-            )
-            try:
-                annot.set_name(f"granite-{code}-{i}")
-            except Exception:
-                pass
-            annot.update()
-            n += 1
+    w, h = page.rect.width, page.rect.height
+
+    def strip_rect():
+        nonlocal strip
+        col = strip // 22
+        row = strip % 22
+        strip += 1
+        x = w - 210 - col * 36
+        y = 70 + row * 22
+        return fitz.Rect(x, y, x + 28, y + 16)
+
+    def room_rect(room: str):
+        pt = room_point(rooms, room)
+        if not pt:
+            return None
+        slot = room_slots[room]
+        room_slots[room] += 1
+        return fitz.Rect(pt.x + 18, pt.y - 8 + slot * 14, pt.x + 46, pt.y + 6 + slot * 14)
+
+    def place(rect, subject, content, rgb, name):
+        nonlocal n
+        if rect is None:
+            rect = strip_rect()
+        write_box(page, rect, subject, content, rgb, name)
+        n += 1
+
+    for ln in job.get("lines") or []:
+        code = str(ln.get("code") or "").strip()
+        room = ln.get("room") or ""
+        kind = ln.get("kind") or ""
+        floor = ln.get("floor") or ""
+        text = ln.get("text") or ""
+        need = ln.get("need") or ln.get("blocker") or ""
+        qty = ln.get("qty") or 1
+        other = floor != "PLAN 09"
+        no_code = not code
+        trade = kind in ("door", "window", "frame")
+        ask = no_code or "unknown" in (need + kind).lower() or "length" in need.lower() or "kit" in need.lower() or "type" in need.lower()
+
+        if other:
+            subject, flag, rgb = "OTHER", "OTHER · not this sheet", COLOUR["OTHER"]
+        elif no_code:
+            subject, flag, rgb = "NEED", "NEED · no type code · fill this in", COLOUR["NEED"]
+        elif trade:
+            subject, flag, rgb = code, "OTHER TRADE · confirm if this is your job", COLOUR["DOOR"]
+        elif ask:
+            subject, flag, rgb = code or "NEED", "NEED · missing spec · fill this in", COLOUR.get(code, COLOUR["NEED"])
+        else:
+            subject, flag, rgb = code, "FIRST CRACK · confirm", COLOUR.get(code, (0.12, 0.78, 0.78))
+
+        content = (
+            f"{flag}. {code or 'no code'} · qty {qty} · {room or 'no room'} · {text}. {need} "
+            "Author Granite. Not signed. Edit this markup — do not re-type it."
+        )
+        rect = None
+        if code and pool.get(code):
+            rect = pick_hit(pool[code], rooms, room)
+            if rect:
+                rect = fitz.Rect(rect.x0 - PAD, rect.y0 - PAD, rect.x1 + PAD, rect.y1 + PAD)
+        if rect is None and room:
+            rect = room_rect(room)
+        place(rect, subject, content, rgb, f"granite-{ln.get('id')}")
+
+    for i, note in enumerate(job.get("checks") or [], start=1):
+        flag = "CHECK · verify before you sign" if not note.get("ok") else "CHECK · noted"
+        content = f"{flag}. {note.get('text') or ''} Author Granite. Not signed."
+        room = NOTE_FOCUS.get(note.get("id"))
+        rect = room_rect(room) if room else None
+        place(rect, "CHECK", content, COLOUR["CHECK"], f"granite-check-{i}")
+
+    claimed = int((job.get("counts") or {}).get("linesClaimed") or 69)
+    missing = max(0, claimed - len(job.get("lines") or []))
+    if missing:
+        place(
+            None,
+            "CHECK",
+            f"CHECK · API export was cut. {missing} of {claimed} lines were not recovered. Do not treat them as empty. Author Granite.",
+            COLOUR["CHECK"],
+            "granite-check-cut",
+        )
     return n
 
 

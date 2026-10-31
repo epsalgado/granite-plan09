@@ -854,7 +854,7 @@ function specialistHtml() {
       <td>${esc(ln.text)}</td>
       <td>${ln.qty}</td>
       <td>${esc(ln.room || "—")}</td>
-      <td>${onFirstCrackPdf(ln) ? "On PDF" : "List only"}</td>
+      <td>${esc(crackFlag(ln))}</td>
     </tr>`)
     .join("");
   return `
@@ -862,7 +862,7 @@ function specialistHtml() {
     <div class="basket-head spec-head">
       <p class="spec-kicker">Our draft · the rest of the first crack</p>
       <h2>Full draft list</h2>
-      <p>${esc(job.apiNote)} Lines marked On PDF are boxed in Revu. List only stays here.</p>
+      <p>${esc(job.apiNote)} Same lines are markups in Revu. NEED / CHECK means fill in there.</p>
     </div>
     <details class="bb-notes"${notesOpen ? " open" : ""}>
       <summary>Draft notes · ${(job.checks || []).length}</summary>
@@ -897,18 +897,26 @@ function onFirstCrackPdf(ln) {
   return FIRST_CRACK_CODES.has(normCode(ln.code));
 }
 
+function crackFlag(ln) {
+  if ((ln.floor || "") !== "PLAN 09") return "OTHER";
+  if (!normCode(ln.code)) return "NEED";
+  if (["door", "window", "frame"].includes(ln.kind)) return "OTHER TRADE";
+  const ask = `${ln.need || ""} ${ln.blocker || ""} ${ln.kind || ""}`.toLowerCase();
+  if (/unknown|length|kit|type/.test(ask)) return "NEED";
+  return "On sheet";
+}
+
 function crackInventoryHtml() {
-  const p09 = (job.lines || []).filter((ln) => (ln.floor || "") === "PLAN 09");
-  const boxed = p09.filter(onFirstCrackPdf).length;
-  const nocode = p09.filter((ln) => !normCode(ln.code)).length;
-  const doors = p09.filter((ln) => ["door", "window", "frame"].includes(ln.kind)).length;
-  const other = (job.lines || []).filter((ln) => (ln.floor || "") !== "PLAN 09").length;
+  const lines = job.lines || [];
+  const p09 = lines.filter((ln) => (ln.floor || "") === "PLAN 09");
+  const need = p09.filter((ln) => crackFlag(ln) === "NEED").length;
   const notes = (job.checks || []).length;
-  const missing = Math.max(0, (job.counts && job.counts.linesClaimed) || 69) - (job.lines || []).length;
+  const other = lines.filter((ln) => (ln.floor || "") !== "PLAN 09").length;
+  const missing = Math.max(0, (job.counts && job.counts.linesClaimed) || 69) - lines.length;
   return `<div class="crack-split">
-      <p><strong>On the PDF for Revu</strong> · 22 boxes · ${boxed} draft lines (H2, TP3, TP2, S1, AK, hatches). That is the first crack.</p>
-      <p><strong>Not boxed — still here</strong> · ${nocode} with no type code · ${doors} doors/windows/frames · ${other} other floors · ${missing} cut from the export · ${notes} notes below.</p>
-      <p>Revu has the boxes. This list and the notes are the rest of the draft. You still sign.</p>
+      <p><strong>In the Revu Markups List</strong> · ${lines.length} recovered lines + ${notes} notes. Already there. Do not copy them in.</p>
+      <p><strong>Filter first</strong> · Subject NEED (${need} missing info) · CHECK (${notes + (missing ? 1 : 0)} notes) · OTHER (${other} other floors).</p>
+      <p>Fill NEED and CHECK in Revu. You still sign.</p>
     </div>`;
 }
 
@@ -1104,14 +1112,14 @@ function compareHtml() {
       <p class="bb-lead">This file is the BoM API draft stamped on PLAN 09. It is the first crack — not a quote. You check it in Revu. You still sign.</p>
       <ol class="bb-steps">
         <li>Download the first-crack PDF</li>
-        <li>Page 2 is the full list — boxed and not boxed</li>
-        <li>Page 3 in Revu — Markups List is the first crack</li>
+        <li>Open page 3 in Revu — Alt+L is the whole draft</li>
+        <li>Filter NEED and CHECK — fill those in, do not re-type</li>
         <li>Save and drop that file here to compare</li>
       </ol>
       <div class="bb-downloads">
         <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
       </div>
-      <p class="bb-quiet">Page 1 is what this file is. Page 2 is the full draft. Page 3 is the drawing. Author Granite.</p>
+      <p class="bb-quiet">Page 1 = what this is. Page 2 = how to read Subjects. Page 3 = drawing. Every line is already a markup.</p>
       ${crackInventoryHtml()}
       <h3 class="bb-after">After you check in Revu</h3>
       <p class="bb-lead">Drop the PDF you saved, or a Markup Summary CSV. We compare it to this draft: same, missing, extra, different.</p>
