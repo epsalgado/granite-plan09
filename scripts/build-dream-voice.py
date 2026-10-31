@@ -20,22 +20,41 @@ COPY = Path(
 )
 WORK = ROOT / "files" / "demo-video" / "cut-work" / "voice"
 VOICE = "en-US-AvaNeural"
-RATE = "-5%"
+RATE = "-3%"
 
+# Six flowing beats — full sentences, not caption fragments.
 # start_sec, window_sec, spoken line
 LINES = [
-    (0.00, 6.20, "A contractor sends drawings. What will the fittings cost?"),
-    (6.20, 4.20, "They need that answer early. The quote is how Ahlsell wins the job."),
-    (10.40, 6.00, "The customer wants a clear request."),
-    (16.40, 6.50, "The specialist must sign off on the take-off."),
-    (22.90, 8.00, "Today that answer is hand work."),
-    (30.90, 9.00, "Drawing after drawing. They start from a blank page."),
-    (39.90, 7.00, "Hours. Miss a room, the quote is wrong."),
-    (46.90, 8.00, "What if the first pass was not blank?"),
-    (54.90, 9.00, "AI drafts the markup. The specialist does not start from zero."),
-    (63.90, 9.00, "They check. They verify. They add or remove what is needed."),
-    (72.90, 9.00, "They sign off on the take-off. The draft does not."),
-    (81.90, 11.50, "Faster. More confident. Still a person accountable."),
+    (
+        0.00,
+        10.20,
+        "A contractor sends Ahlsell a pack of drawings and asks what the fittings will cost. They need that answer early, because the quote is how Ahlsell wins the job.",
+    ),
+    (
+        10.40,
+        12.20,
+        "The customer wants a clear request: you saw my rooms, you did not invent a shopping list. The specialist is the one who must sign off on the take-off.",
+    ),
+    (
+        22.90,
+        23.70,
+        "Today that answer is still done by hand. They open drawing after drawing and start from a blank page. It takes hours, and if they miss a single room, the quote is wrong.",
+    ),
+    (
+        46.90,
+        16.80,
+        "What if the first pass was not a blank page? The AI reads the plans and drafts the markup, so the specialist does not have to start from zero.",
+    ),
+    (
+        63.90,
+        17.80,
+        "They check that draft, they verify it, and they add or remove whatever is needed. Then they sign off. The draft does not.",
+    ),
+    (
+        81.90,
+        11.00,
+        "The work is faster, and they can be more confident. A person is still accountable.",
+    ),
 ]
 
 
@@ -86,29 +105,28 @@ def main() -> None:
         clips.append((start, fitted))
         print(f"  {dur:.2f}s -> window {window:.2f}s")
 
-    n = len(clips)
-    inputs = ["-i", str(VIDEO)]
-    for _, path in clips:
-        inputs += ["-i", str(path)]
-    filters = []
-    labels = []
-    for i, (start, _) in enumerate(clips, 1):
+    bed = WORK / "bed.wav"
+    run([
+        str(FFMPEG), "-y", "-f", "lavfi",
+        "-i", "anullsrc=r=48000:cl=stereo", "-t", "93.13", str(bed),
+    ])
+    mix = bed
+    for i, (start, path) in enumerate(clips, 1):
         ms = int(round(start * 1000))
-        filters.append(f"[{i}:a]adelay={ms}|{ms},volume=1.0[a{i}]")
-        labels.append(f"[a{i}]")
-    filters.append(
-        "".join(labels)
-        + f"amix=inputs={n}:dropout_transition=0[a]"
-    )
-    cmd = [
-        str(FFMPEG), "-y", *inputs,
-        "-filter_complex", ";".join(filters),
-        "-map", "0:v", "-map", "[a]",
-        "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
-        "-shortest",
+        nxt = WORK / f"mix{i:02d}.wav"
+        run([
+            str(FFMPEG), "-y", "-i", str(mix), "-i", str(path),
+            "-filter_complex",
+            f"[1:a]adelay={ms}|{ms}[a];[0:a][a]amix=inputs=2:duration=first:dropout_transition=0,volume=2",
+            str(nxt),
+        ])
+        mix = nxt
+    run([
+        str(FFMPEG), "-y", "-i", str(VIDEO), "-i", str(mix),
+        "-map", "0:v", "-map", "1:a",
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
         str(OUT),
-    ]
-    run(cmd)
+    ])
     COPY.write_bytes(OUT.read_bytes())
     print(f"wrote {OUT}")
     print(f"copy {COPY}")

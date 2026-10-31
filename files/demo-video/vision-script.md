@@ -16,42 +16,22 @@ A customer asks what the fittings cost. A specialist spends hours counting the d
 ## Spoken script
 
 **[0:00 — The ask]**  
-A contractor sends Ahlsell a pack of drawings and says: what will the hardware and fittings cost?
+A contractor sends Ahlsell a pack of drawings and asks what the fittings will cost. They need that answer early, because the quote is how Ahlsell wins the job.
 
-They need that answer early. Sometimes two years before the building exists. The quote is how Ahlsell wins the job.
+**[0:10 — Two people]**  
+The customer wants a clear request: you saw my rooms, you did not invent a shopping list. The specialist is the one who must sign off on the take-off.
 
-**[0:12 — Two people]**  
-The customer wants a clear request: you saw my rooms, you didn’t invent a shopping list.
+**[0:23 — The pain]**  
+Today that answer is still done by hand. They open drawing after drawing and start from a blank page. It takes hours, and if they miss a single room, the quote is wrong.
 
-The specialist wants to answer faster, and still be sure. They own the customer. They sign the quote.
+**[0:47 — The dream]**  
+What if the first pass was not a blank page? The AI reads the plans and drafts the markup, so the specialist does not have to start from zero.
 
-**[0:24 — The pain]**  
-Today that answer is hand work.
-
-They open drawing after drawing. They count every hook, hatch, shelf, dispenser. They measure what has no length. They look up an article — or an equivalent — in the catalogue.
-
-Some do it in Bluebeam. Some still print A2 and use a highlighter. Either way, they start from a blank page.
-
-Hours. And if they miss a room, the quote is wrong.
-
-**[0:48 — The dream]**  
-What if the first pass was not blank?
-
-AI reads the plans, page by page. It drafts a mark-up — the same kind of list they already make in Bluebeam. It suggests catalogue matches for what the drawing asked for.
-
-Not a finished quote. A starting point.
-
-**[1:04 — The specialist’s job, still theirs]**  
-The specialist opens that draft. They check. They verify. They add or remove what is needed.
-
-They sign off on the take-off. The draft does not.
-
-They did not start from zero. They did not walk every page only to begin counting.
+**[1:04 — Still theirs]**  
+They check that draft, they verify it, and they add or remove whatever is needed. Then they sign off. The draft does not.
 
 **[1:22 — Close]**  
-Faster. More confident. Still a person accountable.
-
-That is what Ahlsell asked for. That is the idea.
+The work is faster, and they can be more confident. A person is still accountable.
 
 ---
 
