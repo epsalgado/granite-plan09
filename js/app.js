@@ -1076,21 +1076,28 @@ function compareHtml() {
   }
   return `
     <div class="bb-box" id="bbDrop">
-      <p class="spec-kicker">Specialist tool · Bluebeam</p>
-      <h2>Upload your Bluebeam file</h2>
+      <p class="spec-kicker">Specialist tool · first crack</p>
+      <p class="stamp sent">FIRST CRACK · NOT SIGNED</p>
+      <h2>Open this PDF in Revu</h2>
+      <p class="bb-lead">This file is the BoM API draft stamped on PLAN 09. It is the first crack — not a quote. You check it in Revu. You still sign.</p>
       <ol class="bb-steps">
-        <li>Count in Revu</li>
-        <li>Save PDF or Summary CSV</li>
-        <li>Drop it here</li>
-        <li>Take Excel — you still sign</li>
+        <li>Download the first-crack PDF</li>
+        <li>Open page 2 in Revu — the Markups List is the draft</li>
+        <li>Delete, add, or change, then save</li>
+        <li>Drop that save here to compare</li>
       </ol>
-      <p class="bb-lead">Drop the PDF you saved in Revu, or a Markup Summary CSV. We check it against this draft: same, missing, extra, different.</p>
+      <div class="bb-downloads">
+        <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
+      </div>
+      <p class="bb-quiet">Page 1 tells you what the file is for. Page 2 is the drawing. Every draft box is Author Granite.</p>
+      <h3 class="bb-after">After you check in Revu</h3>
+      <p class="bb-lead">Drop the PDF you saved, or a Markup Summary CSV. We compare it to this draft: same, missing, extra, different.</p>
       <button type="button" class="bb-dropzone" id="bbPick"${busy}>
-        <strong>Drop your Bluebeam PDF or CSV here</strong>
-        <span>or click to choose · Revu save, or Markups List → Summary</span>
+        <strong>Drop your saved Revu PDF or CSV here</strong>
+        <span>or click to choose · the file after you checked the first crack</span>
       </button>
       <div class="bb-actions">
-        <button type="button" class="btn-ghost light" id="bbSample"${busy}>No file with you? Try a sample check</button>
+        <button type="button" class="btn-ghost light" id="bbSample"${busy}>No Revu with you? Try a sample check</button>
       </div>
       <p class="bb-quiet">Want the CSV shape Revu exports? <button type="button" class="bb-link" id="bbSampleCsv"${busy}>Download a sample Summary</button></p>
       ${result}
@@ -1278,7 +1285,7 @@ function setLandingRoleUi() {
   const hint = $("doorHint");
   if (hint) {
     hint.textContent = landingRole === "specialist"
-      ? "Then we open the Bluebeam check."
+      ? "Then we give you the first-crack PDF for Revu."
       : "Then we open the customer request.";
   }
   const spec = landingRole === "specialist";
@@ -1286,22 +1293,22 @@ function setLandingRoleUi() {
   const title = $("overviewTitle");
   const lead = $("overviewLead");
   const tryBtn = $("tryExample");
-  if (badge) badge.textContent = spec ? "Draft ready · check Bluebeam" : "Draft ready · still not an order";
+  if (badge) badge.textContent = spec ? "First crack ready · not signed" : "Draft ready · still not an order";
   if (title) {
     title.innerHTML = spec
-      ? "PLAN 09 is ready.<br /><em>Check your Bluebeam file.</em>"
+      ? "PLAN 09 is ready.<br /><em>Take the first-crack PDF.</em>"
       : "PLAN 09 is ready.<br /><em>See what we found.</em>";
   }
   if (lead) {
     lead.textContent = spec
-      ? "Drop the PDF you saved in Revu. We check it against this draft."
+      ? "Open it in Revu. Check the draft. You still sign."
       : "Answer a few questions. This is a request, not an order.";
   }
-  if (tryBtn) tryBtn.textContent = spec ? "Open Bluebeam check" : "See what we found";
+  if (tryBtn) tryBtn.textContent = spec ? "Open first-crack for Revu" : "See what we found";
   const foot = document.querySelector(".preview-list footer");
   if (foot) {
     foot.innerHTML = spec
-      ? "Ready to <strong>check Bluebeam</strong>"
+      ? "Ready for <strong>first crack in Revu</strong>"
       : "Ready to choose <strong>after you answer</strong>";
   }
 }
@@ -1351,14 +1358,14 @@ function updateChrome() {
   const c = counts();
   const groups = questionGroups();
   if (specialist) {
-    banner.textContent = "Specialist tool · drop your Bluebeam PDF or CSV · we check it against this draft";
-    if (sheetTitle) sheetTitle.textContent = "PLAN 09 · upload Bluebeam to check";
+    banner.textContent = "Specialist · first-crack PDF for Revu · you check it · you still sign";
+    if (sheetTitle) sheetTitle.textContent = "PLAN 09 · first crack for Revu";
     $("backBtn").disabled = false;
     $("continueBtn").hidden = true;
     const checked = compareState && compareState.source !== "Could not compare";
     $("flowStatus").textContent = checked
-      ? "The check is in the list. You still sign the quote."
-      : "Drop the PDF you saved in Revu. Granite only checks this draft.";
+      ? "Check done · you still sign the quote"
+      : "Download the first-crack PDF · open it in Revu · you still sign";
   } else {
     banner.textContent = "Customer request · simple path · still not an order";
     if (sheetTitle) sheetTitle.textContent = "A-40-1-1091 · PLAN 09";
@@ -1402,10 +1409,10 @@ function render(opts = {}) {
   if (specialist) {
     $("trust").hidden = false;
     $("trust").innerHTML = `
-      <div class="t-card ok"><strong>This floor</strong><b>PLAN 09</b><span>Fittings draft to check — you still sign</span></div>
-      <div class="t-card ok"><strong>Email vs plan</strong><b>4 H2</b><span>Named shelf rooms are on this sheet</span></div>
+      <div class="t-card ok"><strong>This file</strong><b>First crack</b><span>API draft on the PDF — not a quote</span></div>
+      <div class="t-card ok"><strong>Where you work</strong><b>Revu</b><span>Open it, check the Markups List, save</span></div>
       <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>Never listed these shelves</span></div>
-      <div class="t-card ok"><strong>Your job</strong><b>Revu</b><span>Count there, drop the save here, take Excel</span></div>`;
+      <div class="t-card ok"><strong>Then</strong><b>Compare</b><span>Drop your save here — you still sign</span></div>`;
   }
   const pillEl = $("sheetPill");
   if (pillEl) {
@@ -1416,7 +1423,7 @@ function render(opts = {}) {
         ? hits.length > 1
           ? `Showing ${hits.length} marks on the drawing`
           : `Showing ${mark.label || mark.id} on the drawing`
-        : "Drop your Bluebeam file on the right to check this draft";
+        : "Download the first-crack PDF — that file is for Revu";
     } else if (step === "found") {
       const mark = markFor(selected);
       pillEl.textContent = mark
@@ -2314,7 +2321,7 @@ function setLandingPhase(phase) {
     pill.textContent = "Reading…";
     label.textContent = "A-40-1-1091 · PLAN 09";
   } else {
-    pill.textContent = landingRole === "specialist" ? "Check ready" : "Draft ready";
+    pill.textContent = landingRole === "specialist" ? "First crack ready" : "Draft ready";
     label.textContent = "A-40-1-1091 · PLAN 09";
   }
   setLandingRoleUi();
