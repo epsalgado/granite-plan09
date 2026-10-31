@@ -14,7 +14,7 @@ let specialist = false;
 let chooseIndex = 0;
 let selected = null;
 let zoomQuery = null;
-let notesOpen = false;
+let notesOpen = true;
 let scale = 1;
 let panX = 0;
 let panY = 0;
@@ -854,14 +854,15 @@ function specialistHtml() {
       <td>${esc(ln.text)}</td>
       <td>${ln.qty}</td>
       <td>${esc(ln.room || "—")}</td>
+      <td>${onFirstCrackPdf(ln) ? "On PDF" : "List only"}</td>
     </tr>`)
     .join("");
   return `
     ${compareHtml()}
     <div class="basket-head spec-head">
-      <p class="spec-kicker">Our draft · after you check</p>
-      <h2>Markups list</h2>
-      <p>${esc(job.apiNote)} Subject = code. Space = room. You still sign.</p>
+      <p class="spec-kicker">Our draft · the rest of the first crack</p>
+      <h2>Full draft list</h2>
+      <p>${esc(job.apiNote)} Lines marked On PDF are boxed in Revu. List only stays here.</p>
     </div>
     <details class="bb-notes"${notesOpen ? " open" : ""}>
       <summary>Draft notes · ${(job.checks || []).length}</summary>
@@ -870,7 +871,7 @@ function specialistHtml() {
     <div class="filters">${filters}</div>
     <div class="draft-wrap">
       <table class="draft">
-        <thead><tr><th>Subject</th><th>Comment</th><th>Count</th><th>Space</th></tr></thead>
+        <thead><tr><th>Subject</th><th>Comment</th><th>Count</th><th>Space</th><th>Where</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
@@ -888,6 +889,27 @@ function normCode(s) {
 
 function normSpace(s) {
   return String(s == null ? "" : s).trim().toUpperCase();
+}
+
+const FIRST_CRACK_CODES = new Set(["H2", "TP3", "TP2", "S1", "IL.4", "IL.5", "IL.6", "IL.7", "AK"]);
+
+function onFirstCrackPdf(ln) {
+  return FIRST_CRACK_CODES.has(normCode(ln.code));
+}
+
+function crackInventoryHtml() {
+  const p09 = (job.lines || []).filter((ln) => (ln.floor || "") === "PLAN 09");
+  const boxed = p09.filter(onFirstCrackPdf).length;
+  const nocode = p09.filter((ln) => !normCode(ln.code)).length;
+  const doors = p09.filter((ln) => ["door", "window", "frame"].includes(ln.kind)).length;
+  const other = (job.lines || []).filter((ln) => (ln.floor || "") !== "PLAN 09").length;
+  const notes = (job.checks || []).length;
+  const missing = Math.max(0, (job.counts && job.counts.linesClaimed) || 69) - (job.lines || []).length;
+  return `<div class="crack-split">
+      <p><strong>On the PDF for Revu</strong> · 22 boxes · ${boxed} draft lines (H2, TP3, TP2, S1, AK, hatches). That is the first crack.</p>
+      <p><strong>Not boxed — still here</strong> · ${nocode} with no type code · ${doors} doors/windows/frames · ${other} other floors · ${missing} cut from the export · ${notes} notes below.</p>
+      <p>Revu has the boxes. This list and the notes are the rest of the draft. You still sign.</p>
+    </div>`;
 }
 
 function graniteDraftRows() {
@@ -1082,14 +1104,15 @@ function compareHtml() {
       <p class="bb-lead">This file is the BoM API draft stamped on PLAN 09. It is the first crack — not a quote. You check it in Revu. You still sign.</p>
       <ol class="bb-steps">
         <li>Download the first-crack PDF</li>
-        <li>Open page 2 in Revu — the Markups List is the draft</li>
-        <li>Delete, add, or change, then save</li>
-        <li>Drop that save here to compare</li>
+        <li>Page 2 is the full list — boxed and not boxed</li>
+        <li>Page 3 in Revu — Markups List is the first crack</li>
+        <li>Save and drop that file here to compare</li>
       </ol>
       <div class="bb-downloads">
         <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
       </div>
-      <p class="bb-quiet">Page 1 tells you what the file is for. Page 2 is the drawing. Every draft box is Author Granite.</p>
+      <p class="bb-quiet">Page 1 is what this file is. Page 2 is the full draft. Page 3 is the drawing. Author Granite.</p>
+      ${crackInventoryHtml()}
       <h3 class="bb-after">After you check in Revu</h3>
       <p class="bb-lead">Drop the PDF you saved, or a Markup Summary CSV. We compare it to this draft: same, missing, extra, different.</p>
       <button type="button" class="bb-dropzone" id="bbPick"${busy}>
@@ -2395,7 +2418,7 @@ async function startDemo() {
   bindViewer();
   selected = null;
   zoomQuery = null;
-  notesOpen = false;
+  notesOpen = true;
   specialist = landingRole === "specialist";
   setLandingRoleUi();
   setStep("found");

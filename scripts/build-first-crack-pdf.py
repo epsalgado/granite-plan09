@@ -79,6 +79,95 @@ def unique_hits(page: fitz.Page, code: str):
     return [min(group, key=lambda r: r.x0) for _, group in sorted(by_row.items())]
 
 
+def plan09_lines(job: dict):
+    return [ln for ln in job.get("lines") or [] if (ln.get("floor") or "") == "PLAN 09"]
+
+
+def other_lines(job: dict):
+    return [ln for ln in job.get("lines") or [] if (ln.get("floor") or "") != "PLAN 09"]
+
+
+def boxed_line(ln: dict) -> bool:
+    return str(ln.get("code") or "").upper() in {c.upper() for c in PLACE}
+
+
+def add_inventory(doc: fitz.Document, job: dict, n_marks: int) -> None:
+    page = doc.new_page(width=842, height=595)
+    page.draw_rect(page.rect, color=(0.02, 0.15, 0.16), fill=(0.02, 0.15, 0.16))
+    page.draw_rect(fitz.Rect(22, 22, 820, 573), color=(0.12, 0.78, 0.78), width=2)
+
+    def put(r, text, size=10, color=(1, 1, 1), bold=False):
+        page.insert_textbox(
+            fitz.Rect(*r),
+            text,
+            fontsize=size,
+            fontname="hebo" if bold else "helv",
+            color=color,
+            align=fitz.TEXT_ALIGN_LEFT,
+        )
+
+    p09 = plan09_lines(job)
+    boxed = [ln for ln in p09 if boxed_line(ln)]
+    nocode = [ln for ln in p09 if not boxed_line(ln) and not (ln.get("code") or "").strip()]
+    other_trade = [ln for ln in p09 if (ln.get("kind") or "") in ("door", "window", "frame")]
+    leftover = [
+        ln
+        for ln in p09
+        if not boxed_line(ln)
+        and (ln.get("code") or "").strip()
+        and (ln.get("kind") or "") not in ("door", "window", "frame")
+    ]
+    other = other_lines(job)
+    notes = job.get("checks") or []
+    missing = max(0, int((job.get("counts") or {}).get("linesClaimed") or 69) - len(job.get("lines") or []))
+
+    put((40, 32, 800, 58), "FULL DRAFT  ·  what is on the PDF and what is not", 16, (1, 1, 1), True)
+    put(
+        (40, 58, 800, 88),
+        f"API claimed 69 lines · {len(job.get('lines') or [])} recovered · {n_marks} boxes on page 3. "
+        "This page stays with you in Revu so the missing lines are not a mystery.",
+        10,
+        (0.85, 1, 1),
+    )
+
+    on_pdf = (
+        "ON PAGE 3 — boxed, Author Granite\n"
+        f"{n_marks} boxes  ·  {len(boxed)} draft lines\n"
+        "H2 shelves (4)  ·  TP3 kits (4)  ·  TP2 kits (3)\n"
+        "S1 (3)  ·  elbow taps AK (4)  ·  hatch table IL.4–7 (4)\n"
+        "Filter Markups List by Subject. Delete wrong. Add missing."
+    )
+    off_pdf = (
+        "NOT BOXED — still part of the draft\n"
+        f"{len(nocode)} lines with no type code (WC, basin, support arms).\n"
+        f"{len(other_trade)} doors / windows / metal frames (other trade).\n"
+        f"{len(leftover)} weak marks (arms, EFT, UDS).\n"
+        f"{len(other)} lines on other floors (not this sheet).\n"
+        f"{missing} lines cut from the API export.\n"
+        f"{len(notes)} draft notes — also in Granite."
+    )
+    put((40, 96, 400, 250), on_pdf, 11, (0.72, 1, 0.86))
+    put((420, 96, 802, 250), off_pdf, 11, (1, 0.85, 0.7))
+
+    note_txt = "DRAFT NOTES — check these first\n" + "\n".join(
+        ("OK  " if n.get("ok") else "!!  ") + (n.get("text") or "") for n in notes
+    )
+    put((40, 258, 802, 430), note_txt, 8.5, (0.9, 0.98, 0.98))
+
+    nocode_txt = "NO TYPE CODE (no box — look in Granite list / add in Revu if it is your job)\n" + ", ".join(
+        f"{ln.get('room') or '—'} {(ln.get('text') or '')[:28]}" for ln in nocode
+    )
+    put((40, 434, 802, 500), nocode_txt, 8, (1, 0.82, 0.78))
+    put(
+        (40, 508, 802, 558),
+        "Revu = first crack on the drawing. Granite = the rest of the draft + notes + compare after you save.\n"
+        "You still sign. Nothing on this page is an order.",
+        11,
+        (1, 0.72, 0.27),
+        True,
+    )
+
+
 def add_cover(doc: fitz.Document, n_marks: int) -> None:
     page = doc.new_page(width=842, height=595)
     page.draw_rect(page.rect, color=(0.02, 0.15, 0.16), fill=(0.02, 0.15, 0.16))
@@ -105,19 +194,19 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
     box(
         (56, 220, 786, 360),
         "What to do\n"
-        "1. Open page 2 in Revu. The Markups List is the first crack.\n"
-        "2. Filter by Subject (H2, TP3, IL.5…). Delete what is wrong.\n"
-        "3. Add what is missing. Those marks will show your author.\n"
-        "4. Save the PDF. Drop that save back into Granite to compare.\n"
+        "1. Read page 2 — the full draft: boxed, not boxed, and notes.\n"
+        "2. Open page 3 in Revu. The Markups List is the first crack.\n"
+        "3. Delete, add, or change. New marks show your author.\n"
+        "4. Save. Drop that save back into Granite to compare.\n"
         "5. You still sign the quote. Granite does not.",
         13,
         (1, 1, 1),
     )
     box(
         (56, 370, 786, 470),
-        f"A-40-1-1091  ·  PLAN 09  ·  {n_marks} draft boxes on the drawing\n"
+        f"A-40-1-1091  ·  PLAN 09  ·  {n_marks} boxes on page 3\n"
         "Author of every draft box: Granite\n"
-        "Doors and other trades stay off this first crack.\n"
+        "Page 2 lists everything that is not boxed, so you are not guessing.\n"
         "Lengths and kit contents are still questions — check those first.",
         12,
         (0.85, 1, 1),
@@ -136,7 +225,7 @@ def add_banner(page: fitz.Page) -> None:
     page.draw_rect(bar, color=(0.91, 0.47, 0.13), fill=(0.91, 0.47, 0.13))
     page.insert_textbox(
         bar + (10, 4, -10, -4),
-        "GRANITE FIRST CRACK  ·  not a quote  ·  not signed  ·  open Markups List in Revu  ·  delete / add / save  ·  then drop the save back into Granite",
+        "GRANITE FIRST CRACK  ·  not a quote  ·  page 2 = full list  ·  this page = boxed draft  ·  delete / add / save  ·  drop the save back into Granite",
         fontsize=11,
         fontname="hebo",
         color=(1, 1, 1),
@@ -184,12 +273,13 @@ def main() -> None:
     n = stamp(page, job)
     out = fitz.open()
     add_cover(out, n)
+    add_inventory(out, job, n)
     out.insert_pdf(src)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.save(OUT, deflate=True, garbage=4)
     # Verify markups survived
     check = fitz.open(OUT)
-    drawing = check[1]
+    drawing = check[2]
     annots = list(drawing.annots() or [])
     print(f"wrote {OUT}")
     print(f"pages {check.page_count}  boxes {n}  annots_on_drawing {len(annots)}")

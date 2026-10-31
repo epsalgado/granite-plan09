@@ -1004,6 +1004,15 @@ table.compare th { background: var(--navy); color: #fff; }
 .bb-box.dragover { outline: 3px dashed #fff; }
 .bb-box h2 { margin: 0 0 0.4rem; font-size: 1.28rem; line-height: 1.2; }
 .bb-lead { margin: 0 0 0.7rem !important; font-size: 0.88rem !important; color: #fff !important; }
+.crack-split {
+  background: rgba(4, 35, 38, 0.55);
+  border: 1px solid #1ec8c8;
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  margin: 0.7rem 0 0.9rem;
+}
+.crack-split p { margin: 0 0 0.4rem; font-size: 0.82rem; color: #e8ffff; }
+.crack-split p:last-child { margin: 0; color: #ffd7b0; }
 .bb-after {
   margin: 1.1rem 0 0.35rem;
   font-size: 0.72rem;
