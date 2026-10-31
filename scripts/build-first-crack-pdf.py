@@ -304,12 +304,42 @@ def add_banner(page: fitz.Page) -> None:
     page.draw_rect(bar, color=(0.91, 0.47, 0.13), fill=(0.91, 0.47, 0.13))
     page.insert_textbox(
         bar + (10, 4, -10, -4),
-        "GRANITE FIRST CRACK  ·  page 2 of 3  ·  Alt+L is the whole draft  ·  filter NEED and CHECK  ·  page 3 is the glance table",
+        "GRANITE FIRST CRACK  ·  page 2 of 3  ·  Alt+L is the whole draft  ·  filter NEED and CHECK  ·  off-sheet H1/H2/H3 are in the panel on the right",
         fontsize=11,
         fontname="hebo",
         color=(1, 1, 1),
         align=fitz.TEXT_ALIGN_LEFT,
     )
+
+
+def add_offsheet_panel(page: fitz.Page, job: dict) -> dict:
+    """Visible home for request-only lines. They are not on the floor plate."""
+    others = [ln for ln in job.get("lines") or [] if (ln.get("floor") or "") != "PLAN 09"]
+    box = fitz.Rect(1455, 62, 2358, 258)
+    page.draw_rect(box, color=(0.91, 0.47, 0.13), fill=(0.06, 0.16, 0.18), width=2.5)
+    page.insert_text(
+        (1472, 88),
+        "NOT ON THIS SHEET  ·  request only  ·  H3 is here  ·  room A0-015 is not on PLAN 09",
+        fontsize=13,
+        fontname="hebo",
+        color=(1, 0.72, 0.27),
+    )
+    slots = {}
+    x, y = 1472, 104
+    for ln in others:
+        code = str(ln.get("code") or "—")
+        room = str(ln.get("room") or "—")
+        label = f"{code}  {room}"
+        chip = fitz.Rect(x, y, x + 128, y + 32)
+        fill = (0.91, 0.47, 0.13) if code == "H3" else (0.08, 0.28, 0.30)
+        page.draw_rect(chip, color=(0.12, 0.78, 0.78), fill=fill, width=1.2)
+        page.insert_text((x + 8, y + 22), label, fontsize=12, fontname="hebo", color=(1, 1, 1))
+        slots[ln.get("id")] = chip
+        x += 138
+        if x > 2210:
+            x = 1472
+            y += 40
+    return slots
 
 
 def hits_for(page: fitz.Page, code: str):
@@ -357,6 +387,7 @@ def stamp(page: fitz.Page, job: dict) -> int:
     strip = 0
     n = 0
     w, h = page.rect.width, page.rect.height
+    offsheet = add_offsheet_panel(page, job)
 
     def strip_rect(label=""):
         nonlocal strip
@@ -404,6 +435,8 @@ def stamp(page: fitz.Page, job: dict) -> int:
         )
         rect = None
         on_sheet = floor == "PLAN 09"
+        if not on_sheet:
+            rect = offsheet.get(ln.get("id"))
         if on_sheet and code and pool.get(code):
             rect = pick_hit(pool[code], rooms, room)
             if rect:
