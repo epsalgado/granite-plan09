@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stamp the PLAN 09 BoM draft onto A-40-1-1091 as Revu markups.
 
-Output is a first-crack PDF: cover page + the drawing with Square annotations.
+Pages: 1 cover · 2 drawing (Revu work) · 3 glance table (open the PDF, no hover).
 Author = Granite. Not a quote. Rebuild: python3 scripts/build-first-crack-pdf.py
 """
 from __future__ import annotations
@@ -40,22 +40,36 @@ NOTE_FOCUS = {
 }
 PAD = 8.0
 LEGEND_Y = 500.0
+FLAG_ORDER = {"NEED": 0, "CHECK": 1, "On sheet": 2, "OTHER TRADE": 3, "OTHER": 4}
 
 
-def line_note(job: dict, code: str) -> str:
-    bits = []
-    for ln in job.get("lines") or []:
-        if (ln.get("floor") or "") != "PLAN 09":
-            continue
-        if str(ln.get("code") or "").upper() != code.upper():
-            continue
-        text = ln.get("text") or ln.get("need") or ""
-        if text and text not in bits:
-            bits.append(text)
-        need = ln.get("need") or ln.get("blocker") or ""
-        if need and need not in bits:
-            bits.append(need)
-    return " · ".join(bits[:2]) if bits else "Granite first crack — check in Revu"
+def line_flag(ln: dict):
+    """Return (revu_subject, glance_flag, comment_prefix, rgb)."""
+    code = str(ln.get("code") or "").strip()
+    if code in ("—", "-", "–", "−"):
+        code = ""
+    kind = ln.get("kind") or ""
+    floor = ln.get("floor") or ""
+    need = ln.get("need") or ln.get("blocker") or ""
+    other = floor != "PLAN 09"
+    no_code = not code
+    trade = kind in ("door", "window", "frame")
+    ask = (
+        no_code
+        or "unknown" in (need + kind).lower()
+        or "length" in need.lower()
+        or "kit" in need.lower()
+        or "type" in need.lower()
+    )
+    if other:
+        return "OTHER", "OTHER", "OTHER · not this sheet", COLOUR["OTHER"]
+    if no_code:
+        return "NEED", "NEED", "NEED · no type code · fill this in", COLOUR["NEED"]
+    if trade:
+        return code, "OTHER TRADE", "OTHER TRADE · confirm if this is your job", COLOUR["DOOR"]
+    if ask:
+        return code or "NEED", "NEED", "NEED · missing spec · fill this in", COLOUR.get(code, COLOUR["NEED"])
+    return code, "On sheet", "FIRST CRACK · confirm", COLOUR.get(code, (0.12, 0.78, 0.78))
 
 
 def rooms_on_page(page: fitz.Page):
@@ -78,7 +92,6 @@ def unique_hits(page: fitz.Page, code: str):
     raw = page.search_for(code)
     if code == "AK":
         raw = [r for r in raw if r.y0 > LEGEND_Y]
-    # Hatch table prints the code twice on one row. Plan marks stay one box each.
     if not code.startswith("IL"):
         return raw
     by_row = defaultdict(list)
@@ -87,68 +100,52 @@ def unique_hits(page: fitz.Page, code: str):
     return [min(group, key=lambda r: r.x0) for _, group in sorted(by_row.items())]
 
 
-def plan09_lines(job: dict):
-    return [ln for ln in job.get("lines") or [] if (ln.get("floor") or "") == "PLAN 09"]
-
-
-def other_lines(job: dict):
-    return [ln for ln in job.get("lines") or [] if (ln.get("floor") or "") != "PLAN 09"]
-
-
-def add_inventory(doc: fitz.Document, job: dict, n_marks: int) -> None:
-    page = doc.new_page(width=842, height=595)
-    page.draw_rect(page.rect, color=(0.02, 0.15, 0.16), fill=(0.02, 0.15, 0.16))
-    page.draw_rect(fitz.Rect(22, 22, 820, 573), color=(0.12, 0.78, 0.78), width=2)
-
-    def put(r, text, size=10, color=(1, 1, 1), bold=False):
-        page.insert_textbox(
-            fitz.Rect(*r),
-            text,
-            fontsize=size,
-            fontname="hebo" if bold else "helv",
-            color=color,
-            align=fitz.TEXT_ALIGN_LEFT,
+def glance_rows(job: dict):
+    rows = []
+    for ln in job.get("lines") or []:
+        subject, flag, prefix, rgb = line_flag(ln)
+        rows.append(
+            {
+                "subject": subject,
+                "flag": flag,
+                "qty": ln.get("qty") or 1,
+                "room": ln.get("room") or "—",
+                "text": ln.get("text") or "",
+                "need": ln.get("need") or ln.get("blocker") or "",
+                "rgb": rgb,
+                "order": FLAG_ORDER.get(flag, 5),
+            }
         )
-
-    put((40, 32, 800, 70), "MARKUPS LIST  ·  how to read the first crack", 16, (1, 1, 1), True)
-    put(
-        (40, 72, 800, 120),
-        f"All {n_marks} draft items are already in Revu’s Markups List. "
-        "You do not copy them in. Filter by Subject. Fill in NEED and CHECK. You still sign.",
-        12,
-        (0.85, 1, 1),
-    )
-    put(
-        (40, 128, 800, 280),
-        "Subject  ·  what it means\n"
-        "H2 / TP3 / IL.5 / AK …  a counted mark on this sheet. Confirm qty and spec.\n"
-        "NEED                     no type code or missing length/kit. You fill this in.\n"
-        "CHECK                    a draft note. Verify before you sign.\n"
-        "OTHER                    on another floor. Keep on the list, not this sheet.\n"
-        "DT / PDT / FÖ / IMP      door, window, frame. Other trade — confirm if yours.\n"
-        "\n"
-        "Author of every first-crack box: Granite. Your adds will show your name.",
-        12,
-        (1, 1, 1),
-    )
-    put(
-        (40, 300, 800, 430),
-        "Work the list, not page 1.\n"
-        "1. Open page 3. Alt+L (Markups List).\n"
-        "2. Filter Subject = NEED, then CHECK.\n"
-        "3. Edit Comment / add a product. Delete what is wrong.\n"
-        "4. Save. Drop the save back into Granite.\n"
-        "5. Still not an order until you sign.",
-        12,
-        (0.85, 1, 1),
-    )
-    put(
-        (40, 480, 800, 548),
-        "FIRST CRACK  ·  FILL NEED AND CHECK  ·  STILL NOT AN ORDER",
-        14,
-        (1, 0.72, 0.27),
-        True,
-    )
+    for note in job.get("checks") or []:
+        rows.append(
+            {
+                "subject": "CHECK",
+                "flag": "CHECK",
+                "qty": "—",
+                "room": "—",
+                "text": note.get("text") or "",
+                "need": "Verify before you sign." if not note.get("ok") else "Noted.",
+                "rgb": COLOUR["CHECK"],
+                "order": FLAG_ORDER["CHECK"],
+            }
+        )
+    claimed = int((job.get("counts") or {}).get("linesClaimed") or 69)
+    missing = max(0, claimed - len(job.get("lines") or []))
+    if missing:
+        rows.append(
+            {
+                "subject": "CHECK",
+                "flag": "CHECK",
+                "qty": missing,
+                "room": "—",
+                "text": f"API export was cut. {missing} of {claimed} lines were not recovered.",
+                "need": "Do not treat them as empty.",
+                "rgb": COLOUR["CHECK"],
+                "order": FLAG_ORDER["CHECK"],
+            }
+        )
+    rows.sort(key=lambda r: (r["order"], str(r["subject"]), str(r["room"]), str(r["text"])))
+    return rows
 
 
 def add_cover(doc: fitz.Document, n_marks: int) -> None:
@@ -176,8 +173,8 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
     )
     box(
         (56, 220, 786, 360),
-        "What to do\n"
-        "1. Open page 3 in Revu. Alt+L — that list is the first crack.\n"
+        "What to do in Revu\n"
+        "1. Open page 2 only — that is the drawing. Alt+L is the first crack.\n"
         "2. Filter NEED and CHECK. Those need your input. Do not re-type them.\n"
         "3. Delete wrong. Fill missing. New marks show your author.\n"
         "4. Save. Drop that save back into Granite to compare.\n"
@@ -188,7 +185,7 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
     box(
         (56, 370, 786, 470),
         f"A-40-1-1091  ·  PLAN 09  ·  {n_marks} markups in the list\n"
-        "Author Granite. Page 2 is only a legend for the Subjects.\n"
+        "Page 3 is a glance of the same list if you open this PDF without Revu.\n"
         "NEED = missing info. CHECK = a note. OTHER = not this sheet.",
         12,
         (0.85, 1, 1),
@@ -202,12 +199,100 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
     )
 
 
+def add_glance(doc: fitz.Document, job: dict, n_marks: int) -> None:
+    """Readable table of every draft line. Not the Revu work surface."""
+    page = doc.new_page(width=1191, height=842)
+    page.draw_rect(page.rect, color=(0.96, 0.97, 0.97), fill=(0.96, 0.97, 0.97))
+    page.draw_rect(fitz.Rect(0, 0, 1191, 72), color=(0.02, 0.15, 0.16), fill=(0.02, 0.15, 0.16))
+
+    def put(r, text, size=10, color=(0.08, 0.12, 0.14), bold=False, align=fitz.TEXT_ALIGN_LEFT):
+        page.insert_textbox(
+            fitz.Rect(*r),
+            text,
+            fontsize=size,
+            fontname="hebo" if bold else "helv",
+            color=color,
+            align=align,
+        )
+
+    put((28, 12, 900, 40), "GLANCE  ·  full API draft  ·  not the work surface", 16, (1, 1, 1), True)
+    put(
+        (28, 40, 1160, 68),
+        f"Revu work is page 2 (drawing + Markups List). This page is the same {n_marks} items as a table, "
+        "so you can see what is there without hovering the drawing.",
+        11,
+        (0.75, 0.95, 0.95),
+    )
+
+    rows = glance_rows(job)
+    counts = defaultdict(int)
+    for r in rows:
+        counts[r["flag"]] += 1
+    put(
+        (28, 80, 1160, 104),
+        "  ·  ".join(f"{k} {counts.get(k, 0)}" for k in ("NEED", "CHECK", "On sheet", "OTHER TRADE", "OTHER")),
+        11,
+        (0.15, 0.22, 0.24),
+        True,
+    )
+
+    headers = [
+        (28, "Subject"),
+        (118, "Flag"),
+        (228, "Qty"),
+        (268, "Room"),
+        (348, "Comment"),
+        (780, "What is missing / note"),
+    ]
+    y = 112
+    page.draw_rect(fitz.Rect(22, y, 1169, y + 18), color=(0.02, 0.15, 0.16), fill=(0.02, 0.15, 0.16))
+    for x, label in headers:
+        page.insert_text((x, y + 13), label, fontsize=8, fontname="hebo", color=(1, 1, 1))
+    y += 20
+
+    def cell(x, baseline, text, size=7, color=(0.08, 0.12, 0.14), bold=False):
+        page.insert_text(
+            (x, baseline),
+            str(text),
+            fontsize=size,
+            fontname="hebo" if bold else "helv",
+            color=color,
+        )
+
+    row_h = 9.0
+    for i, r in enumerate(rows):
+        if y + row_h > 818:
+            break
+        bg = (1, 1, 1) if i % 2 == 0 else (0.93, 0.95, 0.95)
+        page.draw_rect(fitz.Rect(22, y, 1169, y + row_h), color=bg, fill=bg)
+        page.draw_rect(fitz.Rect(22, y, 26, y + row_h), color=r["rgb"], fill=r["rgb"])
+        flag_col = (0.72, 0.12, 0.10) if r["flag"] == "NEED" else (
+            (0.72, 0.35, 0.05) if r["flag"] == "CHECK" else (0.15, 0.22, 0.24)
+        )
+        base = y + 7
+        cell(28, base, r["subject"], bold=True)
+        cell(118, base, r["flag"], color=flag_col, bold=True)
+        cell(228, base, r["qty"])
+        cell(268, base, r["room"])
+        cell(348, base, str(r["text"])[:92])
+        cell(780, base, str(r["need"])[:88])
+        y += row_h
+
+    put(
+        (28, 822, 1160, 838),
+        "Work in Revu on page 2. Filter NEED and CHECK. Fill those in. You still sign.",
+        9,
+        (0.35, 0.22, 0.08),
+        True,
+    )
+
+
 def add_banner(page: fitz.Page) -> None:
     bar = fitz.Rect(24, 18, page.rect.width - 24, 54)
     page.draw_rect(bar, color=(0.91, 0.47, 0.13), fill=(0.91, 0.47, 0.13))
     page.insert_textbox(
         bar + (10, 4, -10, -4),
-        "GRANITE FIRST CRACK  ·  whole draft is in the Markups List  ·  filter NEED and CHECK  ·  fill those in  ·  you still sign",
+        "GRANITE FIRST CRACK  ·  page 2 of 3  ·  Alt+L is the whole draft  ·  filter NEED and CHECK  ·  page 3 is the glance table",
         fontsize=11,
         fontname="hebo",
         color=(1, 1, 1),
@@ -254,7 +339,7 @@ def stamp(page: fitz.Page, job: dict) -> int:
     pool = {}
     for ln in job.get("lines") or []:
         code = str(ln.get("code") or "").strip()
-        if code and code not in pool:
+        if code and code not in ("—", "-", "–", "−") and code not in pool:
             pool[code] = hits_for(page, code)
     room_slots = defaultdict(int)
     strip = 0
@@ -286,31 +371,14 @@ def stamp(page: fitz.Page, job: dict) -> int:
         n += 1
 
     for ln in job.get("lines") or []:
+        subject, _flag, prefix, rgb = line_flag(ln)
         code = str(ln.get("code") or "").strip()
         room = ln.get("room") or ""
-        kind = ln.get("kind") or ""
-        floor = ln.get("floor") or ""
         text = ln.get("text") or ""
         need = ln.get("need") or ln.get("blocker") or ""
         qty = ln.get("qty") or 1
-        other = floor != "PLAN 09"
-        no_code = not code
-        trade = kind in ("door", "window", "frame")
-        ask = no_code or "unknown" in (need + kind).lower() or "length" in need.lower() or "kit" in need.lower() or "type" in need.lower()
-
-        if other:
-            subject, flag, rgb = "OTHER", "OTHER · not this sheet", COLOUR["OTHER"]
-        elif no_code:
-            subject, flag, rgb = "NEED", "NEED · no type code · fill this in", COLOUR["NEED"]
-        elif trade:
-            subject, flag, rgb = code, "OTHER TRADE · confirm if this is your job", COLOUR["DOOR"]
-        elif ask:
-            subject, flag, rgb = code or "NEED", "NEED · missing spec · fill this in", COLOUR.get(code, COLOUR["NEED"])
-        else:
-            subject, flag, rgb = code, "FIRST CRACK · confirm", COLOUR.get(code, (0.12, 0.78, 0.78))
-
         content = (
-            f"{flag}. {code or 'no code'} · qty {qty} · {room or 'no room'} · {text}. {need} "
+            f"{prefix}. {code or 'no code'} · qty {qty} · {room or 'no room'} · {text}. {need} "
             "Author Granite. Not signed. Edit this markup — do not re-type it."
         )
         rect = None
@@ -323,8 +391,8 @@ def stamp(page: fitz.Page, job: dict) -> int:
         place(rect, subject, content, rgb, f"granite-{ln.get('id')}")
 
     for i, note in enumerate(job.get("checks") or [], start=1):
-        flag = "CHECK · verify before you sign" if not note.get("ok") else "CHECK · noted"
-        content = f"{flag}. {note.get('text') or ''} Author Granite. Not signed."
+        prefix = "CHECK · verify before you sign" if not note.get("ok") else "CHECK · noted"
+        content = f"{prefix}. {note.get('text') or ''} Author Granite. Not signed."
         room = NOTE_FOCUS.get(note.get("id"))
         rect = room_rect(room) if room else None
         place(rect, "CHECK", content, COLOUR["CHECK"], f"granite-check-{i}")
@@ -350,17 +418,18 @@ def main() -> None:
     n = stamp(page, job)
     out = fitz.open()
     add_cover(out, n)
-    add_inventory(out, job, n)
     out.insert_pdf(src)
+    add_glance(out, job, n)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.save(OUT, deflate=True, garbage=4)
-    # Verify markups survived
     check = fitz.open(OUT)
-    drawing = check[2]
+    drawing = check[1]
     annots = list(drawing.annots() or [])
+    glance_text = check[2].get_text()
     print(f"wrote {OUT}")
     print(f"pages {check.page_count}  boxes {n}  annots_on_drawing {len(annots)}")
-    for a in annots[:5]:
+    print("glance_has_NEED", "NEED" in glance_text, "glance_rows_hint", glance_text.count("NEED"))
+    for a in annots[:4]:
         info = a.info
         print(" ", info.get("subject"), info.get("title"), (info.get("content") or "")[:60])
 

@@ -23,7 +23,7 @@ git clone https://github.com/epsalgado/granite-plan09.git
 
 Static HTML/CSS/JS. No build step. Pages settings: Framework **None**, output `/`, branch `main`.
 
-The landing has **two doors**: Send a request (customer) or First crack in Revu (specialist). Open PLAN 09 after you pick a path. Customer: Found → Choose → Send, with request Excel. Specialist downloads `files/granite-plan09-FIRST-CRACK-for-Revu.pdf` (all recovered draft lines + notes are Revu markups; Subject NEED/CHECK = fill in, do not re-type). They work the Markups List, then drop the save to Compare. Rebuild that PDF with `python3 scripts/build-first-crack-pdf.py`. Catalog stays available on Choose, Send, and Specialist (not on the customer Found screen).
+The landing has **two doors**: Send a request (customer) or First crack in Revu (specialist). Open PLAN 09 after you pick a path. Customer: Found → Choose → Send, with request Excel. Specialist downloads `files/granite-plan09-FIRST-CRACK-for-Revu.pdf` (page 2 = drawing + Revu markups; page 3 = glance table of the same draft). Subject NEED/CHECK = fill in, do not re-type. They work the Markups List, then drop the save to Compare. Rebuild that PDF with `python3 scripts/build-first-crack-pdf.py`. Catalog stays available on Choose, Send, and Specialist (not on the customer Found screen).
 
 **Catalog** (header) searches `data/articles.json`: 7,800+ real Ahlsell article numbers from the school packing-protocol `ARTIKELLISTA` plus the four `reference-quote.csv` files. SV/EN toggle; search matches Swedish names, English glosses, and article numbers. Not a live ahlsell.se download. Rebuild with `python3 scripts/build-articles.py`.
 

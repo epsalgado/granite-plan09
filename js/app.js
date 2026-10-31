@@ -916,7 +916,7 @@ function crackInventoryHtml() {
   return `<div class="crack-split">
       <p><strong>In the Revu Markups List</strong> · ${lines.length} recovered lines + ${notes} notes. Already there. Do not copy them in.</p>
       <p><strong>Filter first</strong> · Subject NEED (${need} missing info) · CHECK (${notes + (missing ? 1 : 0)} notes) · OTHER (${other} other floors).</p>
-      <p>Fill NEED and CHECK in Revu. You still sign.</p>
+      <p>Page 3 is the same list as a table — a glance if you open the PDF itself. Work stays on page 2.</p>
     </div>`;
 }
 
@@ -1112,14 +1112,14 @@ function compareHtml() {
       <p class="bb-lead">This file is the BoM API draft stamped on PLAN 09. It is the first crack — not a quote. You check it in Revu. You still sign.</p>
       <ol class="bb-steps">
         <li>Download the first-crack PDF</li>
-        <li>Open page 3 in Revu — Alt+L is the whole draft</li>
+        <li>Open page 2 in Revu — that is the drawing. Alt+L is the whole draft</li>
         <li>Filter NEED and CHECK — fill those in, do not re-type</li>
         <li>Save and drop that file here to compare</li>
       </ol>
       <div class="bb-downloads">
         <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
       </div>
-      <p class="bb-quiet">Page 1 = what this is. Page 2 = how to read Subjects. Page 3 = drawing. Every line is already a markup.</p>
+      <p class="bb-quiet">Page 1 = what this is. Page 2 = drawing (work here in Revu). Page 3 = glance table if you open the PDF without hovering.</p>
       ${crackInventoryHtml()}
       <h3 class="bb-after">After you check in Revu</h3>
       <p class="bb-lead">Drop the PDF you saved, or a Markup Summary CSV. We compare it to this draft: same, missing, extra, different.</p>
