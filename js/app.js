@@ -1217,10 +1217,17 @@ function updateChrome() {
   if (specialist) {
     banner.textContent = "Specialist tool · drop your Bluebeam PDF or CSV · we check it against this draft";
     if (sheetTitle) sheetTitle.textContent = "PLAN 09 · upload Bluebeam to check";
-    $("flowStatus").textContent = "Drop their Revu PDF or Summary CSV on the right";
-    $("continueBtn").textContent = "Customer request";
-    $("continueBtn").disabled = false;
     $("backBtn").disabled = false;
+    const checked = compareState && compareState.source !== "Could not compare";
+    if (checked) {
+      $("flowStatus").textContent = "Check done · take Excel — you still sign";
+      $("continueBtn").textContent = "Download Excel";
+      $("continueBtn").disabled = false;
+    } else {
+      $("flowStatus").textContent = "Drop the PDF you saved in Revu. We check it against this draft.";
+      $("continueBtn").textContent = "Drop a file first";
+      $("continueBtn").disabled = true;
+    }
   } else {
     banner.textContent = "Customer request · simple path · still not an order";
     if (sheetTitle) sheetTitle.textContent = "A-40-1-1091 · PLAN 09";
@@ -2224,7 +2231,7 @@ async function startDemo() {
 
 function continueFlow() {
   if (specialist) {
-    setRole(false);
+    if (compareState && compareState.source !== "Could not compare") downloadCompareExcel();
     return;
   }
   if (step === "found") {
