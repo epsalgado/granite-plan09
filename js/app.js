@@ -910,7 +910,10 @@ function compareHtml() {
           <span class="bb-pill diff">Different ${s.different.length}</span>
           <span class="bb-pill granite">Only in Granite ${s.onlyGranite.length}</span>
           <span class="bb-pill extra">Only in Bluebeam ${s.onlyBluebeam.length}</span>
+        </div>
+        <div class="bb-downloads">
           <button type="button" class="btn-orange" id="bbCmpXls">Download Excel</button>
+          <button type="button" class="btn-ghost light" id="bbCmpCsv">Download comparison CSV</button>
         </div>
         <p class="bb-source">${esc(label)}${s.note ? " · " + esc(s.note) : ""}</p>
         ${cmpTable("Different", s.different, true)}
@@ -918,7 +921,6 @@ function compareHtml() {
         ${cmpTable("Only in Bluebeam", s.onlyBluebeam, true)}
         ${cmpTable("Same", s.same, false)}
         <div class="send-actions">
-          <button type="button" class="btn-ghost light" id="bbCmpCsv">Download comparison CSV</button>
           <button type="button" class="btn-ghost light" id="bbClear">Clear check</button>
         </div>`;
     }

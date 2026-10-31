@@ -1052,6 +1052,7 @@ table.compare th { background: var(--navy); color: #fff; }
 .app[data-role="specialist"] .bb-box .need.always { color: #c8ffff; }
 .bb-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 0.15rem; }
 .bb-pills { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.7rem 0 0.4rem; }
+.bb-downloads { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; margin: 0 0 0.55rem; }
 .bb-pill {
   font-size: 0.72rem;
   font-weight: 800;
