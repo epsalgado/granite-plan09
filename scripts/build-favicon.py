@@ -1,46 +1,59 @@
 #!/usr/bin/env python3
-"""Build Granite tab icons locally. No image API. Rebuild: python3 scripts/build-favicon.py"""
+"""Build Granite tab icons locally. No image API. Rebuild: python3 scripts/build-favicon.py
+
+Three-room floor plate + one first-crack mark. Not a letter.
+"""
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "img"
-FONT = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
 DARK = (4, 35, 38, 255)
 TEAL = (30, 200, 200, 255)
+AMBER = (232, 119, 34, 255)
 
-# Path G — no <text>, no embedded PNG. Reads at 16px.
 SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="7" fill="#042326"/>
-  <path fill="#1ec8c8" d="M16.1 6.1c-5.5 0-9.9 4.4-9.9 9.9s4.4 9.9 9.9 9.9c3.9 0 7.3-2.2 8.9-5.5l-3.7-2c-1 1.9-2.9 3.2-5.2 3.2-3.2 0-5.8-2.6-5.8-5.6s2.6-5.6 5.8-5.6c2.1 0 4 1.1 5.1 2.7h-3.8v3.8h8.9V13.8C24.3 9.5 20.6 6.1 16.1 6.1z"/>
+  <rect x="6.4" y="6.4" width="19.2" height="19.2" rx="1.2" fill="none" stroke="#1ec8c8" stroke-width="2.2"/>
+  <path fill="none" stroke="#1ec8c8" stroke-width="2.2" d="M14.8 6.4 V25.6 M14.8 16 H25.6"/>
+  <rect x="16.6" y="17.4" width="7.2" height="6.4" rx="0.5" fill="#e87722"/>
 </svg>
 """
+
+
+def xy(size, n):
+    return n * size / 32
 
 
 def tile(size: int) -> Image.Image:
     im = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    r = max(4, int(size * 0.22))
+    r = max(3, int(size * 0.22))
     d.rounded_rectangle((0, 0, size - 1, size - 1), radius=r, fill=DARK)
-    font = ImageFont.truetype(str(FONT), int(size * 0.60))
-    bbox = d.textbbox((0, 0), "G", font=font)
-    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    x = (size - tw) / 2 - bbox[0]
-    y = (size - th) / 2 - bbox[1] + size * 0.02
-    d.text((x, y), "G", font=font, fill=TEAL)
+    w = max(2, round(size * 2.2 / 32))
+    inset = xy(size, 6.4)
+    outer = [inset, inset, size - 1 - inset, size - 1 - inset]
+    d.rounded_rectangle(outer, radius=max(1, size // 24), outline=TEAL, width=w)
+    mid_x = xy(size, 14.8)
+    mid_y = xy(size, 16)
+    d.line([(mid_x, inset), (mid_x, size - 1 - inset)], fill=TEAL, width=w)
+    d.line([(mid_x, mid_y), (size - 1 - inset, mid_y)], fill=TEAL, width=w)
+    d.rounded_rectangle(
+        [xy(size, 16.6), xy(size, 17.4), xy(size, 16.6 + 7.2), xy(size, 17.4 + 6.4)],
+        radius=max(1, size // 32),
+        fill=AMBER,
+    )
     return im
 
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "favicon.svg").write_text(SVG)
-    big = tile(180)
-    big.save(OUT / "favicon-180.png")
+    tile(180).save(OUT / "favicon-180.png")
     p32 = tile(32)
     p32.save(OUT / "favicon-32.png")
-    p16 = tile(16)
-    p16.save(OUT / "favicon-16.png")
+    tile(16).save(OUT / "favicon-16.png")
     p32.save(OUT / "favicon.ico", format="ICO", sizes=[(16, 16), (32, 32)])
     print(f"wrote {OUT / 'favicon.svg'} {OUT / 'favicon.ico'} {OUT / 'favicon-32.png'}")
 
