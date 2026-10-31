@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Cache-Control" content="no-store" />
   <title>Granite — PLAN 09 is not an order</title>
-  <link rel="stylesheet" href="css/app.css?v=nopitch2" />
+  <link rel="stylesheet" href="css/app.css?v=doors1" />
 </head>
 <body>
-  <main class="hero" id="landing" data-phase="upload">
+  <main class="hero" id="landing" data-phase="upload" data-role="customer">
     <header class="hero-nav">
-      <div class="logo">Granite <small>drawing → basket · AI</small></div>
+      <div class="logo">Granite <small>drawing → request</small></div>
       <div class="hero-nav-right">
         <span class="chip-quiet">Team Granite · Ahlsell hackathon</span>
       </div>
@@ -18,15 +18,24 @@
 
     <section class="hero-grid">
       <div class="hero-copy" data-phase-copy="upload">
-        <p class="badge">No drawing loaded</p>
-        <h1>Pick a drawing<br /><em>from the pack.</em></h1>
-        <p class="lead">
-          Eleven drawings are on the server. We only ran the BoM API on PLAN 09
-          (A-40-1-1091), so that is the only sheet with a draft.
-        </p>
+        <p class="badge">PLAN 09 · one floor</p>
+        <h1>Who is opening<br /><em>this drawing?</em></h1>
+        <p class="lead">Pick a path, then open PLAN 09. Still not an order.</p>
+        <div class="doors" role="tablist" aria-label="Who is this for">
+          <button type="button" class="door customer on" id="doorCust">
+            <span class="door-kicker">Customer</span>
+            <strong>Send a request</strong>
+            <span>Answer a few questions on PLAN 09. Send a list. A specialist still checks it.</span>
+          </button>
+          <button type="button" class="door specialist" id="doorSpec">
+            <span class="door-kicker">Specialist</span>
+            <strong>Check Bluebeam</strong>
+            <span>Drop the PDF you saved in Revu. We check it against this draft.</span>
+          </button>
+        </div>
         <div class="actions">
           <button class="btn-orange" id="uploadExample" type="button">Open PLAN 09</button>
-          <span class="micro">Other sheets have no draft yet</span>
+          <span class="micro" id="doorHint">Then we open the customer request.</span>
         </div>
       </div>
 
@@ -41,8 +50,9 @@
       </div>
 
       <div class="hero-copy" data-phase-copy="overview" hidden>
-        <p class="badge">Draft ready · still not an order</p>
-        <h1>PLAN 09 is ready.<br /><em>Open the draft.</em></h1>
+        <p class="badge" id="overviewBadge">Draft ready · still not an order</p>
+        <h1 id="overviewTitle">PLAN 09 is ready.<br /><em>See what we found.</em></h1>
+        <p class="lead" id="overviewLead">Answer a few questions. This is a request, not an order.</p>
         <div class="actions">
           <button class="btn-orange" id="tryExample" type="button">See what we found</button>
         </div>
@@ -58,52 +68,52 @@
             <img class="preview-plan" src="img/plan-1091.png" alt="PLAN 09 drawing ready to upload" />
             <div class="hero-scan" aria-hidden="true"></div>
             <div class="file-picker" id="filePicker">
-              <p class="file-picker-path">project-4-health-centre / drawings</p>
+              <p class="file-picker-path">Health centre · floor plans</p>
               <p class="file-group">Floor plans</p>
               <button type="button" class="file-row ready" id="pick1091">
                 <span class="fname">A-40-1-1091.pdf</span>
                 <span class="fmeta">PLAN 09 · draft ready</span>
               </button>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-40-1-1092.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-40-1-1101.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-40-1-1102.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-40-1-1103.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-40-1-1111.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-40-1-1122.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
               <p class="file-group">Setting-out</p>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-46-4-02.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-46-4-04.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-46-4-06.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
-              <div class="file-row locked" title="BoM API was not run on this sheet">
+              <div class="file-row locked" title="No draft on this sheet">
                 <span class="fname">A-46-4-11.pdf</span>
-                <span class="fmeta">No API run</span>
+                <span class="fmeta">No draft</span>
               </div>
             </div>
             <ol class="hero-steps" id="heroSteps">
@@ -206,6 +216,6 @@
   </div>
 
   <input type="file" id="bbFile" accept=".pdf,.csv,.txt,.xml,application/pdf,text/csv,text/xml" hidden />
-  <script src="js/app.js?v=nopitch2"></script>
+  <script src="js/app.js?v=doors1"></script>
 </body>
 </html>

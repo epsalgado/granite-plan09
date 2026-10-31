@@ -26,6 +26,7 @@ let requestSent = false;
 let lineFilter = "fittings";
 let compareState = null;
 let compareBusy = false;
+let landingRole = "customer";
 const BASE_W = 1600;
 const STEPS = ["drawing", "reading", "found", "choose", "send"];
 
@@ -330,6 +331,57 @@ function zoomToFit(marks) {
   applyView();
 }
 
+function customerFocusSet() {
+  const rooms = new Set();
+  const codes = new Set();
+  for (const it of flowItems) {
+    if (it.group !== "need" && it.group !== "ready") continue;
+    if (it.room) rooms.add(it.room);
+    if (it.code) codes.add(normCode(it.code));
+  }
+  return { rooms, codes };
+}
+
+function comparePinClass(m) {
+  if (!compareState || compareState.source === "Could not compare") return "";
+  const isRoom = String(m.label || m.id).startsWith("A0-");
+  const label = normCode(m.label || m.code);
+  const room = normSpace(m.id || m.room || m.label);
+  const rank = { extra: 4, diff: 3, miss: 2, same: 1 };
+  let best = 0;
+  let cls = "dim";
+  const consider = (status, r) => {
+    const sub = normCode(r.subject);
+    const spaces = String(r.space || "")
+      .split(",")
+      .map((x) => normSpace(x))
+      .filter(Boolean);
+    const ok = isRoom ? spaces.includes(room) : sub === label;
+    if (!ok) return;
+    if (rank[status] > best) {
+      best = rank[status];
+      cls = "cmp-" + status;
+    }
+  };
+  compareState.onlyBluebeam.forEach((r) => consider("extra", r));
+  compareState.different.forEach((r) => consider("diff", r));
+  compareState.onlyGranite.forEach((r) => consider("miss", r));
+  compareState.same.forEach((r) => consider("same", r));
+  return cls;
+}
+
+function pinTone(m) {
+  if (specialist) return comparePinClass(m);
+  const { rooms, codes } = customerFocusSet();
+  const on =
+    rooms.has(m.id) ||
+    rooms.has(m.label) ||
+    rooms.has(m.room) ||
+    codes.has(normCode(m.label)) ||
+    codes.has(normCode(m.code));
+  return on ? "" : "dim";
+}
+
 function visibleMarks() {
   return (job.marks || []).filter((m) => {
     const label = String(m.label || m.id);
@@ -350,7 +402,8 @@ function drawMarks() {
         : String(m.label).startsWith("IL")
           ? "extra"
           : "code";
-      return `<button type="button" class="pin ${kind} ${sel}" data-id="${m.id}" data-room="${room}"
+      const tone = pinTone(m);
+      return `<button type="button" class="pin ${kind} ${sel} ${tone}" data-id="${m.id}" data-room="${room}"
         style="left:${m.x}%;top:${m.y}%">${m.label}</button>`;
     })
     .join("");
@@ -521,8 +574,8 @@ function foundHtml() {
   return `
     <div class="basket-head">
       <p class="cust-kicker">Customer · what we found</p>
-      <h2>Read this, then answer questions</h2>
-      <p>Pins on the drawing are rooms we found. You do not pick products here. Click a card to zoom to it, then press Start questions.</p>
+      <h2>What goes on your request</h2>
+      <p>Bright pins are this request. Click a card to zoom, then press Start questions. You are not shopping yet.</p>
     </div>
     <button type="button" class="brief ok ${selected === "IL.4" ? "sel" : ""}" data-zoom="IL.4">
       <strong>Already on the request</strong>
@@ -535,8 +588,8 @@ function foundHtml() {
       <p class="how">Click to see the rooms · then press Start questions</p>
     </button>
     <div class="brief off">
-      <strong>Left off this request</strong>
-      <p>${c.cant.length} lines stay off: doors, windows, other floors, and symbols with no type. They are not on this request.</p>
+      <strong>Another trade / other floors</strong>
+      <p>Doors, windows and rooms that are not on PLAN 09 stay off this request.</p>
     </div>`;
 }
 
@@ -571,13 +624,19 @@ function chooseHtml() {
       <p>${g.items.length} on PLAN 09 · ${esc(where)}</p>
     </div>
     <p class="ask">${esc(g.question)}</p>
+    ${
+      rooms.length > 1
+        ? `<p class="apply-all">This answer applies to all ${rooms.length} rooms: ${esc(rooms.join(", "))}.</p>`
+        : ""
+    }
     <p class="need always">${esc(g.hint || "")}</p>
     <div class="choices">${options}</div>
     ${
       picked
         ? `<p class="picked-note">${skip ? "Saved as a question for Ahlsell." : "Saved on the request."} Press Next question.</p>`
         : `<p class="need always">Pick one box. This is still not an order.</p>`
-    }`;
+    }
+    <p class="cat-hint">Need a different article? Catalog is top right — it has names and numbers, not specs.</p>`;
 }
 
 function sendHtml() {
@@ -605,8 +664,9 @@ function sendHtml() {
       <thead><tr><th>Room</th><th>Item</th><th>Qty</th><th>Article</th><th>Your choice</th></tr></thead>
       <tbody>${rows || `<tr><td colspan="5">Nothing added yet — you can still send the questions.</td></tr>`}</tbody>
     </table>
-    <p class="draft-meta">${c.need.length} still need an answer · ${c.cant.length} cannot be bought from this drawing</p>
+    <p class="draft-meta">${c.need.length} still need an answer · doors and other floors stay off this list</p>
     <div class="send-actions">
+      <button type="button" class="btn-orange" id="reqXlsBtn">Download request Excel</button>
       <button type="button" class="btn-ghost light" id="csvBtn">Download request CSV</button>
       <span id="sentMsg" ${requestSent ? "" : "hidden"}>Sent. A specialist will check this floor.</span>
     </div>`;
@@ -850,6 +910,7 @@ function compareHtml() {
           <span class="bb-pill diff">Different ${s.different.length}</span>
           <span class="bb-pill granite">Only in Granite ${s.onlyGranite.length}</span>
           <span class="bb-pill extra">Only in Bluebeam ${s.onlyBluebeam.length}</span>
+          <button type="button" class="btn-orange" id="bbCmpXls">Download Excel</button>
         </div>
         <p class="bb-source">${esc(label)}${s.note ? " · " + esc(s.note) : ""}</p>
         ${cmpTable("Different", s.different, true)}
@@ -857,7 +918,6 @@ function compareHtml() {
         ${cmpTable("Only in Bluebeam", s.onlyBluebeam, true)}
         ${cmpTable("Same", s.same, false)}
         <div class="send-actions">
-          <button type="button" class="btn-orange" id="bbCmpXls">Download comparison Excel</button>
           <button type="button" class="btn-ghost light" id="bbCmpCsv">Download comparison CSV</button>
           <button type="button" class="btn-ghost light" id="bbClear">Clear check</button>
         </div>`;
@@ -867,6 +927,12 @@ function compareHtml() {
     <div class="bb-box" id="bbDrop">
       <p class="spec-kicker">Specialist tool · Bluebeam</p>
       <h2>Upload your Bluebeam file</h2>
+      <ol class="bb-steps">
+        <li>Count in Revu</li>
+        <li>Save PDF or Summary CSV</li>
+        <li>Drop it here</li>
+        <li>Take Excel — you still sign</li>
+      </ol>
       <p class="bb-lead">Drop the PDF you saved in Revu, or a Markup Summary CSV. We check it against this draft: same, missing, extra, different.</p>
       <button type="button" class="bb-dropzone" id="bbPick"${busy}>
         <strong>Drop your Bluebeam PDF or CSV here</strong>
@@ -1004,8 +1070,13 @@ function renderCatalog() {
   });
 }
 
+function catalogAllowed() {
+  if (specialist) return true;
+  return step === "choose" || step === "send";
+}
+
 function openCatalog() {
-  if (!job) return;
+  if (!job || !catalogAllowed()) return;
   catalogOpen = true;
   $("catOverlay").hidden = false;
   renderCatalog();
@@ -1049,9 +1120,61 @@ function addFromCatalog(article) {
   renderCatalog();
 }
 
+function setLandingRoleUi() {
+  if ($("landing")) $("landing").dataset.role = landingRole;
+  if ($("doorCust")) $("doorCust").classList.toggle("on", landingRole === "customer");
+  if ($("doorSpec")) $("doorSpec").classList.toggle("on", landingRole === "specialist");
+  const hint = $("doorHint");
+  if (hint) {
+    hint.textContent = landingRole === "specialist"
+      ? "Then we open the Bluebeam check."
+      : "Then we open the customer request.";
+  }
+  const spec = landingRole === "specialist";
+  const badge = $("overviewBadge");
+  const title = $("overviewTitle");
+  const lead = $("overviewLead");
+  const tryBtn = $("tryExample");
+  if (badge) badge.textContent = spec ? "Draft ready · check Bluebeam" : "Draft ready · still not an order";
+  if (title) {
+    title.innerHTML = spec
+      ? "PLAN 09 is ready.<br /><em>Check your Bluebeam file.</em>"
+      : "PLAN 09 is ready.<br /><em>See what we found.</em>";
+  }
+  if (lead) {
+    lead.textContent = spec
+      ? "Drop the PDF you saved in Revu. We check it against this draft."
+      : "Answer a few questions. This is a request, not an order.";
+  }
+  if (tryBtn) tryBtn.textContent = spec ? "Open Bluebeam check" : "See what we found";
+  const foot = document.querySelector(".preview-list footer");
+  if (foot) {
+    foot.innerHTML = spec
+      ? "Ready to <strong>check Bluebeam</strong>"
+      : "Ready to choose <strong>after you answer</strong>";
+  }
+}
+
+function updateLegend() {
+  const el = document.querySelector(".pin-legend");
+  if (!el) return;
+  if (specialist && compareState && compareState.source !== "Could not compare") {
+    el.innerHTML =
+      `<span class="lg same"></span> Same <span class="lg diff"></span> Different <span class="lg miss"></span> Only Granite <span class="lg onlybb"></span> Only Bluebeam`;
+  } else if (!specialist) {
+    el.innerHTML =
+      `<span class="lg room"></span> On this request <span class="lg code"></span> Product <span class="lg extra"></span> Hatch`;
+  } else {
+    el.innerHTML =
+      `<span class="lg room"></span> Room <span class="lg code"></span> Product <span class="lg extra"></span> Extra`;
+  }
+}
+
 function setRole(next) {
   specialist = !!next;
-  if (catalogOpen) closeCatalog();
+  landingRole = specialist ? "specialist" : "customer";
+  setLandingRoleUi();
+  if (catalogOpen && !catalogAllowed()) closeCatalog();
   render({ zoom: false });
 }
 
@@ -1065,6 +1188,7 @@ function updateChrome() {
   $("custBtn").classList.toggle("on", !specialist);
   $("specBtn").classList.toggle("on", specialist);
   $("catalogBtn").classList.toggle("active", catalogOpen);
+  $("catalogBtn").hidden = !catalogAllowed();
   const addedN = flowItems.filter((it) => it.group === "added").length;
   $("catalogBtn").textContent = addedN ? `Catalog (${addedN})` : "Catalog";
   $("app").dataset.step = step;
@@ -1079,9 +1203,9 @@ function updateChrome() {
     banner.textContent = "Specialist tool · drop your Bluebeam PDF or CSV · we check it against this draft";
     if (sheetTitle) sheetTitle.textContent = "PLAN 09 · upload Bluebeam to check";
     $("flowStatus").textContent = "Drop their Revu PDF or Summary CSV on the right";
-    $("continueBtn").textContent = "Back to customer";
+    $("continueBtn").textContent = "Customer request";
     $("continueBtn").disabled = false;
-    $("backBtn").disabled = true;
+    $("backBtn").disabled = false;
   } else {
     banner.textContent = "Customer request · simple path · still not an order";
     if (sheetTitle) sheetTitle.textContent = "A-40-1-1091 · PLAN 09";
@@ -1120,10 +1244,10 @@ function render(opts = {}) {
   if (specialist) {
     $("trust").hidden = false;
     $("trust").innerHTML = `
-      <div class="t-card warn"><strong>API draft</strong><b>63/69</b><span>${esc(job.apiNote)}</span></div>
-      <div class="t-card ok"><strong>Email vs plan</strong><b>4 match</b><span>Named H2 rooms are here</span></div>
+      <div class="t-card ok"><strong>This floor</strong><b>PLAN 09</b><span>Fittings draft to check — you still sign</span></div>
+      <div class="t-card ok"><strong>Email vs plan</strong><b>4 H2</b><span>Named shelf rooms are on this sheet</span></div>
       <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>Never listed these shelves</span></div>
-      <div class="t-card ok"><strong>Bluebeam check</strong><b>Upload</b><span>Your Revu PDF or Summary CSV against this draft</span></div>`;
+      <div class="t-card ok"><strong>Your job</strong><b>Revu</b><span>Count there, drop the save here, take Excel</span></div>`;
   }
   const pillEl = $("sheetPill");
   if (pillEl) {
@@ -1139,13 +1263,18 @@ function render(opts = {}) {
         : "Click a card to zoom · then Start questions";
     } else if (step === "choose") {
       const g = currentGroup();
-      const room = selected || (g && g.items[0] && g.items[0].room);
-      pillEl.textContent = room ? `This question · ${room}` : "Pick one box on the right";
+      const rooms = g ? [...new Set(g.items.map((it) => it.room).filter(Boolean))] : [];
+      pillEl.textContent = rooms.length > 1
+        ? `This question · ${rooms.length} rooms`
+        : rooms[0]
+          ? `This question · ${rooms[0]}`
+          : "Pick one box on the right";
     } else {
       const it = flowItems.find((x) => x.id === selected || x.room === selected);
       pillEl.textContent = it ? `${it.room || it.code || ""} · ${it.title}` : "Check the request list";
     }
   }
+  updateLegend();
   drawMarks();
   $("side").innerHTML = sideHtml();
   $("side").querySelectorAll("[data-item]").forEach((el) => {
@@ -1178,6 +1307,8 @@ function render(opts = {}) {
   });
   const csv = $("csvBtn");
   if (csv) csv.addEventListener("click", downloadCsv);
+  const reqXls = $("reqXlsBtn");
+  if (reqXls) reqXls.addEventListener("click", downloadRequestExcel);
   bindCompareUi();
   updateChrome();
   if (opts.zoom) focusSelected();
@@ -1615,6 +1746,10 @@ function buildCompareXlsx() {
     name: "All lines",
     xml: xlsxSheet(allRows, { freeze: true, filter: true, widths }),
   });
+  return packXlsx(sheets);
+}
+
+function packXlsx(sheets) {
   const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
   <fonts>
@@ -1736,6 +1871,53 @@ function downloadCompareExcel() {
   const bytes = buildCompareXlsx();
   downloadBlob(
     "granite-plan09-compare.xlsx",
+    new Blob([bytes], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    })
+  );
+}
+
+function downloadRequestExcel() {
+  const c = counts();
+  const header = [
+    { v: "Room", s: 1 },
+    { v: "Item", s: 1 },
+    { v: "Qty", s: 1 },
+    { v: "Article", s: 1 },
+    { v: "Your choice", s: 1 },
+  ];
+  const body = c.inBasket.map((it) => {
+    const ch = it.choice || {};
+    const ask = optionVerb(ch) === "Send as a question";
+    const style = ask ? 4 : 2;
+    return [
+      { v: it.room || "—", s: style },
+      { v: itemTitle(it), s: style },
+      { v: it.qty, t: "n", s: style },
+      { v: ch.article || "question", s: style },
+      { v: choiceName(it), s: style },
+    ];
+  });
+  const summary = xlsxSheet(
+    [
+      [{ v: "PLAN 09 customer request", s: 6 }],
+      [{ v: "Not an order. A specialist still checks lengths, kit types and hatch quantities.", s: 0 }],
+      [],
+      [{ v: "On the request", s: 2 }, { v: c.inBasket.length, t: "n", s: 2 }],
+      [{ v: "Still a question", s: 4 }, { v: c.questions.length, t: "n", s: 4 }],
+      [{ v: "Not answered yet", s: 3 }, { v: c.need.length, t: "n", s: 3 }],
+    ],
+    { widths: [28, 14] }
+  );
+  const bytes = packXlsx([
+    { name: "Summary", xml: summary },
+    {
+      name: "Request",
+      xml: xlsxSheet([header, ...body], { freeze: true, filter: true, widths: [14, 36, 8, 14, 32] }),
+    },
+  ]);
+  downloadBlob(
+    "granite-plan09-request.xlsx",
     new Blob([bytes], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     })
@@ -1935,15 +2117,16 @@ function setLandingPhase(phase) {
   const pill = $("heroPill");
   const label = $("heroBarLabel");
   if (phase === "upload") {
-    pill.textContent = "Empty";
-    label.textContent = "No file";
+    pill.textContent = "Pick a path";
+    label.textContent = "PLAN 09";
   } else if (phase === "reading") {
     pill.textContent = "Reading…";
     label.textContent = "A-40-1-1091 · PLAN 09";
   } else {
-    pill.textContent = "Draft ready";
+    pill.textContent = landingRole === "specialist" ? "Check ready" : "Draft ready";
     label.textContent = "A-40-1-1091 · PLAN 09";
   }
+  setLandingRoleUi();
 }
 
 function markHeroSteps(activeIdx) {
@@ -2012,7 +2195,8 @@ async function startDemo() {
   $("app").classList.add("on");
   bindViewer();
   selected = null;
-  specialist = false;
+  specialist = landingRole === "specialist";
+  setLandingRoleUi();
   setStep("found");
 }
 
@@ -2047,6 +2231,10 @@ function continueFlow() {
 }
 
 function backFlow() {
+  if (specialist) {
+    goLanding("overview");
+    return;
+  }
   if (step === "send") setStep("choose");
   else if (step === "choose") setStep("found");
   else if (step === "found") goLanding("overview");
@@ -2097,6 +2285,14 @@ $("pick1091").addEventListener("click", (e) => {
   choosePlan09();
 });
 $("skipRead").addEventListener("click", skipLandingRead);
+$("doorCust").addEventListener("click", () => {
+  landingRole = "customer";
+  setLandingRoleUi();
+});
+$("doorSpec").addEventListener("click", () => {
+  landingRole = "specialist";
+  setLandingRoleUi();
+});
 $("custBtn").addEventListener("click", () => setRole(false));
 $("specBtn").addEventListener("click", () => setRole(true));
 $("bbFile").addEventListener("change", (e) => {
