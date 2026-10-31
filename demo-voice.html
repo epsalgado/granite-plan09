@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Granite — demo voice (captions)</title>
+  <link rel="icon" href="img/favicon.ico?v=6" sizes="any" />
+  <style>
+    :root { --ink:#e8ffff; --muted:#9fd; --bg:#042326; --card:#0a3236; --amber:#e87722; --teal:#1ec8c8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font: 18px/1.45 "Segoe UI", system-ui, sans-serif; background: #042326; color: var(--ink); }
+    main { max-width: 42rem; margin: 0 auto; padding: 1.5rem 1.2rem 3rem; }
+    h1 { font-size: 1.4rem; margin: 0 0 0.35rem; }
+    .sub { color: #9ee; margin: 0 0 1.2rem; font-size: 0.92rem; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.2rem; }
+    button, a.btn {
+      font: inherit; cursor: pointer; border: 0; border-radius: 8px;
+      padding: 0.55rem 0.9rem; background: var(--amber); color: #fff; text-decoration: none;
+    }
+    button.ghost, a.ghost { background: transparent; color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
+    button.on { box-shadow: 0 0 0 3px #1ec8c8; }
+    .card { background: var(--card); border-radius: 12px; padding: 1rem 1.1rem; margin: 0 0 0.7rem; }
+    .card .who { color: var(--amber); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+    .card p { margin: 0.25rem 0 0.55rem; font-size: 1.15rem; }
+    .card.now { outline: 2px solid var(--teal); }
+    .note { font-size: 0.82rem; color: #8cc; margin-top: 1.2rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Demo voice · captions</h1>
+    <p class="sub">Generated female computer voice. Not a real person. Play this while you click the live demo. Sound off on the other tab.</p>
+    <div class="row">
+      <button type="button" id="playCust">Play customer</button>
+      <button type="button" id="playSpec">Play specialist</button>
+      <button type="button" id="playBoth">Play both</button>
+      <button type="button" class="ghost" id="stopBtn">Stop</button>
+      <a class="btn ghost" href="https://granite-plan09.pages.dev/" target="_blank" rel="noreferrer">Open live demo</a>
+    </div>
+    <p class="sub" id="status">Stopped.</p>
+    <div id="cards"></div>
+    <p class="note">Rebuild audio: <code>PYTHONPATH=.py-tts python3 scripts/build-demo-voice.py</code>. Files in <code>files/demo-voice/</code>.</p>
+  </main>
+  <script>
+    const CAPS = [
+      { id: "c1", who: "Customer", text: "Customer. Send a request. Still not an order.", src: "files/demo-voice/c1.mp3" },
+      { id: "c2", who: "Customer", text: "Open PLAN 09.", src: "files/demo-voice/c2.mp3" },
+      { id: "c3", who: "Customer", text: "This is what we found on your floor.", src: "files/demo-voice/c3.mp3" },
+      { id: "c4", who: "Customer", text: "Answer a few questions. Missing spec stays a question.", src: "files/demo-voice/c4.mp3" },
+      { id: "c5", who: "Customer", text: "Send. A specialist will check it.", src: "files/demo-voice/c5.mp3" },
+      { id: "s1", who: "Specialist", text: "Specialist. First crack in Revu. You still sign.", src: "files/demo-voice/s1.mp3" },
+      { id: "s2", who: "Specialist", text: "Download the PDF. Page 2. Alt+L.", src: "files/demo-voice/s2.mp3" },
+      { id: "s3", who: "Specialist", text: "69 lines are already markups. Real codes stay.", src: "files/demo-voice/s3.mp3" },
+      { id: "s4", who: "Specialist", text: "Filter NEED and CHECK. Fill those in.", src: "files/demo-voice/s4.mp3" },
+      { id: "s5", who: "Specialist", text: "H3 is not on this sheet. We said so.", src: "files/demo-voice/s5.mp3" },
+      { id: "s6", who: "Specialist", text: "Save. Compare. Sign.", src: "files/demo-voice/s6.mp3" }
+    ];
+    const box = document.getElementById("cards");
+    const status = document.getElementById("status");
+    let audio = null;
+    let queue = [];
+    let idx = -1;
+
+    CAPS.forEach((c) => {
+      const el = document.createElement("article");
+      el.className = "card";
+      el.id = "card-" + c.id;
+      el.innerHTML = `<div class="who">${c.who}</div><p>${c.text}</p><button type="button" class="ghost" data-one="${c.id}">Play this line</button>`;
+      box.appendChild(el);
+    });
+
+    function stop() {
+      if (audio) { audio.pause(); audio = null; }
+      queue = [];
+      idx = -1;
+      document.querySelectorAll(".card").forEach((el) => el.classList.remove("now"));
+      status.textContent = "Stopped.";
+    }
+
+    function playList(ids) {
+      stop();
+      queue = ids.slice();
+      next();
+    }
+
+    function next() {
+      idx += 1;
+      if (idx >= queue.length) { status.textContent = "Done."; return; }
+      const id = queue[idx];
+      const cap = CAPS.find((c) => c.id === id);
+      document.querySelectorAll(".card").forEach((el) => el.classList.toggle("now", el.id === "card-" + id));
+      status.textContent = `Playing ${cap.who}: ${cap.text}`;
+      audio = new Audio(cap.src);
+      audio.onended = next;
+      audio.onerror = () => { status.textContent = "Could not play " + cap.src; next(); };
+      audio.play();
+    }
+
+    document.getElementById("playCust").onclick = () => playList(["c1","c2","c3","c4","c5"]);
+    document.getElementById("playSpec").onclick = () => playList(["s1","s2","s3","s4","s5","s6"]);
+    document.getElementById("playBoth").onclick = () => playList(CAPS.map((c) => c.id));
+    document.getElementById("stopBtn").onclick = stop;
+    box.addEventListener("click", (e) => {
+      const id = e.target && e.target.dataset && e.target.dataset.one;
+      if (id) playList([id]);
+    });
+  </script>
+</body>
+</html>

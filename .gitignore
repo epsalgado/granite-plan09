@@ -1,5 +1,7 @@
 img/labels.json
 api.txt
+.py-tts/
+.venv-tts/
 .DS_Store
 *.log
 .idea/
