@@ -13,6 +13,8 @@ let step = "drawing";
 let specialist = false;
 let chooseIndex = 0;
 let selected = null;
+let zoomQuery = null;
+let notesOpen = false;
 let scale = 1;
 let panX = 0;
 let panY = 0;
@@ -476,6 +478,8 @@ function bindViewer() {
 }
 
 function markFor(id) {
+  const hits = marksForQuery(queryFromToken(id));
+  if (hits.length) return hits[0];
   if (!job || !id) return null;
   const marks = job.marks || [];
   const hit =
@@ -493,6 +497,117 @@ function markFor(id) {
   );
 }
 
+const CHECK_FOCUS = {
+  h2match: { rooms: ["A0-022", "A0-023", "A0-025", "A0-026"], codes: ["H2"] },
+  h2len: { rooms: ["A0-022", "A0-023", "A0-025", "A0-026"], codes: ["H2"] },
+  kits: { codes: ["TP3", "TP2"] },
+  il: { codes: ["IL.4", "IL.5", "IL.6", "IL.7"] },
+  unknown: { codes: ["S1"] },
+  quote: { codes: ["H2"] },
+  nocode: { codes: ["S1", "AK"] },
+  noroom: { codes: ["IL.4", "IL.5", "IL.6", "IL.7"] },
+};
+
+function queryFromToken(id) {
+  if (!id) return null;
+  if (/^A0-/i.test(id)) return { rooms: [normSpace(id)], codes: [] };
+  return { rooms: [], codes: [normCode(id)] };
+}
+
+function queryFromRow(room, code) {
+  const rooms = String(room || "")
+    .split(",")
+    .map((x) => normSpace(x))
+    .filter((x) => /^A0-/.test(x));
+  const codes = String(code || "")
+    .split(",")
+    .map((x) => normCode(x))
+    .filter(Boolean);
+  if (!rooms.length && !codes.length) return null;
+  return { rooms, codes };
+}
+
+function markDist2(a, b) {
+  const dx = (a.x || 0) - (b.x || 0);
+  const dy = (a.y || 0) - (b.y || 0);
+  return dx * dx + dy * dy;
+}
+
+function marksMatchingRoom(room) {
+  const r = normSpace(room);
+  if (!r || !job) return [];
+  return (job.marks || []).filter((m) => {
+    return normSpace(m.id) === r || normSpace(m.label) === r || normSpace(m.room) === r;
+  });
+}
+
+function marksMatchingCode(code) {
+  const c = normCode(code);
+  if (!c || !job) return [];
+  return (job.marks || []).filter((m) => {
+    return normCode(m.id) === c || normCode(m.label) === c || normCode(m.code) === c;
+  });
+}
+
+function marksForQuery(q) {
+  if (!q || !job) return [];
+  if (q.markIds && q.markIds.length) {
+    const want = new Set(q.markIds);
+    return (job.marks || []).filter((m) => want.has(m.id));
+  }
+  const rooms = q.rooms || [];
+  const codes = q.codes || [];
+  const roomMarks = rooms.flatMap(marksMatchingRoom);
+  const codeMarks = codes.flatMap(marksMatchingCode);
+  if (roomMarks.length && codeMarks.length) {
+    const out = [];
+    const seen = new Set();
+    const add = (m) => {
+      if (m && !seen.has(m.id)) {
+        seen.add(m.id);
+        out.push(m);
+      }
+    };
+    roomMarks.forEach(add);
+    for (const rm of roomMarks) {
+      for (const code of codes) {
+        const hits = marksMatchingCode(code);
+        if (!hits.length) continue;
+        hits.sort((a, b) => markDist2(a, rm) - markDist2(b, rm));
+        add(hits[0]);
+      }
+    }
+    return out;
+  }
+  if (roomMarks.length) return roomMarks;
+  if (codeMarks.length) return codeMarks;
+  return [];
+}
+
+function focusOn(q) {
+  zoomQuery = q && ((q.rooms && q.rooms.length) || (q.codes && q.codes.length) || (q.markIds && q.markIds.length))
+    ? q
+    : null;
+  selected = zoomQuery
+    ? (zoomQuery.rooms && zoomQuery.rooms[0]) || (zoomQuery.codes && zoomQuery.codes[0]) || (zoomQuery.markIds && zoomQuery.markIds[0]) || null
+    : null;
+  render({ zoom: true });
+}
+
+function rowFocused(room, code) {
+  if (!zoomQuery) return selected && (selected === room || selected === code);
+  const rooms = zoomQuery.rooms || [];
+  const codes = zoomQuery.codes || [];
+  const r = normSpace(room);
+  const c = normCode(code);
+  if (rooms.length && r) {
+    if (!rooms.includes(r)) return false;
+    return !codes.length || !c || codes.includes(c);
+  }
+  if (codes.length && c) return codes.includes(c) && !rooms.length;
+  return false;
+}
+
 function groupFocusIds() {
   if (step !== "choose") return null;
   const g = currentGroup();
@@ -507,6 +622,9 @@ function groupFocusIds() {
 }
 
 function pinSelected(m) {
+  if (zoomQuery) {
+    return marksForQuery(zoomQuery).some((hit) => hit.id === m.id);
+  }
   if (step === "choose") {
     const g = currentGroup();
     if (g) {
@@ -523,6 +641,10 @@ function pinSelected(m) {
 }
 
 function marksForFocus() {
+  if (zoomQuery) {
+    const hits = marksForQuery(zoomQuery);
+    if (hits.length) return hits;
+  }
   const g = step === "choose" ? currentGroup() : null;
   if (g && job) {
     const marks = job.marks || [];
@@ -546,8 +668,14 @@ function focusSelected() {
 }
 
 function select(id) {
-  selected = id;
-  render({ zoom: true });
+  const mark = (job && job.marks || []).find((m) => m.id === id || m.room === id || m.label === id);
+  if (mark) {
+    zoomQuery = { markIds: [mark.id] };
+    selected = mark.id;
+    render({ zoom: true });
+    return;
+  }
+  focusOn(queryFromToken(id));
 }
 
 function groupClass(it) {
@@ -644,7 +772,7 @@ function sendHtml() {
   const rows = c.inBasket
     .map((it) => {
       const ch = it.choice || {};
-      return `<tr>
+      return `<tr data-send="1" data-room="${esc(it.room || "")}" data-code="${esc(it.code || "")}" class="${rowFocused(it.room, it.code) ? "sel" : ""}">
         <td>${esc(it.room || "—")}</td>
         <td>${esc(itemTitle(it))}</td>
         <td>${it.qty}</td>
@@ -699,7 +827,15 @@ function filteredLines() {
 
 function specialistHtml() {
   const checks = (job.checks || [])
-    .map((c) => `<li class="${c.ok ? "ok" : ""}">${c.ok ? "✓" : "!"} ${esc(c.text)}</li>`)
+    .map((c) => {
+      const q = CHECK_FOCUS[c.id];
+      const can = !!(q && ((q.rooms && q.rooms.length) || (q.codes && q.codes.length)));
+      const on = zoomQuery && zoomQuery.checkId === c.id;
+      const rooms = can && q.rooms ? ` data-rooms="${esc(q.rooms.join(","))}"` : "";
+      const codes = can && q.codes ? ` data-codes="${esc(q.codes.join(","))}"` : "";
+      const check = can ? ` data-check="${esc(c.id)}"` : "";
+      return `<li class="${c.ok ? "ok" : ""} ${can ? "zoomable" : ""} ${on ? "sel" : ""}"${rooms}${codes}${check}>${c.ok ? "✓" : "!"} ${esc(c.text)}</li>`;
+    })
     .join("");
   const lines = filteredLines();
   const filters = [
@@ -713,7 +849,7 @@ function specialistHtml() {
     .map(([id, label]) => `<button type="button" class="filter-btn ${lineFilter === id ? "active" : ""}" data-filter="${id}">${label}</button>`)
     .join("");
   const rows = lines
-    .map((ln) => `<tr data-line="${ln.id}" data-room="${esc(ln.room || "")}" data-code="${esc(ln.code || "")}">
+    .map((ln) => `<tr data-line="${ln.id}" data-room="${esc(ln.room || "")}" data-code="${esc(ln.code || "")}" class="${rowFocused(ln.room, ln.code) ? "sel" : ""}">
       <td>${esc(ln.code || "—")}</td>
       <td>${esc(ln.text)}</td>
       <td>${ln.qty}</td>
@@ -727,7 +863,7 @@ function specialistHtml() {
       <h2>Markups list</h2>
       <p>${esc(job.apiNote)} Subject = code. Space = room. You still sign.</p>
     </div>
-    <details class="bb-notes">
+    <details class="bb-notes"${notesOpen ? " open" : ""}>
       <summary>Draft notes · ${(job.checks || []).length}</summary>
       <ul class="checks">${checks}</ul>
     </details>
@@ -883,7 +1019,7 @@ function applyCompare(theirRows, meta) {
 }
 
 function cmpRowHtml(row) {
-  return `<tr data-cmp="1" data-room="${esc(row.space || "")}" data-code="${esc(row.subject || "")}">
+  return `<tr data-cmp="1" data-room="${esc(row.space || "")}" data-code="${esc(row.subject || "")}" class="${rowFocused(row.space, row.subject) ? "sel" : ""}">
     <td>${esc(row.subject || "—")}</td>
     <td>${esc(row.space || "—")}</td>
     <td>${row.graniteQty}</td>
@@ -1274,9 +1410,12 @@ function render(opts = {}) {
   const pillEl = $("sheetPill");
   if (pillEl) {
     if (specialist) {
-      const mark = markFor(selected);
+      const hits = zoomQuery ? marksForQuery(zoomQuery) : [];
+      const mark = hits[0] || markFor(selected);
       pillEl.textContent = mark
-        ? `Showing ${mark.label || mark.id} on the drawing`
+        ? hits.length > 1
+          ? `Showing ${hits.length} marks on the drawing`
+          : `Showing ${mark.label || mark.id} on the drawing`
         : "Drop your Bluebeam file on the right to check this draft";
     } else if (step === "found") {
       const mark = markFor(selected);
@@ -1301,16 +1440,26 @@ function render(opts = {}) {
   $("side").innerHTML = sideHtml();
   $("side").querySelectorAll("[data-item]").forEach((el) => {
     el.addEventListener("click", () => {
-      selected = el.dataset.room || el.dataset.code || el.dataset.item;
-      render({ zoom: true });
+      focusOn(queryFromRow(el.dataset.room, el.dataset.code) || queryFromToken(el.dataset.item));
     });
   });
   $("side").querySelectorAll("[data-zoom]").forEach((el) => {
     el.addEventListener("click", () => {
-      selected = el.dataset.zoom;
-      render({ zoom: true });
+      focusOn(queryFromToken(el.dataset.zoom));
     });
   });
+  $("side").querySelectorAll(".checks .zoomable").forEach((el) => {
+    el.addEventListener("click", () => {
+      notesOpen = true;
+      focusOn({
+        rooms: (el.dataset.rooms || "").split(",").map((x) => x.trim()).filter(Boolean),
+        codes: (el.dataset.codes || "").split(",").map((x) => x.trim()).filter(Boolean),
+        checkId: el.dataset.check || "",
+      });
+    });
+  });
+  const notes = $("side").querySelector(".bb-notes");
+  if (notes) notes.addEventListener("toggle", () => { notesOpen = notes.open; });
   $("side").querySelectorAll("[data-opt]").forEach((el) => {
     el.addEventListener("click", () => pickOption(el.dataset.opt));
   });
@@ -1323,8 +1472,12 @@ function render(opts = {}) {
   });
   $("side").querySelectorAll("tr[data-line]").forEach((el) => {
     el.addEventListener("click", () => {
-      selected = el.dataset.room || el.dataset.code;
-      render({ zoom: true });
+      focusOn(queryFromRow(el.dataset.room, el.dataset.code));
+    });
+  });
+  $("side").querySelectorAll("tr[data-send]").forEach((el) => {
+    el.addEventListener("click", () => {
+      focusOn(queryFromRow(el.dataset.room, el.dataset.code));
     });
   });
   const csv = $("csvBtn");
@@ -1335,7 +1488,9 @@ function render(opts = {}) {
   if (reqSend) reqSend.addEventListener("click", sendRequest);
   bindCompareUi();
   updateChrome();
-  if (opts.zoom) focusSelected();
+  if (opts.zoom) {
+    requestAnimationFrame(() => requestAnimationFrame(focusSelected));
+  }
 }
 
 function pickOption(optId) {
@@ -1346,6 +1501,10 @@ function pickOption(optId) {
     it.choice = opt;
   });
   selected = g.items[0].room || g.items[0].id;
+  zoomQuery = {
+    rooms: [...new Set(g.items.map((it) => it.room).filter(Boolean))],
+    codes: [],
+  };
   render({ zoom: true });
 }
 
@@ -1979,8 +2138,7 @@ function bindCompareUi() {
   }
   $("side").querySelectorAll("tr[data-cmp]").forEach((el) => {
     el.addEventListener("click", () => {
-      selected = el.dataset.room || el.dataset.code;
-      render({ zoom: true });
+      focusOn(queryFromRow(el.dataset.room, el.dataset.code));
     });
   });
 }
@@ -2078,9 +2236,18 @@ function setStep(next, { silent = false } = {}) {
     const undone = groups.findIndex((g) => !(g.items[0] && g.items[0].choice));
     chooseIndex = undone >= 0 ? undone : 0;
     const g = currentGroup();
-    if (g) selected = g.items[0].room || g.items[0].id;
+    if (g) {
+      selected = g.items[0].room || g.items[0].id;
+      zoomQuery = {
+        rooms: [...new Set(g.items.map((it) => it.room).filter(Boolean))],
+        codes: [],
+      };
+    }
   }
-  if (next === "found") selected = null;
+  if (next === "found") {
+    selected = null;
+    zoomQuery = null;
+  }
   render({ zoom: next === "choose" });
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
@@ -2220,6 +2387,8 @@ async function startDemo() {
   $("app").classList.add("on");
   bindViewer();
   selected = null;
+  zoomQuery = null;
+  notesOpen = false;
   specialist = landingRole === "specialist";
   setLandingRoleUi();
   setStep("found");
@@ -2239,6 +2408,9 @@ function continueFlow() {
       chooseIndex += 1;
       const next = currentGroup();
       selected = next ? next.items[0].room || next.items[0].id : selected;
+      zoomQuery = next
+        ? { rooms: [...new Set(next.items.map((it) => it.room).filter(Boolean))], codes: [] }
+        : zoomQuery;
       render({ zoom: true });
       requestAnimationFrame(() => requestAnimationFrame(focusSelected));
       return;

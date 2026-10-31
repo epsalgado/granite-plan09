@@ -955,6 +955,9 @@ button.brief.sel { outline: 2px solid #fff; }
   overflow-wrap: break-word;
 }
 .checks li.ok { background: rgba(42, 122, 82, 0.28); color: #d4f5e4; }
+.checks li.zoomable { cursor: pointer; }
+.checks li.zoomable:hover { outline: 1px solid #1ec8c8; }
+.checks li.sel { outline: 2px solid #8fe8e8; }
 table.compare {
   width: 100%;
   table-layout: fixed;
