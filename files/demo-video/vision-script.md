@@ -85,7 +85,7 @@ When we film the app, each beat is a *feeling*, not a tutorial:
 
 Three jobs. Do them in this order. Do not mix them.
 
-1. **Pictures** — you click the real app (and Revu) on the laptop. We record the screen only. No talking yet.  
+1. **Pictures** — you click the real app and the two PDFs in **Edge**. No Revu. Screen only. No talking.  
 2. **Voice** — later, a human or a warmer computer voice reads the script. Not the old robot track.  
 3. **Cut** — we drop the six clips under the six voice lines on the NAS.
 
@@ -93,18 +93,18 @@ You never have to narrate.
 
 ### The six shots (you click this)
 
+This recording pass is **Edge only**. Do not open Revu. Do not press Alt+L.
+
 Open https://granite-plan09.pages.dev — hard-refresh first.
 
 | Shot | Script beat | You do | Hold on this |
 |---|---|---|---|
 | 1 | The ask | Landing. Show the file `A-40-1-1091.pdf` in the list. Do not go in yet. | “A pack of drawings arrived.” |
 | 2 | Two people | Click **Customer**, then **Specialist**, then back to **Customer**. Stay on the two doors. | Two jobs, one drawing. |
-| 3 | The pain | **Neither door.** Do **not** press Open PLAN 09. Open the raw architect file `data/A-40-1-1091.pdf` in Revu (or any PDF viewer). Zoom a room. Empty sheet — no Granite boxes. | Starting from zero. |
-| 4 | The dream | Specialist door → download **first-crack PDF** → **page 2**. Boxes already on the sheet. Alt+L only if Revu is installed (opens the Markups List). No Revu: Edge or any viewer is fine. | Boxes already there. |
-| 5 | Still theirs | Revu: edit one comment, leave unsigned. No Revu: hover one box so the comment shows. | They check. They sign. |
+| 3 | The pain | **Neither door.** Do **not** press Open PLAN 09. Open `data/A-40-1-1091.pdf` in Edge. Zoom a room. Empty sheet. | Starting from zero. |
+| 4 | The dream | Specialist door → Open PLAN 09 → download first-crack PDF (or the board link). Open in Edge. **Page 2.** Zoom the amber boxes. | Boxes already there. |
+| 5 | Still theirs | Same Edge tab, page 2. Click one amber box so the comment pops. Leave it. | They check. They sign. |
 | 6 | Close | Back to the site. Customer path → **Send request** until **SENT · NOT AN ORDER**. | Handoff, not an order. |
-
-If Revu is not on that machine, shot 4–5 are: open the first-crack PDF in any PDF viewer, page 2, hover a box. Say so in the cut. Do not fake Revu.
 
 ### How you record (laptop)
 
