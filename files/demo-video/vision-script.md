@@ -100,8 +100,8 @@ Open https://granite-plan09.pages.dev — hard-refresh first.
 | 1 | The ask | Landing. Show the file `A-40-1-1091.pdf` in the list. Do not go in yet. | “A pack of drawings arrived.” |
 | 2 | Two people | Click **Customer**, then **Specialist**, then back to **Customer**. Stay on the two doors. | Two jobs, one drawing. |
 | 3 | The pain | **Neither door.** Do **not** press Open PLAN 09. Open the raw architect file `data/A-40-1-1091.pdf` in Revu (or any PDF viewer). Zoom a room. Empty sheet — no Granite boxes. | Starting from zero. |
-| 4 | The dream | Specialist door → download **first-crack PDF** → open **page 2 in Revu**. Alt+L once, then close the list. Do not filter NEED. | Boxes already there. |
-| 5 | Still theirs | In Revu, click one box and change a comment. Leave the stamp as not signed. | They check. They sign. |
+| 4 | The dream | Specialist door → download **first-crack PDF** → **page 2**. Boxes already on the sheet. Alt+L only if Revu is installed (opens the Markups List). No Revu: Edge or any viewer is fine. | Boxes already there. |
+| 5 | Still theirs | Revu: edit one comment, leave unsigned. No Revu: hover one box so the comment shows. | They check. They sign. |
 | 6 | Close | Back to the site. Customer path → **Send request** until **SENT · NOT AN ORDER**. | Handoff, not an order. |
 
 If Revu is not on that machine, shot 4–5 are: open the first-crack PDF in any PDF viewer, page 2, hover a box. Say so in the cut. Do not fake Revu.
