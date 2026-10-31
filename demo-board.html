@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Granite — six shots</title>
+  <link rel="icon" href="img/favicon.ico?v=6" sizes="any" />
+  <style>
+    :root { --bg:#042326; --ink:#e8ffff; --amber:#e87722; --teal:#1ec8c8; --card:#0a3236; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.45 "Segoe UI", system-ui, sans-serif; }
+    main { max-width: 40rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+    h1 { font-size: 1.3rem; margin: 0 0 0.4rem; }
+    .sub { color: #9ee; font-size: 0.92rem; margin: 0 0 1.2rem; }
+    .card { background: var(--card); border-radius: 12px; padding: 1rem 1.1rem; margin: 0 0 0.75rem; }
+    .card.on { outline: 2px solid var(--teal); }
+    .n { color: var(--amber); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; }
+    .card h2 { font-size: 1.05rem; margin: 0.2rem 0 0.45rem; }
+    .card p { margin: 0.25rem 0; }
+    .do { color: var(--teal); }
+    .say { color: #ffe0c2; }
+    .row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0 0 1rem; }
+    button {
+      font: inherit; border: 0; border-radius: 8px; padding: 0.5rem 0.85rem;
+      background: var(--amber); color: #fff; cursor: pointer;
+    }
+    a { color: var(--teal); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Six shots · the dream film</h1>
+    <p class="sub">Record the screen only. No talking. Win+G on the laptop. One take per card. Live demo in another window.</p>
+    <div class="row">
+      <button type="button" id="prev">Previous shot</button>
+      <button type="button" id="next">Next shot</button>
+      <a href="./">Open the live demo</a>
+    </div>
+    <div id="board"></div>
+  </main>
+  <script>
+    const SHOTS = [
+      {
+        n: "Shot 1 · The ask",
+        say: "A contractor sends drawings and asks what the fittings will cost.",
+        do: "Stay on the landing. Show A-40-1-1091 in the file list. Do not open PLAN 09 yet."
+      },
+      {
+        n: "Shot 2 · Two people",
+        say: "The customer wants a clear request. The specialist will sign.",
+        do: "Click Customer, then Specialist, then Customer again. Stay on the two doors."
+      },
+      {
+        n: "Shot 3 · The pain",
+        say: "Today they start from a blank page. Drawing after drawing, by hand.",
+        do: "Open the architect PDF — the plan with no Granite boxes. Zoom a room. Empty sheet."
+      },
+      {
+        n: "Shot 4 · The dream",
+        say: "AI takes the first pass. A draft is already in their tool.",
+        do: "Specialist door → download first-crack PDF → Revu page 2. Alt+L once, then close the list. Do not filter NEED."
+      },
+      {
+        n: "Shot 5 · Still theirs",
+        say: "They check. They change what is wrong. They still sign.",
+        do: "In Revu, click one box and edit the comment. Leave it unsigned."
+      },
+      {
+        n: "Shot 6 · Close",
+        say: "Faster. More confident. Still a person accountable.",
+        do: "Customer path to Send request. Stop on SENT · NOT AN ORDER."
+      }
+    ];
+    let i = 0;
+    const box = document.getElementById("board");
+    function draw() {
+      box.innerHTML = SHOTS.map((s, idx) => `
+        <article class="card${idx === i ? " on" : ""}">
+          <div class="n">${s.n}</div>
+          <h2>${s.n.split("·")[1]}</h2>
+          <p class="say">Voice later: ${s.say}</p>
+          <p class="do">You click: ${s.do}</p>
+        </article>`).join("");
+      document.getElementById("next").textContent = i >= SHOTS.length - 1 ? "Done" : "Next shot";
+    }
+    document.getElementById("next").onclick = () => { if (i < SHOTS.length - 1) i += 1; draw(); };
+    document.getElementById("prev").onclick = () => { if (i > 0) i -= 1; draw(); };
+    draw();
+  </script>
+</body>
+</html>
