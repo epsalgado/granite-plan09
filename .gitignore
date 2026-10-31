@@ -4,6 +4,8 @@ api.txt
 .venv-tts/
 files/demo-video/frames/*.mp4
 files/demo-video/frames/concat.txt
+files/demo-video/cut-work/
+files/demo-video/cut-preview/
 .DS_Store
 *.log
 .idea/

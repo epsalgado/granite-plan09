@@ -122,7 +122,10 @@ We do **not** use the current `demo-voice` MP3s for this film.
 
 ### What I do after you have the takes
 
-Put the six clips in `files/demo-video/takes/` named `1-ask.mp4` … `6-close.mp4`. Tell me. I cut them to the script on the data array and we pick the voice take.
+Takes landed in `2hero/screenshots/` as `1-dream.mp4` … `6-dream.mp4`.
+
+Cut (silent + captions): `files/demo-video/granite-plan09-dream.mp4`  
+Also copied next to the takes. Rebuild: `python3 scripts/build-dream-cut.py`
 
 ---
 
