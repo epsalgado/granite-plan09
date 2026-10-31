@@ -1117,7 +1117,7 @@ function compareHtml() {
         <li>Save and drop that file here to compare</li>
       </ol>
       <div class="bb-downloads">
-        <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
+        <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf?v=69" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
       </div>
       <p class="bb-quiet">Page 1 = what this is. Page 2 = drawing (work here in Revu). Page 3 = glance table if you open the PDF without hovering.</p>
       ${crackInventoryHtml()}

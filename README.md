@@ -6,7 +6,7 @@ Hackathon prototype (Team Granite). Customer basket + specialist trust view for 
 **Code:** https://github.com/epsalgado/granite-plan09  
 Cloudflare Web Analytics is on for the live demo (page views only, no names).  
 
-This is Eddie’s working mockup, not the official 2Hero repo (`2hero-programs/ahl-team-granite`). The pack has 11 drawings; only PLAN 09 (`A-40-1-1091`) has a BoM API run. The specialist view uses Wilmer’s exported draft (**63 of 69 lines** recovered; the file was cut at the end).
+This is Eddie’s working mockup, not the official 2Hero repo (`2hero-programs/ahl-team-granite`). The pack has 11 drawings; only PLAN 09 (`A-40-1-1091`) has a BoM API run. The specialist view uses Wilmer’s full draft (**69 lines** in `data/wilmer-api-lines-69.json`; 56 on PLAN 09, 13 request-only including H3 in A0-015). The Discord paste had been cut; the file of 2026-10-31 is complete.
 
 ## For teammates
 

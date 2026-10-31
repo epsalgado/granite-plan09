@@ -3,7 +3,7 @@
   "title": "PLAN 09 — health centre ground floor",
   "job": "9d01abee754977639447e9fc0feac564aab2da2a370f9ae1a16f6b375834fd7f",
   "packNote": "1 of 11 drawings in the project pack",
-  "apiNote": "63 of 69 lines recovered from Wilmer’s export (end of file was cut).",
+  "apiNote": "All 69 lines from Wilmer’s job 9d01abee… (file wilmer-api-lines-69.json). 56 on PLAN 09; 13 request-only on other rooms (8× H2, 4× H1, 1× H3 in A0-015).",
   "askedForThisSheet": {
     "H2_rooms": [
       "A0-022",
@@ -11,11 +11,24 @@
       "A0-025",
       "A0-026"
     ],
-    "H2_building_total": 12
+    "H2_building_total": 12,
+    "H2_request_rooms": [
+      "A1-016",
+      "A1-017",
+      "A1-020",
+      "A1-023",
+      "A1-039",
+      "A1-040",
+      "A1-053",
+      "A2-040"
+    ],
+    "H3_request_rooms": [
+      "A0-015"
+    ]
   },
   "quoteHasH2": false,
   "counts": {
-    "linesRecovered": 63,
+    "linesRecovered": 69,
     "linesClaimed": 69,
     "notesClaimed": 12,
     "readyToOrder": 0
@@ -1618,19 +1631,103 @@
       "blocker": "Other floor",
       "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
       "source": null
+    },
+    {
+      "id": "L64",
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-023",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L65",
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-039",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L66",
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-040",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L67",
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A1-053",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L68",
+      "code": "H2",
+      "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A2-040",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
+    },
+    {
+      "id": "L69",
+      "code": "H3",
+      "text": "Hylla H3; provisional room allowance, length and specification unavailable",
+      "qty": 1,
+      "unit": "st",
+      "room": "A0-015",
+      "floor": null,
+      "scope": "request only",
+      "kind": "request",
+      "blocker": "Other floor",
+      "need": "This room is in the customer request, not on PLAN 09. Other drawings.",
+      "source": null
     }
   ],
   "notes": [
     "Only A-40-1-1091.pdf page 1 was in this job. The other 10 drawings were not uploaded.",
     "Room description, type standard, customer Excel and the old quote were not supplied to the API.",
     "The four H2 rooms named for this sheet (A0-022, 023, 025, 026) match the request. Lengths are missing.",
-    "Shelf lines from the request on other floors (H1 / extra H2) are provisional — not on PLAN 09.",
+    "Shelf lines from the request on other floors (H1 / extra H2 / H3 in A0-015) are provisional — not on PLAN 09.",
     "IL hatch quantities come from the schedule on this sheet, not from counting each hatch on the floor. PLAN 09 is the sheet name, not proof of the install floor.",
     "Some sanitary symbols have no type code. They were not merged just because the code is empty.",
     "Partially shown WC / basin east of A0-008a were counted once, with no room.",
     "S1, EFT20.1V and UDS11.1V have no description. Do not invent a product.",
     "Uncoded articulated-arm symbols in BVC rooms stay unidentified. Confirm whether they belong to another coded assembly.",
-    "The copy of this result was cut at the end: 63 of 69 lines recovered. The last request-only H2 rooms and the raw notes list are incomplete."
+    "Full API lines file received 2026-10-31 (wilmer-api-lines-69.json). 69/69 lines. The six that were missing from the Discord paste are request-only: H2 in A1-023, A1-039, A1-040, A1-053, A2-040, and H3 in A0-015. H2 building total is now 4 on this plan + 8 request-only = 12. Notes list was not in that file."
   ],
   "checks": [
     {
@@ -1686,12 +1783,12 @@
     {
       "id": "other",
       "ok": true,
-      "text": "Request-only H1/H2 on other floors stay out of this basket."
+      "text": "Request-only shelves stay out of this basket: 4× H1, 8× H2, 1× H3 (A0-015). They stay on the specialist list as OTHER."
     },
     {
-      "id": "trunc",
-      "ok": false,
-      "text": "Export was cut: 63 of 69 lines recovered. Do not treat the missing 6 as empty."
+      "id": "complete",
+      "ok": true,
+      "text": "All 69 API lines are in this draft. The six recovered lines are other-floor request shelves, not PLAN 09."
     }
   ],
   "compare": [
@@ -1702,7 +1799,7 @@
     },
     {
       "asked": "12 H2 in the whole-building Excel",
-      "drawn": "4 on this plan; more only in the request",
+      "drawn": "4 on this plan; 8 H2 + 1 H3 only in the request",
       "basket": "Other floors hidden from customer"
     },
     {

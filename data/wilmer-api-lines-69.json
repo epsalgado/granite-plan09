@@ -1,0 +1,972 @@
+[
+  {
+    "code": "IL.4",
+    "floor": "PLAN 09",
+    "quantity": 2,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "HILA Inspektionslucka 300x300 mm",
+    "unit": "st"
+  },
+  {
+    "code": "IL.5",
+    "floor": "PLAN 09",
+    "quantity": 16,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "IL.5 LK Ram/lucka UNI INB UNI 550 590 x 580 x 26 mm",
+    "unit": "st"
+  },
+  {
+    "code": "IL.6",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "LK Ventilskåp med tillhörande lucka 250 x 250X 95 mm",
+    "unit": "st"
+  },
+  {
+    "code": "IL.7",
+    "floor": "PLAN 09",
+    "quantity": 2,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "IL.7 HILA Inspektionslucka 300x300 mm",
+    "unit": "st"
+  },
+  {
+    "code": "TP2",
+    "floor": "PLAN 09",
+    "quantity": 3,
+    "room": "A0-006",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "TVÄTTPLATSUTRUSTNING",
+    "unit": "st"
+  },
+  {
+    "code": "TP3",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-026",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "TVÄTTPLATSUTRUSTNING",
+    "unit": "st"
+  },
+  {
+    "code": "TP3",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-025",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "TVÄTTPLATSUTRUSTNING",
+    "unit": "st"
+  },
+  {
+    "code": "TP3",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-023",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "TVÄTTPLATSUTRUSTNING",
+    "unit": "st"
+  },
+  {
+    "code": "TP3",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-022",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "TVÄTTPLATSUTRUSTNING",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-026",
+    "scope": "drawings and request",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Hylla H2; length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-025",
+    "scope": "drawings and request",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Hylla H2; length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-023",
+    "scope": "drawings and request",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Hylla H2; length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-022",
+    "scope": "drawings and request",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Hylla H2; length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "S1",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-025",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "S1; description unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "S1",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-023",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "S1; description unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "AK",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-027",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "ARMBÅGSKONTAKT",
+    "unit": "st"
+  },
+  {
+    "code": "AK",
+    "floor": "PLAN 09",
+    "quantity": 2,
+    "room": "A0-028",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "ARMBÅGSKONTAKT",
+    "unit": "st"
+  },
+  {
+    "code": "AK",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "ARMBÅGSKONTAKT outside entrance",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-004",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "WC-stol",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-004",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Tvättställ",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 2,
+    "room": "A0-004",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Stödarm",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-024",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "WC-stol",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-024",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Tvättställ",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 2,
+    "room": "A0-024",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Stödarm",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-002",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Utslagsback",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-009a",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "WC-stol",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-009a",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Tvättställ",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-009b",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "WC-stol",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-009b",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Tvättställ",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-008a",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "WC-stol",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-008a",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Tvättställ",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "WC-stol, partially shown east of A0-008a",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Tvättställ, partially shown east of A0-008a",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-025",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Unidentified articulated arm with circular head; product type to be confirmed",
+    "unit": "st"
+  },
+  {
+    "code": null,
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-023",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "Unidentified articulated arm with circular head; product type to be confirmed",
+    "unit": "st"
+  },
+  {
+    "code": "DT9.4H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-005",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "DT9.4H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-002",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "DT10.1H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-004",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "DT10.8V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-006",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "DT9.2H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-009a",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "DT9.2V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-009b",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "DT9.2H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-008a",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "DT9.2H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ at right match line",
+    "unit": "st"
+  },
+  {
+    "code": "PDT13.2V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-026",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "PARDÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "PDT13.2V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-025",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "PARDÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "PDT13.2H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-023",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "PARDÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "DT10.5H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-024",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "EFT20.1V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-030",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "EFT20.1V, ELC; description unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "DT6.1V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ, DATA",
+    "unit": "st"
+  },
+  {
+    "code": "PDT15.2V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-022",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "PARDÖRR AV TRÄ",
+    "unit": "st"
+  },
+  {
+    "code": "IMP11.1H",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-028",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "INVÄNDIGT METALLPARTI",
+    "unit": "st"
+  },
+  {
+    "code": "UMP11.2V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-028",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "UTVÄNDIGT METALLPARTI",
+    "unit": "st"
+  },
+  {
+    "code": "DT10.11V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-030",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "DÖRR AV TRÄ, AMALGAMAVSKILJNING",
+    "unit": "st"
+  },
+  {
+    "code": "UDS11.1V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-029",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "UDS11.1V, KOMPRESSORRUM; description unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "FÖ12.1V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": "A0-026",
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "FÖNSTER ÖPPNINGSBART",
+    "unit": "st"
+  },
+  {
+    "code": "FÖ12.1V",
+    "floor": "PLAN 09",
+    "quantity": 1,
+    "room": null,
+    "scope": "drawings",
+    "sources": [
+      {
+        "file": "A-40-1-1091.pdf",
+        "page": 1
+      }
+    ],
+    "text": "FÖNSTER ÖPPNINGSBART at right match line",
+    "unit": "st"
+  },
+  {
+    "code": "H1",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-029",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H1",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-045",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H1",
+    "floor": null,
+    "quantity": 1,
+    "room": "A2-030",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H1",
+    "floor": null,
+    "quantity": 1,
+    "room": "A3-035",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H1; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-016",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-017",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-020",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-023",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-039",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-040",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": null,
+    "quantity": 1,
+    "room": "A1-053",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H2",
+    "floor": null,
+    "quantity": 1,
+    "room": "A2-040",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H2; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  },
+  {
+    "code": "H3",
+    "floor": null,
+    "quantity": 1,
+    "room": "A0-015",
+    "scope": "request only",
+    "sources": [],
+    "text": "Hylla H3; provisional room allowance, length and specification unavailable",
+    "unit": "st"
+  }
+]

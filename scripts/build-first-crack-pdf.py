@@ -259,7 +259,7 @@ def add_glance(doc: fitz.Document, job: dict, n_marks: int) -> None:
             color=color,
         )
 
-    row_h = 9.0
+    row_h = 8.0
     for i, r in enumerate(rows):
         if y + row_h > 818:
             break
