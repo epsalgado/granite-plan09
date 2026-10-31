@@ -23,7 +23,7 @@ git clone https://github.com/epsalgado/granite-plan09.git
 
 Static HTML/CSS/JS. No build step. Pages settings: Framework **None**, output `/`, branch `main`.
 
-**Demo voice (captions):** open `demo-voice.html` or https://granite-plan09.pages.dev/demo-voice.html — generated female computer voice reads the customer and specialist walks. Rebuild with `PYTHONPATH=.py-tts python3 scripts/build-demo-voice.py`.
+**Walkthrough video:** https://granite-plan09.pages.dev/demo-walk.html (MP4, ~1 min, generated voice). Rebuild with `python3 scripts/build-demo-video.py`. Caption-only player: `demo-voice.html`.
 
 The landing has **two doors**: Send a request (customer) or First crack in Revu (specialist). Open PLAN 09 after you pick a path. Customer: Found → Choose → Send, with request Excel. Specialist downloads `files/granite-plan09-FIRST-CRACK-for-Revu.pdf` (page 2 = drawing + Revu markups; page 3 = glance table of the same draft). Subject NEED/CHECK = fill in, do not re-type. They work the Markups List, then drop the save to Compare. Rebuild that PDF with `python3 scripts/build-first-crack-pdf.py`. Catalog stays available on Choose, Send, and Specialist (not on the customer Found screen).
 

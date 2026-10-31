@@ -2,6 +2,8 @@ img/labels.json
 api.txt
 .py-tts/
 .venv-tts/
+files/demo-video/frames/*.mp4
+files/demo-video/frames/concat.txt
 .DS_Store
 *.log
 .idea/
