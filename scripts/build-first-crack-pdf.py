@@ -62,7 +62,7 @@ def line_flag(ln: dict):
         or "type" in need.lower()
     )
     if other:
-        return "OTHER", "OTHER", "OTHER · not this sheet", COLOUR["OTHER"]
+        return code or "OTHER", "OTHER", "OTHER · not this sheet", COLOUR["OTHER"]
     if no_code:
         return "NEED", "NEED", "NEED · no type code · fill this in", COLOUR["NEED"]
     if trade:
@@ -346,14 +346,22 @@ def stamp(page: fitz.Page, job: dict) -> int:
     n = 0
     w, h = page.rect.width, page.rect.height
 
-    def strip_rect():
+    def strip_rect(label=""):
         nonlocal strip
-        col = strip // 22
-        row = strip % 22
+        col = strip // 16
+        row = strip % 16
         strip += 1
-        x = w - 210 - col * 36
-        y = 70 + row * 22
-        return fitz.Rect(x, y, x + 28, y + 16)
+        x = w - 248 - col * 118
+        y = 64 + row * 20
+        if label:
+            page.insert_text(
+                (x - 78, y + 12),
+                label[:16],
+                fontsize=8,
+                fontname="hebo",
+                color=(0.35, 0.40, 0.44),
+            )
+        return fitz.Rect(x, y, x + 26, y + 14)
 
     def room_rect(room: str):
         pt = room_point(rooms, room)
@@ -363,10 +371,10 @@ def stamp(page: fitz.Page, job: dict) -> int:
         room_slots[room] += 1
         return fitz.Rect(pt.x + 18, pt.y - 8 + slot * 14, pt.x + 46, pt.y + 6 + slot * 14)
 
-    def place(rect, subject, content, rgb, name):
+    def place(rect, subject, content, rgb, name, label=""):
         nonlocal n
         if rect is None:
-            rect = strip_rect()
+            rect = strip_rect(label)
         write_box(page, rect, subject, content, rgb, name)
         n += 1
 
@@ -374,6 +382,7 @@ def stamp(page: fitz.Page, job: dict) -> int:
         subject, _flag, prefix, rgb = line_flag(ln)
         code = str(ln.get("code") or "").strip()
         room = ln.get("room") or ""
+        floor = ln.get("floor") or ""
         text = ln.get("text") or ""
         need = ln.get("need") or ln.get("blocker") or ""
         qty = ln.get("qty") or 1
@@ -382,13 +391,21 @@ def stamp(page: fitz.Page, job: dict) -> int:
             "Author Granite. Not signed. Edit this markup — do not re-type it."
         )
         rect = None
-        if code and pool.get(code):
+        on_sheet = floor == "PLAN 09"
+        if on_sheet and code and pool.get(code):
             rect = pick_hit(pool[code], rooms, room)
             if rect:
                 rect = fitz.Rect(rect.x0 - PAD, rect.y0 - PAD, rect.x1 + PAD, rect.y1 + PAD)
-        if rect is None and room:
+        if rect is None and on_sheet and room:
             rect = room_rect(room)
-        place(rect, subject, content, rgb, f"granite-{ln.get('id')}")
+        place(
+            rect,
+            subject,
+            content,
+            rgb,
+            f"granite-{ln.get('id')}",
+            label=f"{code or '—'} {room or ''}".strip(),
+        )
 
     for i, note in enumerate(job.get("checks") or [], start=1):
         prefix = "CHECK · verify before you sign" if not note.get("ok") else "CHECK · noted"
