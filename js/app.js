@@ -653,23 +653,36 @@ function sendHtml() {
       </tr>`;
     })
     .join("");
+  const sent = requestSent
+    ? `<div class="sent-box">
+        <p class="cust-kicker">Request sent</p>
+        <h2>Sent. A specialist will check this floor.</h2>
+        <p>Still not an order. Download the list if you want to keep a copy.</p>
+      </div>`
+    : `<div class="basket-head">
+        <p class="cust-kicker">Customer request · send</p>
+        <h2>Send PLAN 09 as a request</h2>
+        <p>Not an order. An Ahlsell specialist still checks lengths, kit types and hatch quantities.</p>
+      </div>`;
+  const actions = requestSent
+    ? `<div class="send-actions">
+        <button type="button" class="btn-orange" id="reqXlsBtn">Download request Excel</button>
+        <button type="button" class="btn-ghost light" id="csvBtn">Download request CSV</button>
+      </div>`
+    : `<div class="send-actions">
+        <button type="button" class="btn-orange" id="reqSendBtn">Send request</button>
+        <button type="button" class="btn-ghost light" id="reqXlsBtn">Download request Excel</button>
+        <button type="button" class="btn-ghost light" id="csvBtn">Download request CSV</button>
+      </div>`;
   return `
-    <div class="basket-head">
-      <p class="cust-kicker">Customer request · send</p>
-      <h2>Send PLAN 09 as a request</h2>
-      <p>Not an order. An Ahlsell specialist still checks lengths, kit types and hatch quantities.</p>
-    </div>
-    <p class="stamp">PARTIAL · NOT SIGNED</p>
+    ${sent}
+    <p class="stamp${requestSent ? " sent" : ""}">${requestSent ? "SENT · NOT AN ORDER" : "PARTIAL · NOT SIGNED"}</p>
     <table class="draft send-table">
       <thead><tr><th>Room</th><th>Item</th><th>Qty</th><th>Article</th><th>Your choice</th></tr></thead>
       <tbody>${rows || `<tr><td colspan="5">Nothing added yet — you can still send the questions.</td></tr>`}</tbody>
     </table>
     <p class="draft-meta">${c.need.length} still need an answer · doors and other floors stay off this list</p>
-    <div class="send-actions">
-      <button type="button" class="btn-orange" id="reqXlsBtn">Download request Excel</button>
-      <button type="button" class="btn-ghost light" id="csvBtn">Download request CSV</button>
-      <span id="sentMsg" ${requestSent ? "" : "hidden"}>Sent. A specialist will check this floor.</span>
-    </div>`;
+    ${actions}`;
 }
 
 function filteredLines() {
@@ -1233,6 +1246,10 @@ function updateChrome() {
           : `Saved · ${chooseIndex + 1} of ${groups.length}`;
         $("continueBtn").textContent = last ? "Review request" : "Next question";
       }
+    } else if (requestSent) {
+      $("flowStatus").textContent = "Sent · a specialist will check this floor";
+      $("continueBtn").textContent = "Sent";
+      $("continueBtn").disabled = true;
     } else {
       $("flowStatus").textContent = `${c.inBasket.length} lines on the request · still not an order`;
       $("continueBtn").textContent = "Send request";
@@ -1311,6 +1328,8 @@ function render(opts = {}) {
   if (csv) csv.addEventListener("click", downloadCsv);
   const reqXls = $("reqXlsBtn");
   if (reqXls) reqXls.addEventListener("click", downloadRequestExcel);
+  const reqSend = $("reqSendBtn");
+  if (reqSend) reqSend.addEventListener("click", sendRequest);
   bindCompareUi();
   updateChrome();
   if (opts.zoom) focusSelected();
@@ -2192,6 +2211,7 @@ async function startDemo() {
   }
   demoStarted = true;
   sheetChosen = true;
+  requestSent = false;
   $("landing").style.display = "none";
   $("landing").hidden = true;
   $("app").classList.add("on");
@@ -2227,9 +2247,15 @@ function continueFlow() {
     return;
   }
   if (step === "send") {
-    requestSent = true;
-    render({ zoom: false });
+    sendRequest();
   }
+}
+
+function sendRequest() {
+  if (specialist || step !== "send" || requestSent) return;
+  requestSent = true;
+  render({ zoom: false });
+  if ($("side")) $("side").scrollTop = 0;
 }
 
 function backFlow() {
@@ -2237,7 +2263,10 @@ function backFlow() {
     goLanding("overview");
     return;
   }
-  if (step === "send") setStep("choose");
+  if (step === "send") {
+    requestSent = false;
+    setStep("choose");
+  }
   else if (step === "choose") setStep("found");
   else if (step === "found") goLanding("overview");
 }
