@@ -840,7 +840,7 @@ function specialistHtml() {
   const lines = filteredLines();
   const filters = [
     ["fittings", "Fittings"],
-    ["all", "All 63"],
+    ["all", "All 69"],
     ["noroom", "No room"],
     ["nocode", "No code"],
     ["doors", "Doors"],
@@ -911,11 +911,20 @@ function crackInventoryHtml() {
   const p09 = lines.filter((ln) => (ln.floor || "") === "PLAN 09");
   const need = p09.filter((ln) => crackFlag(ln) === "NEED").length;
   const notes = (job.checks || []).length;
-  const other = lines.filter((ln) => (ln.floor || "") !== "PLAN 09").length;
+  const other = lines.filter((ln) => (ln.floor || "") !== "PLAN 09");
   const missing = Math.max(0, (job.counts && job.counts.linesClaimed) || 69) - lines.length;
+  const otherBy = {};
+  other.forEach((ln) => {
+    const c = normCode(ln.code) || "—";
+    (otherBy[c] || (otherBy[c] = [])).push(ln.room || "—");
+  });
+  const otherList = Object.keys(otherBy)
+    .sort()
+    .map((c) => `${c} ${otherBy[c].join(" ")}`)
+    .join(" · ");
   return `<div class="crack-split">
-      <p><strong>In the Revu Markups List</strong> · ${lines.length} recovered lines + ${notes} notes. Already there. Do not copy them in.</p>
-      <p><strong>Filter first</strong> · Subject NEED (${need} missing info) · CHECK (${notes + (missing ? 1 : 0)} notes) · OTHER (${other} other floors).</p>
+      <p><strong>In the Revu Markups List</strong> · ${lines.length} lines + ${notes} notes. Already there. Do not copy them in.</p>
+      <p><strong>Filter first</strong> · Subject NEED (${need} missing info) · CHECK (${notes + (missing ? 1 : 0)} notes). Off-sheet shelves keep their code: ${otherList}.</p>
       <p>Page 3 is the same list as a table — a glance if you open the PDF itself. Work stays on page 2.</p>
     </div>`;
 }
@@ -1117,7 +1126,7 @@ function compareHtml() {
         <li>Save and drop that file here to compare</li>
       </ol>
       <div class="bb-downloads">
-        <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf?v=70" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
+        <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf?v=71" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
       </div>
       <p class="bb-quiet">Page 1 = what this is. Page 2 = drawing (work here in Revu). Page 3 = glance table if you open the PDF without hovering.</p>
       ${crackInventoryHtml()}

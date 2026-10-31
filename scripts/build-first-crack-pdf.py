@@ -186,7 +186,7 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
         (56, 370, 786, 470),
         f"A-40-1-1091  ·  PLAN 09  ·  {n_marks} markups in the list\n"
         "Page 3 is a glance of the same list if you open this PDF without Revu.\n"
-        "NEED = missing info. CHECK = a note. OTHER = not this sheet.",
+        "NEED = missing info. CHECK = a note. Off-sheet shelves keep H1 / H2 / H3.",
         12,
         (0.85, 1, 1),
     )
@@ -229,10 +229,22 @@ def add_glance(doc: fitz.Document, job: dict, n_marks: int) -> None:
     for r in rows:
         counts[r["flag"]] += 1
     put(
-        (28, 80, 1160, 104),
+        (28, 80, 1160, 98),
         "  ·  ".join(f"{k} {counts.get(k, 0)}" for k in ("NEED", "CHECK", "On sheet", "OTHER TRADE", "OTHER")),
-        11,
+        10,
         (0.15, 0.22, 0.24),
+        True,
+    )
+    other_lines = [ln for ln in job.get("lines") or [] if (ln.get("floor") or "") != "PLAN 09"]
+    by_code = defaultdict(list)
+    for ln in other_lines:
+        by_code[str(ln.get("code") or "—")].append(str(ln.get("room") or "—"))
+    other_bits = [f"{code}  " + "  ".join(rooms) for code, rooms in sorted(by_code.items())]
+    put(
+        (28, 98, 1160, 118),
+        "Other floors · listed as themselves · " + "   ·   ".join(other_bits),
+        9,
+        (0.25, 0.28, 0.30),
         True,
     )
 
@@ -244,7 +256,7 @@ def add_glance(doc: fitz.Document, job: dict, n_marks: int) -> None:
         (348, "Comment"),
         (780, "What is missing / note"),
     ]
-    y = 112
+    y = 122
     page.draw_rect(fitz.Rect(22, y, 1169, y + 18), color=(0.02, 0.15, 0.16), fill=(0.02, 0.15, 0.16))
     for x, label in headers:
         page.insert_text((x, y + 13), label, fontsize=8, fontname="hebo", color=(1, 1, 1))
