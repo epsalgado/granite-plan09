@@ -68,11 +68,23 @@ def main():
         str(FFMPEG), "-y", "-f", "concat", "-safe", "0",
         "-i", str(listing), "-c", "copy", str(raw),
     ])
-    # Burn captions in a second pass so ASS times stay on the concat clock.
+    # Cover the team name on screen, then burn captions.
+    # Timeline: landing 0–22.5, empty PDF 22.5–46.5, specialist UI 46.5–55.5,
+    # first-crack PDF 55.5–81.5, customer send 81.5–end.
+    hide = (
+        "drawbox=x=8:y=4:w=180:h=42:color=0x0F4373:t=fill:enable='between(t,0,22.5)',"
+        "drawbox=x=1520:y=4:w=392:h=42:color=0x0D3058:t=fill:enable='between(t,0,22.5)',"
+        "drawbox=x=8:y=4:w=160:h=44:color=0x153739:t=fill:enable='between(t,46.5,55.5)',"
+        "drawbox=x=40:y=2:w=560:h=40:color=0x3D3D3D:t=fill:enable='between(t,55.5,81.5)',"
+        "drawbox=x=470:y=168:w=1450:h=36:color=0xE87722:t=fill:enable='between(t,55.5,63.5)',"
+        "drawbox=x=980:y=568:w=280:h=88:color=0xFFFF00:t=fill:enable='between(t,63.5,81.5)',"
+        "drawbox=x=8:y=4:w=160:h=44:color=0x16518B:t=fill:enable='between(t,81.5,94)',"
+        f"subtitles={ASS}:fontsdir=/usr/share/fonts/truetype/dejavu"
+    )
     run([
         str(FFMPEG), "-y", "-i", str(raw),
-        "-vf", f"subtitles={ASS}:fontsdir=/usr/share/fonts/truetype/dejavu",
-        "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+        "-vf", hide,
+        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
         "-an", str(OUT),
     ])
     COPY.write_bytes(OUT.read_bytes())

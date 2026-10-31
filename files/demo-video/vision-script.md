@@ -9,7 +9,7 @@ Use this for the film. The app walk comes after, as pictures of this story — n
 
 ## The story in one breath
 
-A customer asks what the fittings cost. A specialist spends hours counting the drawings by hand. Granite’s idea: let AI take the first pass, put a draft in the tool they already use, and let the specialist start from something — not from zero.
+A customer asks what the fittings cost. A specialist spends hours counting the drawings by hand. The idea: let AI take the first pass, put a draft in the tool they already use, and let the specialist start from something — not from zero. They check, verify, add or remove, then sign off.
 
 ---
 
@@ -42,9 +42,9 @@ AI reads the plans, page by page. It drafts a mark-up — the same kind of list 
 Not a finished quote. A starting point.
 
 **[1:04 — The specialist’s job, still theirs]**  
-The specialist opens that draft in Revu. They check. They change what is wrong. They fill what the machine could not know.
+The specialist opens that draft. They check. They verify. They add or remove what is needed.
 
-They still sign. Granite does not.
+They sign off on the take-off. The draft does not.
 
 They did not start from zero. They did not walk every page only to begin counting.
 
