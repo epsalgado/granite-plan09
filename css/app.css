@@ -78,61 +78,19 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
 .app-team-flare {
   display: inline-flex;
   align-items: center;
-  padding: 0.45rem 0.75rem;
-  background: #ffe14a;
-  color: #1a0800;
-  font-weight: 900;
+  padding: 0.32rem 0.7rem;
+  background: rgba(30, 200, 200, 0.14);
+  color: #c8ffff;
+  font-weight: 700;
   font-size: 0.78rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   text-decoration: none;
-  border-radius: 8px;
-  border: 3px solid #e10600;
-  box-shadow: 0 0 0 2px #ffe14a;
-  animation: flare-pulse 1.35s ease-in-out infinite;
+  border-radius: 999px;
+  border: 1px solid rgba(30, 200, 200, 0.45);
 }
-.app-team-flare:hover { filter: brightness(1.08); }
-.app-team-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-  margin: 0 1rem;
-  padding: 0.7rem 1rem;
-  background: repeating-linear-gradient(-45deg, #ffe14a 0 14px, #ffd000 14px 28px);
-  color: #1a0800;
-  font-weight: 900;
-  font-size: clamp(1.05rem, 2.4vw, 1.45rem);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 4px solid #e10600;
-  border-radius: 10px;
-  box-shadow: 0 8px 0 #9a0000;
-  animation: flare-pulse 1.35s ease-in-out infinite;
-}
-.app-team-banner .flare-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: 50%;
-  background: #e10600;
+.app-team-flare:hover {
+  background: rgba(30, 200, 200, 0.24);
   color: #fff;
-  font-size: 1.15rem;
-  line-height: 1;
-}
-.app-team-banner .flare-sub {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  font-weight: 800;
-  opacity: 0.8;
-}
-@keyframes flare-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
 }
 
 .hero-grid {
