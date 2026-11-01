@@ -79,19 +79,42 @@ button, .btn { font: inherit; cursor: pointer; border: 0; border-radius: 8px; }
   display: inline-flex;
   align-items: center;
   padding: 0.32rem 0.7rem;
-  background: rgba(30, 200, 200, 0.14);
-  color: #c8ffff;
+  background: rgba(232, 119, 34, 0.18);
+  color: #ffd7b0;
   font-weight: 700;
   font-size: 0.78rem;
   letter-spacing: 0.02em;
   text-decoration: none;
   border-radius: 999px;
-  border: 1px solid rgba(30, 200, 200, 0.45);
+  border: 1px solid rgba(232, 119, 34, 0.5);
 }
 .app-team-flare:hover {
-  background: rgba(30, 200, 200, 0.24);
+  background: rgba(232, 119, 34, 0.3);
   color: #fff;
 }
+.app-team-banner {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.7rem 1.1rem;
+  flex-wrap: wrap;
+  margin: 0 1.2rem;
+  padding: 0.65rem 1rem;
+  background: #e87722;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+}
+.app-team-banner strong {
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+.app-team-banner span {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #fff4e8;
+}
+.app-team-banner:hover { filter: brightness(1.06); }
 
 .hero-grid {
   display: grid;
