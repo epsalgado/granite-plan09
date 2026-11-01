@@ -10,7 +10,7 @@
   <link rel="icon" href="img/favicon.svg?v=6" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="img/favicon-180.png?v=6" />
   <meta name="theme-color" content="#042326" />
-  <link rel="stylesheet" href="css/app.css?v=crack6" />
+  <link rel="stylesheet" href="css/app.css?v=crack8" />
 </head>
 <body>
   <main class="hero" id="landing" data-phase="upload" data-role="customer">
@@ -18,24 +18,31 @@
       <div class="logo">Granite <small>drawing → request</small></div>
       <div class="hero-nav-right">
         <span class="chip-quiet">Team Granite · Ahlsell hackathon</span>
+        <a class="app-team-flare" href="app-team.html">APP TEAM READ THIS!</a>
       </div>
     </header>
+    <a class="app-team-banner" href="app-team.html">
+      <span class="flare-mark" aria-hidden="true">!</span>
+      <span>APP TEAM READ THIS!</span>
+      <span class="flare-sub">Facts, limits, what to keep</span>
+    </a>
 
     <section class="hero-grid">
       <div class="hero-copy" data-phase-copy="upload">
         <p class="badge">PLAN 09 · one floor</p>
         <h1>Who is opening<br /><em>this drawing?</em></h1>
         <p class="lead">Pick a path, then open PLAN 09. Still not an order.</p>
+        <p class="truth">The API reads PDF text — codes, tables, notes. It does not recognize objects on the plan.</p>
         <div class="doors" role="tablist" aria-label="Who is this for">
           <button type="button" class="door customer on" id="doorCust">
             <span class="door-kicker">Customer</span>
             <strong>Send a request</strong>
-            <span>Answer a few questions on PLAN 09. Send a list. A specialist still checks it.</span>
+            <span>Answer a few questions on what the sheet already lists. A specialist still checks it.</span>
           </button>
           <button type="button" class="door specialist" id="doorSpec">
             <span class="door-kicker">Specialist</span>
             <strong>First crack in Revu</strong>
-            <span>Take the API draft as a PDF. Open it in Revu. Check it. You still sign.</span>
+            <span>A text draft as a PDF. Open it in Revu. Check it. You still sign.</span>
           </button>
         </div>
         <div class="actions">
@@ -46,7 +53,7 @@
 
       <div class="hero-copy" data-phase-copy="reading" hidden>
         <p class="badge">A-40-1-1091.pdf</p>
-        <h1>Reading PLAN 09<br /><em>on the drawing.</em></h1>
+        <h1>Reading the text<br /><em>on PLAN 09.</em></h1>
         <p class="lead" id="heroStatus">File received</p>
         <div class="bar hero-bar"><span id="heroBar"></span></div>
         <div class="actions">
@@ -56,10 +63,10 @@
 
       <div class="hero-copy" data-phase-copy="overview" hidden>
         <p class="badge" id="overviewBadge">Draft ready · still not an order</p>
-        <h1 id="overviewTitle">PLAN 09 is ready.<br /><em>See what we found.</em></h1>
+        <h1 id="overviewTitle">PLAN 09 is ready.<br /><em>See what the sheet lists.</em></h1>
         <p class="lead" id="overviewLead">Answer a few questions. This is a request, not an order.</p>
         <div class="actions">
-          <button class="btn-orange" id="tryExample" type="button">See what we found</button>
+          <button class="btn-orange" id="tryExample" type="button">See what the sheet lists</button>
         </div>
       </div>
 
@@ -123,16 +130,16 @@
             </div>
             <ol class="hero-steps" id="heroSteps">
               <li>File received</li>
-              <li>Reading room names</li>
-              <li>5 wash-place kits found</li>
-              <li>4 shelves found — no lengths</li>
+              <li>Reading text on the sheet</li>
+              <li>5 wash-place kit codes (TP2 / TP3)</li>
+              <li>4 H2 shelf marks — no lengths</li>
               <li>Hatch table on the right</li>
               <li>Doors are another trade</li>
             </ol>
             <aside class="preview-list">
-              <header>This floor · PLAN 09 <small>not an order</small></header>
-              <p>4 shelves <b>need length</b></p>
-              <p>5 wash-place kits <b>need type</b></p>
+              <header>This floor · PLAN 09 <small>text draft · not an order</small></header>
+              <p>4 H2 marks <b>need length</b></p>
+              <p>5 kit codes <b>need type</b></p>
               <p>Hatches <b>from the table</b></p>
               <footer>Ready to choose <strong>after you answer</strong></footer>
             </aside>
@@ -150,11 +157,11 @@
       <nav class="steps" id="steps" aria-label="Customer progress">
         <a href="#drawing">Drawing</a>
         <a href="#reading">Reading</a>
-        <a href="#found">Found</a>
+        <a href="#found">Listed</a>
         <a href="#choose">Choose</a>
         <a href="#send">Send</a>
       </nav>
-      <p class="spec-tools-label" id="specToolsLabel" hidden>First-crack PDF → open in Revu → you still sign</p>
+      <p class="spec-tools-label" id="specToolsLabel" hidden>Text draft → Revu → you still sign</p>
       <div class="top-tools">
         <div class="role-switch" role="tablist" aria-label="Who is using this">
           <button type="button" id="custBtn" class="on" data-role="customer">Customer</button>
@@ -179,7 +186,7 @@
             </span>
             <span class="pin-legend" aria-hidden="true">
               <span class="lg room"></span> Room
-              <span class="lg code"></span> Product
+              <span class="lg code"></span> Text on sheet
               <span class="lg extra"></span> Extra
             </span>
             <span class="reading-pill idle" id="sheetPill">Click a pin to see it in the list</span>
@@ -212,7 +219,7 @@
         </div>
         <button type="button" class="btn-ghost light" id="catClose">Close</button>
       </header>
-      <p class="cat-note" id="catNote">Official names are Swedish. EN is a demo gloss. Search works in both.</p>
+      <p class="cat-note" id="catNote">Lookup only. The API did not pick these articles. Official names are Swedish. EN is a demo gloss.</p>
       <input type="search" id="catSearch" placeholder="Search Swedish or English (hylla, shelf, 309452…)" autocomplete="off" />
       <div class="cat-tags" id="catTags"></div>
       <p class="cat-count" id="catCount"></p>
@@ -221,6 +228,6 @@
   </div>
 
   <input type="file" id="bbFile" accept=".pdf,.csv,.txt,.xml,application/pdf,text/csv,text/xml" hidden />
-  <script src="js/app.js?v=crack6"></script>
+  <script src="js/app.js?v=crack8"></script>
 </body>
 </html>

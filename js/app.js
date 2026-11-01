@@ -151,7 +151,7 @@ function buildFlowItems() {
         ...base,
         group: "need",
         question: "Include the elbow tap in " + ln.room + " on the request?",
-        hint: "Drawn on the plan. Confirm the article with Ahlsell.",
+        hint: "Named on the sheet. Confirm the article with Ahlsell.",
         options: [
           { id: "tap-yes", article: null, name: "Yes — ask Ahlsell for the article", note: "No article number on this sheet." },
           { id: "tap-no", article: null, name: "Leave it to the specialist", note: "Will stay off the customer list." },
@@ -167,7 +167,7 @@ function buildFlowItems() {
             : ln.kind === "unknown"
               ? "No product type — do not invent an article."
               : ln.kind === "sanitary"
-                ? "A symbol is drawn, but there is no type code."
+                ? "Listed from sheet notes. No type code. The API did not see this as an object."
                 : "Not Ahlsell fittings from this drawing (other trade or other floor).",
       });
     }
@@ -204,12 +204,12 @@ function questionGroups() {
               : "Elbow taps";
       const question =
         it.kind === "shelf"
-          ? "The drawing marks H2, but not the length. What should we put on the request?"
+          ? "The sheet text marks H2, but not the length. What should we put on the request?"
           : it.kind === "kit"
-            ? `The drawing marks ${it.code || "a wash-place kit"}, but not the contents. What should we put on the request?`
+            ? `The sheet text marks ${it.code || "a wash-place kit"}, but not the contents. What should we put on the request?`
             : it.kind === "hatch"
               ? "The sheet table lists 16 × IL.5 hatches. Put them on this floor’s request?"
-              : "Elbow taps are drawn. Put them on the request?";
+              : "Elbow taps are named on the sheet. Put them on the request?";
       map.set(key, {
         key,
         kind: it.kind,
@@ -701,9 +701,9 @@ function foundHtml() {
   ].filter(Boolean);
   return `
     <div class="basket-head">
-      <p class="cust-kicker">Customer · what we found</p>
+      <p class="cust-kicker">Customer · what the sheet lists</p>
       <h2>What goes on your request</h2>
-      <p>Bright pins are this request. Click a card to zoom, then press Start questions. You are not shopping yet.</p>
+      <p>This list comes from text on PLAN 09 — codes and the hatch table — not from seeing objects. Click a card to zoom, then press Start questions.</p>
     </div>
     <button type="button" class="brief ok ${selected === "IL.4" ? "sel" : ""}" data-zoom="IL.4">
       <strong>Already on the request</strong>
@@ -764,7 +764,7 @@ function chooseHtml() {
         ? `<p class="picked-note">${skip ? "Saved as a question for Ahlsell." : "Saved on the request."} Press Next question.</p>`
         : `<p class="need always">Pick one box. This is still not an order.</p>`
     }
-    <p class="cat-hint">Need a different article? Catalog is top right — it has names and numbers, not specs.</p>`;
+    <p class="cat-hint">Need a different article? Catalog is a lookup only — the API did not pick those numbers.</p>`;
 }
 
 function sendHtml() {
@@ -790,7 +790,7 @@ function sendHtml() {
     : `<div class="basket-head">
         <p class="cust-kicker">Customer request · send</p>
         <h2>Send PLAN 09 as a request</h2>
-        <p>Not an order. An Ahlsell specialist still checks lengths, kit types and hatch quantities.</p>
+        <p>Not an order. This is what you asked from the sheet text. An Ahlsell specialist still checks it.</p>
       </div>`;
   const actions = requestSent
     ? `<div class="send-actions">
@@ -849,18 +849,23 @@ function specialistHtml() {
     .map(([id, label]) => `<button type="button" class="filter-btn ${lineFilter === id ? "active" : ""}" data-filter="${id}">${label}</button>`)
     .join("");
   const rows = lines
-    .map((ln) => `<tr data-line="${ln.id}" data-room="${esc(ln.room || "")}" data-code="${esc(ln.code || "")}" class="${rowFocused(ln.room, ln.code) ? "sel" : ""}">
+    .map((ln) => {
+      const src = lineSource(ln);
+      return `<tr data-line="${ln.id}" data-room="${esc(ln.room || "")}" data-code="${esc(ln.code || "")}" class="${rowFocused(ln.room, ln.code) ? "sel" : ""}">
       <td>${esc(ln.code || "—")}</td>
       <td>${esc(ln.text)}</td>
       <td>${ln.qty}</td>
       <td>${esc(ln.room || "—")}</td>
       <td>${esc(crackFlag(ln))}</td>
-    </tr>`)
+      <td><span class="src-badge src-${src.id}">${esc(src.label)}</span></td>
+    </tr>`;
+    })
     .join("");
   return `
     ${compareHtml()}
+    ${checkFirstHtml()}
     <div class="basket-head spec-head">
-      <p class="spec-kicker">Our draft · the rest of the first crack</p>
+      <p class="spec-kicker">Text draft · the rest of the first crack</p>
       <h2>Full draft list</h2>
       <p>${esc(job.apiNote)} Same lines are markups in Revu. NEED / CHECK means fill in there.</p>
     </div>
@@ -871,7 +876,7 @@ function specialistHtml() {
     <div class="filters">${filters}</div>
     <div class="draft-wrap">
       <table class="draft">
-        <thead><tr><th>Subject</th><th>Comment</th><th>Count</th><th>Space</th><th>Where</th></tr></thead>
+        <thead><tr><th>Subject</th><th>Comment</th><th>Count</th><th>Space</th><th>Flag</th><th>Source</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
@@ -906,6 +911,31 @@ function crackFlag(ln) {
   return "On sheet";
 }
 
+function lineSource(ln) {
+  if ((ln.floor || "") !== "PLAN 09" || ln.kind === "request") {
+    return { id: "off", label: "not on this sheet" };
+  }
+  if (["door", "window", "frame"].includes(ln.kind)) {
+    return { id: "trade", label: "other trade" };
+  }
+  if (ln.kind === "sanitary" || !normCode(ln.code)) {
+    return { id: "nocode", label: "no type code" };
+  }
+  return { id: "text", label: "from text" };
+}
+
+function checkFirstHtml() {
+  return `<div class="check-first">
+      <p class="spec-kicker">Check these first</p>
+      <ul>
+        <li><strong>Other trade</strong> — doors, windows, frames. Not Ahlsell sakvaror.</li>
+        <li><strong>No type code</strong> — WC, basin, support arm, slop sink. Listed from notes, not seen as objects.</li>
+        <li><strong>Not on this sheet</strong> — H1 / H2 / H3 on other floors. H3 is A0-015, which PLAN 09 does not draw.</li>
+        <li><strong>Notes can overcount</strong> — a type mark also appears in sheet notes. Confirm the room before you keep the qty.</li>
+      </ul>
+    </div>`;
+}
+
 function crackInventoryHtml() {
   const lines = job.lines || [];
   const p09 = lines.filter((ln) => (ln.floor || "") === "PLAN 09");
@@ -923,9 +953,9 @@ function crackInventoryHtml() {
     .map((c) => `${c} ${otherBy[c].join(" ")}`)
     .join(" · ");
   return `<div class="crack-split">
-      <p><strong>In the Revu Markups List</strong> · ${lines.length} lines + ${notes} notes. Already there. Do not copy them in.</p>
+      <p><strong>In the Revu Markups List</strong> · ${lines.length} lines + ${notes} notes. A text draft, already there. Do not copy them in. Not a complete take-off.</p>
       <p><strong>Filter first</strong> · Subject NEED (${need} missing info) · CHECK (${notes + (missing ? 1 : 0)} notes). Off-sheet shelves keep their code: ${otherList}.</p>
-      <p>Page 3 is the same list as a table — a glance if you open the PDF itself. Work stays on page 2.</p>
+      <p>Boxes sit on text hits, not on fittings. Page 3 is the same list as a table. Work stays on page 2.</p>
     </div>`;
 }
 
@@ -1115,10 +1145,10 @@ function compareHtml() {
   }
   return `
     <div class="bb-box" id="bbDrop">
-      <p class="spec-kicker">Specialist tool · first crack</p>
-      <p class="stamp sent">FIRST CRACK · NOT SIGNED</p>
+      <p class="spec-kicker">Specialist tool · text draft</p>
+      <p class="stamp sent">TEXT DRAFT · NOT SIGNED</p>
       <h2>Open this PDF in Revu</h2>
-      <p class="bb-lead">This file is the BoM API draft stamped on PLAN 09. It is the first crack — not a quote. You check it in Revu. You still sign.</p>
+      <p class="bb-lead">This file is the BoM API text draft stamped on PLAN 09 — codes, tables and notes, not object detection. First crack, not a quote. You check it in Revu. You still sign.</p>
       <ol class="bb-steps">
         <li>Download the first-crack PDF</li>
         <li>Open page 2 in Revu — that is the drawing. Alt+L is the whole draft</li>
@@ -1126,9 +1156,9 @@ function compareHtml() {
         <li>Save and drop that file here to compare</li>
       </ol>
       <div class="bb-downloads">
-        <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf?v=72" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
+        <a class="btn-orange" id="bbFirstCrack" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf?v=73" download="granite-plan09-FIRST-CRACK-for-Revu.pdf">Download first-crack PDF for Revu</a>
       </div>
-      <p class="bb-quiet">Page 1 = what this is. Page 2 = drawing (work here in Revu). Page 3 = glance table if you open the PDF without hovering.</p>
+      <p class="bb-quiet">Page 1 = what this is (and is not). Page 2 = drawing (work here in Revu). Page 3 = glance table if you open the PDF without hovering.</p>
       ${crackInventoryHtml()}
       <h3 class="bb-after">After you check in Revu</h3>
       <p class="bb-lead">Drop the PDF you saved, or a Markup Summary CSV. We compare it to this draft: same, missing, extra, different.</p>
@@ -1201,8 +1231,8 @@ function applyCatalogChrome() {
   $("catTitle").textContent = sv ? "Katalog" : "Catalog";
   $("catClose").textContent = sv ? "Stäng" : "Close";
   $("catNote").textContent = sv
-    ? "Officiella namn är svenska. EN är en visningstext. Sök fungerar på båda språken."
-    : "Official names are Swedish. EN is a demo gloss. Search works in both.";
+    ? "Endast uppslag. API:t valde inte dessa artiklar. Officiella namn är svenska. EN är en visningstext."
+    : "Lookup only. The API did not pick these articles. Official names are Swedish. EN is a demo gloss.";
   $("catSearch").placeholder = sv
     ? "Sök svenska eller engelska (hylla, shelf, 309452…)"
     : "Search Swedish or English (hylla, shelf, 309452…)";
@@ -1325,7 +1355,7 @@ function setLandingRoleUi() {
   const hint = $("doorHint");
   if (hint) {
     hint.textContent = landingRole === "specialist"
-      ? "Then we give you the first-crack PDF for Revu."
+      ? "Then we give you the text draft as a PDF for Revu."
       : "Then we open the customer request.";
   }
   const spec = landingRole === "specialist";
@@ -1333,22 +1363,22 @@ function setLandingRoleUi() {
   const title = $("overviewTitle");
   const lead = $("overviewLead");
   const tryBtn = $("tryExample");
-  if (badge) badge.textContent = spec ? "First crack ready · not signed" : "Draft ready · still not an order";
+  if (badge) badge.textContent = spec ? "Text draft ready · not signed" : "Sheet list ready · still not an order";
   if (title) {
     title.innerHTML = spec
-      ? "PLAN 09 is ready.<br /><em>Take the first-crack PDF.</em>"
-      : "PLAN 09 is ready.<br /><em>See what we found.</em>";
+      ? "PLAN 09 is ready.<br /><em>Take the text draft PDF.</em>"
+      : "PLAN 09 is ready.<br /><em>See what the sheet lists.</em>";
   }
   if (lead) {
     lead.textContent = spec
-      ? "Open it in Revu. Check the draft. You still sign."
-      : "Answer a few questions. This is a request, not an order.";
+      ? "Open it in Revu. The API read text, not objects. You still sign."
+      : "Answer a few questions on what the sheet already lists. This is a request, not an order.";
   }
-  if (tryBtn) tryBtn.textContent = spec ? "Open first-crack for Revu" : "See what we found";
+  if (tryBtn) tryBtn.textContent = spec ? "Open first-crack for Revu" : "See what the sheet lists";
   const foot = document.querySelector(".preview-list footer");
   if (foot) {
     foot.innerHTML = spec
-      ? "Ready for <strong>first crack in Revu</strong>"
+      ? "Ready for <strong>a text draft in Revu</strong>"
       : "Ready to choose <strong>after you answer</strong>";
   }
 }
@@ -1361,10 +1391,10 @@ function updateLegend() {
       `<span class="lg same"></span> Same <span class="lg diff"></span> Different <span class="lg miss"></span> Only Granite <span class="lg onlybb"></span> Only Bluebeam`;
   } else if (!specialist) {
     el.innerHTML =
-      `<span class="lg room"></span> On this request <span class="lg code"></span> Product <span class="lg extra"></span> Hatch`;
+      `<span class="lg room"></span> On this request <span class="lg code"></span> Text on sheet <span class="lg extra"></span> Hatch`;
   } else {
     el.innerHTML =
-      `<span class="lg room"></span> Room <span class="lg code"></span> Product <span class="lg extra"></span> Extra`;
+      `<span class="lg room"></span> Room <span class="lg code"></span> Text on sheet <span class="lg extra"></span> Extra`;
   }
 }
 
@@ -1398,14 +1428,14 @@ function updateChrome() {
   const c = counts();
   const groups = questionGroups();
   if (specialist) {
-    banner.textContent = "Specialist · first-crack PDF for Revu · you check it · you still sign";
-    if (sheetTitle) sheetTitle.textContent = "PLAN 09 · first crack for Revu";
+    banner.textContent = "Specialist · text draft for Revu · not object detection · you still sign";
+    if (sheetTitle) sheetTitle.textContent = "PLAN 09 · text draft for Revu";
     $("backBtn").disabled = false;
     $("continueBtn").hidden = true;
     const checked = compareState && compareState.source !== "Could not compare";
     $("flowStatus").textContent = checked
       ? "Check done · you still sign the quote"
-      : "Download the first-crack PDF · open it in Revu · you still sign";
+      : "Download the text draft · open it in Revu · you still sign";
   } else {
     banner.textContent = "Customer request · simple path · still not an order";
     if (sheetTitle) sheetTitle.textContent = "A-40-1-1091 · PLAN 09";
@@ -1449,10 +1479,10 @@ function render(opts = {}) {
   if (specialist) {
     $("trust").hidden = false;
     $("trust").innerHTML = `
-      <div class="t-card ok"><strong>This file</strong><b>First crack</b><span>API draft on the PDF — not a quote</span></div>
-      <div class="t-card ok"><strong>Where you work</strong><b>Revu</b><span>Open it, check the Markups List, save</span></div>
-      <div class="t-card warn"><strong>Old quote</strong><b>No H2</b><span>Never listed these shelves</span></div>
-      <div class="t-card ok"><strong>Then</strong><b>Compare</b><span>Drop your save here — you still sign</span></div>`;
+      <div class="t-card ok"><strong>This file</strong><b>Text draft</b><span>Codes, tables, notes — not objects</span></div>
+      <div class="t-card ok"><strong>Where you work</strong><b>Revu</b><span>Markups List. Check, change, save</span></div>
+      <div class="t-card warn"><strong>Cannot</strong><b>See objects</b><span>Boxes sit on text hits. You still sign</span></div>
+      <div class="t-card ok"><strong>Then</strong><b>Compare</b><span>Drop your save — not a new take-off</span></div>`;
   }
   const pillEl = $("sheetPill");
   if (pillEl) {
@@ -1463,7 +1493,7 @@ function render(opts = {}) {
         ? hits.length > 1
           ? `Showing ${hits.length} marks on the drawing`
           : `Showing ${mark.label || mark.id} on the drawing`
-        : "Download the first-crack PDF — that file is for Revu";
+        : "Download the text-draft PDF — that file is for Revu";
     } else if (step === "found") {
       const mark = markFor(selected);
       pillEl.textContent = mark
@@ -2339,9 +2369,9 @@ function goLanding(phase) {
 
 const READ_STEPS = [
   [12, "File received"],
-  [28, "Reading room names"],
-  [48, "5 wash-place kits found"],
-  [68, "4 shelves found — no lengths"],
+  [28, "Reading text on the sheet"],
+  [48, "5 wash-place kit codes (TP2 / TP3)"],
+  [68, "4 H2 shelf marks — no lengths"],
   [86, "Hatch table on the right"],
   [100, "Doors are another trade"],
 ];
@@ -2361,7 +2391,7 @@ function setLandingPhase(phase) {
     pill.textContent = "Reading…";
     label.textContent = "A-40-1-1091 · PLAN 09";
   } else {
-    pill.textContent = landingRole === "specialist" ? "First crack ready" : "Draft ready";
+    pill.textContent = landingRole === "specialist" ? "Text draft ready" : "Sheet list ready";
     label.textContent = "A-40-1-1091 · PLAN 09";
   }
   setLandingRoleUi();

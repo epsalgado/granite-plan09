@@ -3,7 +3,7 @@
   "title": "PLAN 09 — health centre ground floor",
   "job": "9d01abee754977639447e9fc0feac564aab2da2a370f9ae1a16f6b375834fd7f",
   "packNote": "1 of 11 drawings in the project pack",
-  "apiNote": "All 69 lines from Wilmer’s job 9d01abee… (file wilmer-api-lines-69.json). 56 on PLAN 09; 13 request-only on other rooms (8× H2, 4× H1, 1× H3 in A0-015).",
+  "apiNote": "69 lines from Wilmer’s BoM API job (file wilmer-api-lines-69.json). The API read PDF text — codes, tables, notes — not drawn objects. 56 on PLAN 09; 13 request-only on other rooms (8× H2, 4× H1, 1× H3 in A0-015).",
   "askedForThisSheet": {
     "H2_rooms": [
       "A0-022",

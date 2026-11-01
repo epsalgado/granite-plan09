@@ -11,6 +11,8 @@ Use this for the film. The app walk comes after, as pictures of this story — n
 
 A customer asks what the fittings cost. A specialist spends hours counting the drawings by hand. The idea: let AI take the first pass, put a draft in the tool they already use, and let the specialist start from something — not from zero. They check, verify, add or remove, then sign off.
 
+**Live demo (not this film):** the BoM API reads PDF text. It does not recognize objects. Use this script as a wish, not as a claim.
+
 ---
 
 ## Spoken script

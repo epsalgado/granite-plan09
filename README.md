@@ -3,6 +3,7 @@
 Hackathon prototype (Team Granite). Customer basket + specialist trust view for **one drawing**: `A-40-1-1091.pdf`.
 
 **Live demo:** https://granite-plan09.pages.dev  
+**App team facts:** https://granite-plan09.pages.dev/app-team.html (yellow “APP TEAM READ THIS!” on the landing).  
 **Code:** https://github.com/epsalgado/granite-plan09  
 Cloudflare Web Analytics is on for the live demo (page views only, no names).  
 
@@ -25,7 +26,9 @@ Static HTML/CSS/JS. No build step. Pages settings: Framework **None**, output `/
 
 **Walkthrough video:** https://granite-plan09.pages.dev/demo-walk.html (MP4, ~1 min, generated voice). Rebuild with `python3 scripts/build-demo-video.py`. Caption-only player: `demo-voice.html`.
 
-The landing has **two doors**: Send a request (customer) or First crack in Revu (specialist). Open PLAN 09 after you pick a path. Customer: Found → Choose → Send, with request Excel. Specialist downloads `files/granite-plan09-FIRST-CRACK-for-Revu.pdf` (page 2 = drawing + Revu markups; page 3 = glance table of the same draft). Subject NEED/CHECK = fill in, do not re-type. They work the Markups List, then drop the save to Compare. Rebuild that PDF with `python3 scripts/build-first-crack-pdf.py`. Catalog stays available on Choose, Send, and Specialist (not on the customer Found screen).
+The BoM API read **PDF text** (codes, tables, notes). It did **not** recognize drawn objects. The demo says that plainly.
+
+The landing has **two doors**: Send a request (customer) or First crack in Revu (specialist). Open PLAN 09 after you pick a path. Customer: Listed → Choose → Send, with request Excel. Specialist downloads `files/granite-plan09-FIRST-CRACK-for-Revu.pdf` (page 2 = drawing + Revu markups; page 3 = glance table of the same text draft). Subject NEED/CHECK = fill in, do not re-type. They work the Markups List, then drop the save to Compare. Rebuild that PDF with `python3 scripts/build-first-crack-pdf.py`. Catalog is a lookup only — the API did not pick those articles. Catalog stays available on Choose, Send, and Specialist (not on the customer Listed screen).
 
 **Catalog** (header) searches `data/articles.json`: 7,800+ real Ahlsell article numbers from the school packing-protocol `ARTIKELLISTA` plus the four `reference-quote.csv` files. SV/EN toggle; search matches Swedish names, English glosses, and article numbers. Not a live ahlsell.se download. Rebuild with `python3 scripts/build-articles.py`.
 

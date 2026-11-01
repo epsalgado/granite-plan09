@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <title>APP TEAM READ THIS — Granite</title>
+  <link rel="icon" href="img/favicon.ico?v=6" sizes="any" />
+  <link rel="icon" href="img/favicon.svg?v=6" type="image/svg+xml" />
+  <style>
+    :root {
+      --ink: #102033;
+      --paper: #fffdf6;
+      --line: #d7c9a8;
+      --navy: #071a2e;
+      --amber: #e87722;
+      --red: #e10600;
+      --teal: #0d4f4f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 17px/1.5 "Segoe UI", "Calibri", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    header {
+      background: repeating-linear-gradient(-45deg, #ffe14a 0 16px, #ffd000 16px 32px);
+      border-bottom: 6px solid var(--red);
+      padding: 1.1rem 1.2rem 1.2rem;
+    }
+    header .kicker {
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    header h1 {
+      margin: 0.25rem 0 0.4rem;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    header p { margin: 0; max-width: 46rem; }
+    .bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      padding: 0.7rem 1.2rem;
+      background: var(--navy);
+    }
+    .bar a {
+      color: #ffe14a;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .bar a.ghost { color: #c8ffff; font-weight: 600; }
+    main { max-width: 52rem; margin: 0 auto; padding: 1.4rem 1.2rem 3.5rem; }
+    h2 {
+      margin: 1.8rem 0 0.55rem;
+      font-size: 1.25rem;
+      border-top: 3px solid var(--navy);
+      padding-top: 0.9rem;
+    }
+    h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 0.4rem; }
+    h3 { margin: 1.1rem 0 0.4rem; font-size: 1.02rem; }
+    p { margin: 0 0 0.75rem; }
+    .call {
+      margin: 0 0 1.1rem;
+      padding: 0.85rem 1rem;
+      background: #fff4d6;
+      border: 3px solid #e10600;
+      border-radius: 10px;
+    }
+    .plus {
+      background: #e3f3ea;
+      border-color: #2a7a52;
+    }
+    .limit {
+      background: #fde8e6;
+      border-color: #b42318;
+    }
+    ul { margin: 0 0 0.9rem; padding-left: 1.2rem; }
+    li { margin: 0.28rem 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.5rem 0.6rem;
+      vertical-align: top;
+      text-align: left;
+    }
+    th { background: #071a2e; color: #fff; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    tr:nth-child(even) td { background: #fff8ea; }
+    .tag {
+      display: inline-block;
+      padding: 0.08rem 0.4rem;
+      border-radius: 999px;
+      background: #ffe14a;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    footer {
+      margin-top: 2rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.88rem;
+      color: #5c6b7a;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="kicker">Team Granite · App team · not the customer demo</p>
+    <h1>APP TEAM READ THIS!</h1>
+    <p>Honest notes after we tested the BoM API on PLAN 09. Say what is true. Do not sell object recognition.</p>
+  </header>
+  <nav class="bar">
+    <a href="./">← Back to the demo</a>
+    <a class="ghost" href="files/granite-plan09-FIRST-CRACK-for-Revu.pdf">First-crack PDF</a>
+  </nav>
+
+  <main>
+    <h2>Start here: is the Bluebeam file still a head start?</h2>
+    <div class="call plus">
+      <p><strong>Yes.</strong> Even though the API did not see objects on the plan, the first-crack PDF is still useful. Today the specialist starts from a <strong>blank Markups List</strong>. This file fills it.</p>
+      <p>One line per draft item. Real type codes stay the Subject (<code>H2</code>, <code>TP3</code>, <code>IL.5</code>). NEED / CHECK where info is missing. Off-sheet lines stay off the floor. They filter, delete, add, verify, then they sign. They do not re-type 69 lines.</p>
+      <p>That is the plus. It is a head start. <strong>It is not a take-off.</strong> Say both.</p>
+    </div>
+    <p>Ahlsell already left this door open: sometimes the answer is in the <strong>text</strong> on the sheet, not in the geometry. The jury also asked for dead ends. “We wanted object recognition; this API cannot do it; we stopped pretending; we put the text draft where they already work” is a result.</p>
+
+    <h2>What we hoped vs what we got</h2>
+    <p>We hoped the API would read the drawing the way a specialist does: see the hook, the WC, the shelf, and count them. After testing (Wilmer’s job on PLAN 09), that is not what happened.</p>
+    <div class="call limit">
+      <p><strong>The API is not smart enough to pick objects off the plan.</strong> It pulled from PDF notes and other text already in the file — type marks, the hatch table, room notes. File + page only. Not a pin on the fitting.</p>
+      <p>So it is <strong>useless as “AI looked at the drawing and counted.”</strong> Do not say that.</p>
+      <p>It is <strong>not useless as a first pass of what the sheet already writes down.</strong> Specialists already read <code>H2</code>, <code>TP3</code>, <code>IL.5</code> off the same notes. The App job is: put that dump in Revu, let them add / remove / sign, do not make them start from zero.</p>
+    </div>
+
+    <h2>What the API can reasonably do</h2>
+    <ul>
+      <li>Read <strong>codes and notes</strong> on a vector PDF (<code>H2</code>, <code>TP3</code>, hatch table <code>IL.*</code>).</li>
+      <li>Return a <strong>JSON list</strong> with file + page (not an x/y on the room).</li>
+      <li>Give you something to stamp into Revu so checking starts from a <strong>list, not a blank page</strong>.</li>
+    </ul>
+
+    <h2>What it cannot do</h2>
+    <ul>
+      <li>Recognize drawn objects or symbols.</li>
+      <li>Place a box on the fitting (only on the <strong>text hit</strong>, if we searched for the code).</li>
+      <li>Know doors are another trade, or that a WC has no type code.</li>
+      <li>Map a line to an Ahlsell article number.</li>
+      <li>Produce a quote. A person still signs.</li>
+    </ul>
+
+    <h2>Keep <span class="tag">still the demo</span></h2>
+    <table>
+      <thead><tr><th>Piece</th><th>Why it stays</th></tr></thead>
+      <tbody>
+        <tr><td>First-crack PDF → open in Revu</td><td>Official route. No Bluebeam plugin needed.</td></tr>
+        <tr><td>Markups List as the take-off</td><td>They check / change / remove / verify there.</td></tr>
+        <tr><td>Real type codes as Subject</td><td>Do not rename <code>H2</code> / <code>H3</code> / <code>IL.5</code>.</td></tr>
+        <tr><td>NEED / CHECK</td><td>Fill missing info. Do not re-type coded lines.</td></tr>
+        <tr><td>Off-sheet panel (H3 / other floors)</td><td>Honest: not on PLAN 09. Do not invent a pin.</td></tr>
+        <tr><td>Compare after they save</td><td>Their edits come back. List and drawing stay in sync.</td></tr>
+        <tr><td>Customer request vs specialist draft (15 vs 69)</td><td>Two jobs, one pack. Customer did not invent a shopping list.</td></tr>
+        <tr><td>“You still sign”</td><td>Constraint from Ahlsell. Non-negotiable.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Tweak <span class="tag">same screens, honest wording</span></h2>
+    <table>
+      <thead><tr><th>Piece</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td>Specialist lead / PDF page 1</td><td>Say: draft from sheet text, not object detection. First crack, not a quote.</td></tr>
+        <tr><td>Boxes on the drawing</td><td>Fine if they sit on text. Do not call them “detected fittings.”</td></tr>
+        <tr><td>Door / window / frame lines</td><td>Keep on the specialist list as other trade / CHECK. Do not sell them on the customer path.</td></tr>
+        <tr><td>Sanitary (WC, basin, support arm, slop sink)</td><td>Keep as NEED: listed from notes, no type code, API did not “see” them.</td></tr>
+        <tr><td>Catalogue</td><td>Lookup only. Do not imply the API chose those SKUs.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Add <span class="tag">jury-facing</span></h2>
+    <ol>
+      <li>A short <strong>can / cannot</strong> strip: reads PDF text · does not recognize objects · specialist signs.</li>
+      <li>The <strong>“check these first”</strong> list: other trade, no type code, not on this sheet, notes can overcount (<code>H1</code> / <code>H3</code> also appear in sheet notes).</li>
+      <li>A badge per line if there is time: <strong>from text</strong> / <strong>no code</strong> / <strong>other trade</strong> / <strong>not on this sheet</strong>.</li>
+    </ol>
+    <p>These three are already on the live demo. Keep them visible. Do not hide the limits.</p>
+
+    <h2>Take away or hide <span class="tag">so we do not oversell</span></h2>
+    <table>
+      <thead><tr><th>Remove or stop saying</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Any claim that the machine detected fittings from the plan</td><td>The API did not do that.</td></tr>
+        <tr><td>Any claim that 69 lines are complete or ready to send</td><td>They are a text dump plus gaps.</td></tr>
+        <tr><td>Fake pins on sanitary / doors as if they were found as objects</td><td>We do not have detection.</td></tr>
+        <tr><td>Invented article numbers</td><td>Pack forbids it. Quote numbers + the given article list only.</td></tr>
+        <tr><td>Building a symbol detector on hack day</td><td>App team was told not to. That is Capability’s job.</td></tr>
+        <tr><td>Re-running the same PLAN 09 files for a “better” API result</td><td>Same files return the cached job. You will not get a smarter list.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What to say in one breath</h2>
+    <div class="call">
+      <p>We used the BoM API as a <strong>text first draft</strong>. It does not recognize objects. We put that draft in Bluebeam so the specialist starts from a Markups List, not a blank page. They check, change, remove, verify, and they sign. That is the useful slice. Object take-off is the dead end we are naming.</p>
+    </div>
+
+    <h2>Capability team — do we get a better API?</h2>
+    <p>They are improving <strong>take-off</strong>. They are not updating the hosted API we already called (<code>takeoff.2hero.dev</code>).</p>
+    <ul>
+      <li><strong>App teams</strong> build on that API as a strong first draft. We do not build the engine.</li>
+      <li><strong>Capability teams</strong> use it as a <strong>reference to beat</strong>. They are judged on their own reading of the drawings.</li>
+      <li>Polling the same job again, or sending PLAN 09 a second time, will not get a smarter list (same files come back free and unchanged).</li>
+      <li>If Capability produce a <strong>better list</strong>, we can import <em>that</em> into the same Revu loop. That is a hand-off from them, not a new version of the shared API.</li>
+    </ul>
+
+    <footer>
+      Team Granite · App layer · PLAN 09 · A-40-1-1091 · treat the BoM as a draft, not the truth.
+    </footer>
+  </main>
+</body>
+</html>

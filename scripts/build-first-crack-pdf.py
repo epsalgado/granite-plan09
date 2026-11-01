@@ -163,27 +163,29 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
             align=fitz.TEXT_ALIGN_LEFT,
         )
 
-    box((56, 48, 786, 88), "GRANITE  ·  FIRST CRACK", 14, (0.56, 0.91, 0.91), bold=True)
+    box((56, 48, 786, 88), "GRANITE  ·  FIRST CRACK  ·  TEXT DRAFT", 14, (0.56, 0.91, 0.91), bold=True)
     box((56, 86, 786, 148), "Not a quote. Not signed.", 36, (1, 1, 1), bold=True)
     box(
-        (56, 150, 786, 210),
-        "This PDF is the BoM API draft as Revu markups.\nEvery recovered line is already in the Markups List.",
-        16,
+        (56, 150, 786, 228),
+        "This PDF is a text draft from the BoM API, stamped as Revu markups.\n"
+        "The API read codes, tables and notes. It did not recognize drawn objects.\n"
+        "Boxes sit on text hits, not on fittings. You still sign.",
+        14,
         (0.85, 1, 1),
     )
     box(
-        (56, 220, 786, 360),
+        (56, 232, 786, 372),
         "What to do in Revu\n"
-        "1. Open page 2 only — that is the drawing. Alt+L is the first crack.\n"
+        "1. Open page 2 only - that is the drawing. Alt+L is the first crack.\n"
         "2. Filter NEED and CHECK. Those need your input. Do not re-type them.\n"
         "3. Delete wrong. Fill missing. New marks show your author.\n"
         "4. Save. Drop that save back into Granite to compare.\n"
-        "5. You still sign the quote. Granite does not.",
+        "5. You still sign the quote. This draft does not.",
         13,
         (1, 1, 1),
     )
     box(
-        (56, 370, 786, 470),
+        (56, 378, 786, 478),
         f"A-40-1-1091  ·  PLAN 09  ·  {n_marks} markups in the list\n"
         "Page 3 is a glance of the same list if you open this PDF without Revu.\n"
         "NEED = missing info. CHECK = a note. Off-sheet shelves keep H1 / H2 / H3.",
@@ -192,7 +194,7 @@ def add_cover(doc: fitz.Document, n_marks: int) -> None:
     )
     box(
         (56, 500, 786, 548),
-        "FIRST CRACK  ·  CHECK IN REVU  ·  STILL NOT AN ORDER",
+        "TEXT DRAFT  ·  CHECK IN REVU  ·  STILL NOT AN ORDER",
         14,
         (1, 0.72, 0.27),
         bold=True,
@@ -215,11 +217,11 @@ def add_glance(doc: fitz.Document, job: dict, n_marks: int) -> None:
             align=align,
         )
 
-    put((28, 12, 900, 40), "GLANCE  ·  full API draft  ·  not the work surface", 16, (1, 1, 1), True)
+    put((28, 12, 900, 40), "GLANCE  ·  text draft  ·  not object detection", 16, (1, 1, 1), True)
     put(
         (28, 40, 1160, 68),
-        f"Revu work is page 2 (drawing + Markups List). This page is the same {n_marks} items as a table, "
-        "so you can see what is there without hovering the drawing.",
+        f"Revu work is page 2 (drawing + Markups List). This page is the same {n_marks} items as a table. "
+        "Text draft, not object detection.",
         11,
         (0.75, 0.95, 0.95),
     )
@@ -304,7 +306,7 @@ def add_banner(page: fitz.Page) -> None:
     page.draw_rect(bar, color=(0.91, 0.47, 0.13), fill=(0.91, 0.47, 0.13))
     page.insert_textbox(
         bar + (10, 4, -10, -4),
-        "GRANITE FIRST CRACK  ·  page 2 of 3  ·  Alt+L is the whole draft  ·  filter NEED and CHECK  ·  off-sheet H1/H2/H3 are in the panel on the right",
+        "GRANITE FIRST CRACK  ·  text draft  ·  page 2 of 3  ·  Alt+L is the list  ·  boxes sit on text  ·  filter NEED and CHECK  ·  off-sheet H1/H2/H3 on the right",
         fontsize=11,
         fontname="hebo",
         color=(1, 1, 1),
