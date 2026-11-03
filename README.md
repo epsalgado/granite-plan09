@@ -26,6 +26,8 @@ Static HTML/CSS/JS. No build step. Pages settings: Framework **None**, output `/
 
 **Walkthrough video:** https://granite-plan09.pages.dev/demo-walk.html (MP4, ~1 min, generated voice). Rebuild with `python3 scripts/build-demo-video.py`. Caption-only player: `demo-voice.html`.
 
+**5-minute film (version 1, silent, script overlay):** https://granite-plan09.pages.dev/demo-5min.html
+
 The BoM API read **PDF text** (codes, tables, notes). It did **not** recognize drawn objects. The demo says that plainly.
 
 The landing has **two doors**: Send a request (customer) or First crack in Revu (specialist). Open PLAN 09 after you pick a path. Customer: Listed → Choose → Send, with request Excel. Specialist downloads `files/granite-plan09-FIRST-CRACK-for-Revu.pdf` (page 2 = drawing + Revu markups; page 3 = glance table of the same text draft). Subject NEED/CHECK = fill in, do not re-type. They work the Markups List, then drop the save to Compare. Rebuild that PDF with `python3 scripts/build-first-crack-pdf.py`. Catalog is a lookup only — the API did not pick those articles. Catalog stays available on Choose, Send, and Specialist (not on the customer Listed screen).
