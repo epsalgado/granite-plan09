@@ -3,7 +3,7 @@
 Hackathon prototype (Team Granite). Customer basket + specialist trust view for **one drawing**: `A-40-1-1091.pdf`.
 
 **Live demo:** https://granite-plan09.pages.dev  
-**App team facts:** https://granite-plan09.pages.dev/app-team.html (amber banner on the landing).  
+**App team facts:** https://granite-plan09.pages.dev/app-team.html  
 **Code:** https://github.com/epsalgado/granite-plan09  
 Cloudflare Web Analytics is on for the live demo (page views only, no names).  
 
