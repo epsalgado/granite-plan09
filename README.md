@@ -26,7 +26,7 @@ Static HTML/CSS/JS. No build step. Pages settings: Framework **None**, output `/
 
 **Walkthrough video:** https://granite-plan09.pages.dev/demo-walk.html (MP4, ~1 min, generated voice). Rebuild with `python3 scripts/build-demo-video.py`. Caption-only player: `demo-voice.html`.
 
-**5-minute film (version 1, silent, script overlay):** https://granite-plan09.pages.dev/demo-5min.html
+**5-minute film (version 2, silent, script overlay, zoomed coverage):** https://granite-plan09.pages.dev/demo-5min.html
 **Script with pictures (Word):** https://granite-plan09.pages.dev/files/demo-video/granite-script-sequence.docx
 
 The BoM API read **PDF text** (codes, tables, notes). It did **not** recognize drawn objects. The demo says that plainly.
