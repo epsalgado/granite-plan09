@@ -400,43 +400,6 @@ body[data-phase="cover"] .cover { opacity: 1; }
 }
 .cover p { margin: 0.7rem 0 0; color: var(--muted); font-size: 1.05rem; }
 
-.hud {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-  background: rgba(2, 12, 14, 0.78);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.2rem;
-}
-.hud[hidden],
-body.is-playing .hud { display: none !important; }
-.hud-card {
-  width: min(560px, 100%);
-  background: #0b3a6e;
-  border-radius: 16px;
-  padding: 1.4rem 1.5rem 1.3rem;
-  box-shadow: 0 18px 50px rgba(0,0,0,0.4);
-}
-.hud-card h2 { margin: 0 0 0.4rem; font-size: 1.35rem; }
-.hud-card p, .hud-card ol { color: #c8ffff; }
-.hud-card ol { padding-left: 1.2rem; }
-.hud-card li { margin: 0.25rem 0; }
-.play {
-  margin-top: 0.9rem;
-  background: var(--amber);
-  color: #fff;
-  font-weight: 800;
-  padding: 0.85rem 1.2rem;
-  border-radius: 10px;
-}
-.keys {
-  margin-top: 0.65rem;
-  font-size: 0.78rem;
-  color: #9ee;
-}
-
 @keyframes scan {
   0% { top: 0; }
   100% { top: calc(100% - 4px); }

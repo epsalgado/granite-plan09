@@ -227,7 +227,6 @@ function tick(now) {
 
 function play() {
   document.body.classList.add("is-playing");
-  $("hud").hidden = true;
   playing = true;
   startedAt = performance.now() - elapsed * 1000;
   cancelAnimationFrame(raf);
@@ -267,7 +266,6 @@ function toggle() {
 }
 
 async function boot() {
-  $("play").addEventListener("click", play);
   document.addEventListener("keydown", (e) => {
     if (e.code === "Space") {
       e.preventDefault();
@@ -289,11 +287,7 @@ async function boot() {
   }
   drawMarks();
   applyPhase("cover");
-
-  if (location.hash === "#record") {
-    $("hud").hidden = true;
-    window.setTimeout(play, 1800);
-  }
+  play();
 }
 
 boot();
