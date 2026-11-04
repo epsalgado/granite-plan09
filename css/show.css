@@ -8,6 +8,7 @@
   --font: "Segoe UI", "Calibri", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body {
   margin: 0;
   height: 100%;
@@ -335,7 +336,7 @@ body[data-phase="cover"] .cover { opacity: 1; }
   padding: 1.2rem;
 }
 .hud[hidden],
-body.is-playing .hud { display: none; }
+body.is-playing .hud { display: none !important; }
 .hud-card {
   width: min(560px, 100%);
   background: #0b3a6e;
