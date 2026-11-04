@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <title>Granite — 2-minute show</title>
+  <link rel="icon" href="img/favicon.ico?v=6" sizes="any" />
+  <link rel="stylesheet" href="css/show.css?v=show1" />
+</head>
+<body data-phase="cover">
+  <div class="hud" id="hud">
+    <div class="hud-card">
+      <h2>Silent rebuild · ~2 minutes</h2>
+      <p>No voice. The product performs: scan, marks land, list fills, NEED pulse, stamp, compare.</p>
+      <ol>
+        <li>Open <strong>Cap</strong> in <strong>Studio</strong>. Camera off. Microphone off.</li>
+        <li>Capture this browser window (or the whole display).</li>
+        <li>Press Record in Cap, wait out the countdown, then press Play here.</li>
+        <li>When the last line holds, stop Cap.</li>
+      </ol>
+      <button type="button" class="play" id="play">Play the show</button>
+      <p class="keys">Space play/pause · R restart · F fullscreen</p>
+    </div>
+  </div>
+
+  <main class="show">
+    <header class="top">
+      <div>Granite <small>PLAN 09 · specialist review</small></div>
+      <span class="pill" id="pill">Show</span>
+    </header>
+
+    <section class="desk">
+      <div class="plan-card">
+        <div class="viewport">
+          <div class="stage">
+            <img src="img/plan-1091.png" alt="PLAN 09 drawing" />
+            <div class="marks" id="marks"></div>
+            <div class="scan" aria-hidden="true"></div>
+            <div class="spot" aria-hidden="true"></div>
+            <div class="stamp">TEXT DRAFT · NOT SIGNED</div>
+          </div>
+          <div class="cover">
+            <p class="kicker">Team Granite · App team · 2Hero for Ahlsell</p>
+            <h1>GRANITE<span>PLAN 09</span></h1>
+            <p>A reviewable draft. The person still signs.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="side">
+        <h2>Take-off · this floor</h2>
+        <div class="count"><span id="countNum">0</span><small>lines from the text on the sheet</small></div>
+        <div class="rows" id="rows"></div>
+        <div class="compare-pills">
+          <span class="same">Same</span>
+          <span class="miss">Missing</span>
+          <span class="extra">Extra</span>
+        </div>
+      </aside>
+    </section>
+
+    <p class="caption" id="caption"></p>
+  </main>
+
+  <script src="js/show.js?v=show1"></script>
+</body>
+</html>
