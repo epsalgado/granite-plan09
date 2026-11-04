@@ -50,15 +50,18 @@ body[data-phase="end"] .pill { background: var(--teal); color: #042326; }
 
 .desk {
   display: grid;
-  grid-template-columns: 1fr minmax(280px, 32%);
+  grid-template-columns: 1fr;
   min-height: 0;
   padding: 0 1rem 0.4rem;
   gap: 0.75rem;
 }
-body[data-phase="cover"] .desk,
-body[data-phase="case"] .desk,
-body[data-phase="promise"] .desk {
-  grid-template-columns: 1fr;
+body[data-phase="list"] .desk,
+body[data-phase="need"] .desk,
+body[data-phase="stamp"] .desk,
+body[data-phase="compare"] .desk,
+body[data-phase="insight"] .desk,
+body[data-phase="end"] .desk {
+  grid-template-columns: 1fr minmax(280px, 32%);
 }
 
 .plan-card {
@@ -179,16 +182,14 @@ body[data-phase="need"] .spot,
 body[data-phase="stamp"] .spot { display: block; }
 
 .side {
+  display: none;
   min-height: 0;
   background: rgba(4, 35, 38, 0.72);
   border: 1px solid rgba(30, 200, 200, 0.28);
   border-radius: 14px;
   padding: 0.75rem 0.8rem;
-  display: flex;
   flex-direction: column;
-  transform: translateX(112%);
-  opacity: 0;
-  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+  animation: slideIn 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 body[data-phase="list"] .side,
 body[data-phase="need"] .side,
@@ -196,8 +197,7 @@ body[data-phase="stamp"] .side,
 body[data-phase="compare"] .side,
 body[data-phase="insight"] .side,
 body[data-phase="end"] .side {
-  transform: none;
-  opacity: 1;
+  display: flex;
 }
 .side h2 {
   margin: 0 0 0.2rem;
@@ -275,6 +275,7 @@ body[data-phase="end"] .compare-pills {
 .compare-pills .miss { background: var(--teal); color: #042326; }
 .compare-pills .extra { background: #b42318; }
 
+.caption:empty { opacity: 0; }
 .caption {
   min-height: 4.6rem;
   margin: 0 1rem 0.85rem;
@@ -367,6 +368,10 @@ body.is-playing .hud { display: none; }
 @keyframes blink { 50% { opacity: 0.45; } }
 @keyframes pulse {
   50% { filter: brightness(1.25); }
+}
+@keyframes slideIn {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: none; opacity: 1; }
 }
 
 @media (max-width: 900px) {
