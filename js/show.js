@@ -247,6 +247,19 @@ function toggle() {
 }
 
 async function boot() {
+  $("play").addEventListener("click", play);
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space") {
+      e.preventDefault();
+      toggle();
+    } else if (e.key === "r" || e.key === "R") {
+      restart();
+    } else if (e.key === "F") {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      else document.exitFullscreen();
+    }
+  });
+
   drawRows();
   try {
     const res = await fetch("data/job.json");
@@ -256,19 +269,6 @@ async function boot() {
   }
   drawMarks();
   applyPhase("cover");
-
-  $("play").addEventListener("click", play);
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
-      e.preventDefault();
-      toggle();
-    } else if (e.key === "r" || e.key === "R") {
-      restart();
-    } else if (e.key === "f" || e.key === "F") {
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
-      else document.exitFullscreen();
-    }
-  });
 
   if (location.hash === "#record") {
     $("hud").hidden = true;
