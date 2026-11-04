@@ -163,7 +163,11 @@ function applyPhase(phase) {
   const prev = lastPhase;
   lastPhase = phase;
   document.body.dataset.phase = phase;
-  document.body.dataset.move = moveFor(phase);
+  const move = moveFor(phase);
+  document.body.dataset.move = move;
+  document.querySelectorAll(".spine li").forEach((el) => {
+    el.classList.toggle("on", el.dataset.move === move);
+  });
 
   if (phase === "cover" || phase === "case" || phase === "promise" || phase === "clip") {
     resetMarks();

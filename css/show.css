@@ -57,14 +57,11 @@ button { font: inherit; cursor: pointer; border: 0; }
 .spine li::after {
   content: "";
 }
-body[data-move="case"] .spine [data-move="case"],
-body[data-move="promise"] .spine [data-move="promise"],
-body[data-move="proof"] .spine [data-move="proof"] {
+.spine li.on {
   opacity: 1;
   color: var(--amber);
 }
-body[data-move="insight"] .spine [data-move="insight"] {
-  opacity: 1;
+.spine li[data-move="insight"].on {
   color: var(--teal);
   transform: scale(1.12);
   text-shadow: 0 0 18px rgba(30, 200, 200, 0.45);
