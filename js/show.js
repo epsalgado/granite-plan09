@@ -1,33 +1,34 @@
-const DURATION = 128;
+const DURATION = 126;
+const CLIP_START = 30;
+const CLIP_LEN = 10.07;
 
 const PHASES = [
   { t: 0, phase: "cover" },
   { t: 6.5, phase: "case" },
   { t: 18, phase: "promise" },
-  { t: 30, phase: "empty" },
-  { t: 36, phase: "scan" },
-  { t: 44, phase: "marks" },
-  { t: 54, phase: "list" },
-  { t: 68, phase: "need" },
-  { t: 82, phase: "stamp" },
-  { t: 94, phase: "compare" },
-  { t: 108, phase: "insight" },
-  { t: 122, phase: "end" },
+  { t: CLIP_START, phase: "clip" },
+  { t: CLIP_START + CLIP_LEN, phase: "marks" },
+  { t: 50.2, phase: "list" },
+  { t: 64.2, phase: "need" },
+  { t: 78.2, phase: "stamp" },
+  { t: 90.2, phase: "compare" },
+  { t: 104.2, phase: "insight" },
+  { t: 118.2, phase: "end" },
 ];
 
 const CAPTIONS = [
   { t: 0, text: "" },
   { t: 6.5, text: "Interior fittings. The quote is won or lost on this floor." },
   { t: 18, text: "Can a specialist review this in Bluebeam — and still sign?" },
-  { t: 30, text: "PLAN 09. Empty. No list yet." },
-  { t: 36, text: "The API reads text on the sheet. Codes, tables, notes." },
-  { t: 44, text: "Marks land where the text already named a fitting." },
-  { t: 54, text: "A filled list. They do not re-type sixty-nine lines." },
-  { t: 68, text: "NEED means a person still has to fill this in." },
-  { t: 82, text: "TEXT DRAFT · NOT SIGNED. Checking starts from a list, not a blank page." },
-  { t: 94, text: "Same. Missing. Extra. The specialist can see the gaps." },
-  { t: 108, text: "The machine read text, not objects. That is a dead end for take-off — and still a head start." },
-  { t: 122, text: "The person still signs." },
+  { t: CLIP_START, text: "Specialist path. Open PLAN 09." },
+  { t: CLIP_START + 5.2, text: "The text draft is ready. Still not signed." },
+  { t: CLIP_START + CLIP_LEN, text: "Marks land where the text already named a fitting." },
+  { t: 50.2, text: "A filled list. They do not re-type sixty-nine lines." },
+  { t: 64.2, text: "NEED means a person still has to fill this in." },
+  { t: 78.2, text: "TEXT DRAFT · NOT SIGNED. Checking starts from a list, not a blank page." },
+  { t: 90.2, text: "Same. Missing. Extra. The specialist can see the gaps." },
+  { t: 104.2, text: "The machine read text, not objects. That is a dead end for take-off — and still a head start." },
+  { t: 118.2, text: "The person still signs." },
 ];
 
 const ROWS = [
@@ -160,8 +161,7 @@ function applyPhase(phase) {
     cover: "Show",
     case: "Case",
     promise: "Promise",
-    empty: "Empty floor",
-    scan: "Reading text",
+    clip: "Open",
     marks: "Marks",
     list: "Take-off",
     need: "NEED",
@@ -171,7 +171,7 @@ function applyPhase(phase) {
     end: "Sign",
   }[phase] || "Show";
 
-  if (phase === "cover" || phase === "case" || phase === "promise" || phase === "empty") {
+  if (phase === "cover" || phase === "case" || phase === "promise" || phase === "clip") {
     resetMarks();
     $("countNum").textContent = "0";
     $("rows").querySelectorAll(".row").forEach((el) => el.classList.remove("on", "hot"));
@@ -198,13 +198,29 @@ function applyCaption(t) {
   $("caption").textContent = atTime(CAPTIONS, t).text;
 }
 
+function syncClip(t, phase) {
+  const v = $("clip");
+  if (!v) return;
+  if (phase !== "clip") {
+    if (!v.paused) v.pause();
+    return;
+  }
+  const local = Math.min(CLIP_LEN, Math.max(0, t - CLIP_START));
+  if (Math.abs(v.currentTime - local) > 0.3) v.currentTime = local;
+  if (playing && v.paused) v.play().catch(() => {});
+  if (!playing && !v.paused) v.pause();
+}
+
 function tick(now) {
   if (!playing) return;
   elapsed = Math.min(DURATION, (now - startedAt) / 1000);
-  applyPhase(atTime(PHASES, elapsed).phase);
+  const phase = atTime(PHASES, elapsed).phase;
+  applyPhase(phase);
   applyCaption(elapsed);
+  syncClip(elapsed, phase);
   if (elapsed >= DURATION) {
     playing = false;
+    syncClip(elapsed, phase);
     document.body.classList.add("is-playing");
     return;
   }
@@ -223,12 +239,18 @@ function play() {
 function pause() {
   playing = false;
   cancelAnimationFrame(raf);
+  syncClip(elapsed, atTime(PHASES, elapsed).phase);
 }
 
 function restart() {
   elapsed = 0;
   lastPhase = "";
   clearPending();
+  const v = $("clip");
+  if (v) {
+    v.pause();
+    v.currentTime = 0;
+  }
   resetMarks();
   $("countNum").textContent = "0";
   $("rows").querySelectorAll(".row").forEach((el) => el.classList.remove("on", "hot"));
