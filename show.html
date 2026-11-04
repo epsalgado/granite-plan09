@@ -6,9 +6,9 @@
   <meta http-equiv="Cache-Control" content="no-store" />
   <title>Granite — 2-minute show</title>
   <link rel="icon" href="img/favicon.ico?v=6" sizes="any" />
-  <link rel="stylesheet" href="css/show.css?v=show5" />
+  <link rel="stylesheet" href="css/show.css?v=show6" />
 </head>
-<body data-phase="cover">
+<body data-phase="cover" data-move="cover">
   <div class="hud" id="hud">
     <div class="hud-card">
       <h2>Silent rebuild · ~2 minutes</h2>
@@ -27,7 +27,12 @@
   <main class="show">
     <header class="top">
       <div>Granite <small>PLAN 09 · specialist review</small></div>
-      <span class="pill" id="pill">Show</span>
+      <ol class="spine" id="spine" aria-label="Story moves">
+        <li data-move="case">Case</li>
+        <li data-move="promise">Promise</li>
+        <li data-move="proof">Proof</li>
+        <li data-move="insight">Insight</li>
+      </ol>
     </header>
 
     <section class="desk">
@@ -58,11 +63,18 @@
           <span class="extra">Extra</span>
         </div>
       </aside>
+      <aside class="insight-panel" id="insightPanel">
+        <p class="insight-kicker">Insight</p>
+        <p>The API read text on the sheet. Not objects.</p>
+        <p>That is a dead end for take-off.</p>
+        <p>It is still a first crack in Revu — a filled list, not a blank page.</p>
+        <p class="insight-close">The person still signs.</p>
+      </aside>
     </section>
 
     <p class="caption" id="caption"></p>
   </main>
 
-  <script src="js/show.js?v=show5"></script>
+  <script src="js/show.js?v=show6"></script>
 </body>
 </html>

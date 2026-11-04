@@ -1,4 +1,4 @@
-const DURATION = 126;
+const DURATION = 130;
 const CLIP_START = 30;
 const CLIP_LEN = 10.07;
 
@@ -12,8 +12,7 @@ const PHASES = [
   { t: 64.2, phase: "need" },
   { t: 78.2, phase: "stamp" },
   { t: 90.2, phase: "compare" },
-  { t: 104.2, phase: "insight" },
-  { t: 118.2, phase: "end" },
+  { t: 102, phase: "insight" },
 ];
 
 const CAPTIONS = [
@@ -27,8 +26,7 @@ const CAPTIONS = [
   { t: 64.2, text: "NEED means a person still has to fill this in." },
   { t: 78.2, text: "TEXT DRAFT · NOT SIGNED. Checking starts from a list, not a blank page." },
   { t: 90.2, text: "Same. Missing. Extra. The specialist can see the gaps." },
-  { t: 104.2, text: "The machine read text, not objects. That is a dead end for take-off — and still a head start." },
-  { t: 118.2, text: "The person still signs." },
+  { t: 102, text: "" },
 ];
 
 const ROWS = [
@@ -152,24 +150,20 @@ function clearNeed() {
   $("rows").querySelectorAll(".row").forEach((el) => el.classList.remove("hot"));
 }
 
+function moveFor(phase) {
+  if (phase === "case") return "case";
+  if (phase === "promise") return "promise";
+  if (phase === "insight" || phase === "end") return "insight";
+  if (phase === "cover") return "cover";
+  return "proof";
+}
+
 function applyPhase(phase) {
   if (phase === lastPhase) return;
   const prev = lastPhase;
   lastPhase = phase;
   document.body.dataset.phase = phase;
-  $("pill").textContent = {
-    cover: "Show",
-    case: "Case",
-    promise: "Promise",
-    clip: "Open",
-    marks: "Marks",
-    list: "Take-off",
-    need: "NEED",
-    stamp: "Draft",
-    compare: "Compare",
-    insight: "Insight",
-    end: "Sign",
-  }[phase] || "Show";
+  document.body.dataset.move = moveFor(phase);
 
   if (phase === "cover" || phase === "case" || phase === "promise" || phase === "clip") {
     resetMarks();
